@@ -111,7 +111,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
     public org.bukkit.command.ConsoleCommandSender console;
     public org.bukkit.command.RemoteConsoleCommandSender remoteConsole;
     public ConsoleReader reader;
-    public static int currentTick = 0; // PaperSpigot - Further improve tick loop
+    public static int currentTick = (int) (System.currentTimeMillis() / 50); // PaperSpigot - Further improve tick loop
     public final Thread primaryThread;
     public java.util.Queue<Runnable> processQueue = new java.util.concurrent.ConcurrentLinkedQueue<Runnable>();
     public int autosavePeriod;
@@ -328,42 +328,13 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
     }
 
     protected void k() {
-        boolean flag = true;
-        boolean flag1 = true;
-        boolean flag2 = true;
-        boolean flag3 = true;
-        int i = 0;
+        //FlamePaper 0011
 
         this.b("menu.generatingTerrain");
-        byte b0 = 0;
+        //FlamePaper 0011
 
         // CraftBukkit start - fire WorldLoadEvent and handle whether or not to keep the spawn in memory
-        for (int m = 0; m < worlds.size(); m++) {
-            WorldServer worldserver = this.worlds.get(m);
-            LOGGER.info("Preparing start region for level " + m + " (Seed: " + worldserver.getSeed() + ")");
-
-            if (!worldserver.getWorld().getKeepSpawnInMemory()) {
-                continue;
-            }
-
-            BlockPosition blockposition = worldserver.getSpawn();
-            long j = az();
-            i = 0;
-
-            for (int k = -192; k <= 192 && this.isRunning(); k += 16) {
-                for (int l = -192; l <= 192 && this.isRunning(); l += 16) {
-                    long i1 = az();
-
-                    if (i1 - j > 1000L) {
-                        this.a_("Preparing spawn area", i * 100 / 625);
-                        j = i1;
-                    }
-
-                    ++i;
-                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4);
-                }
-            }
-        }
+        //FlamePaper 0011
 
         for (WorldServer world : this.worlds) {
             this.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldLoadEvent(world.getWorld()));
@@ -511,53 +482,15 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
 
     // PaperSpigot start - Further improve tick loop
     private static final int TPS = 20;
-    private static final long SEC_IN_NANO = 1000000000;
-    private static final long TICK_TIME = SEC_IN_NANO / TPS;
-    private static final long MAX_CATCHUP_BUFFER = TICK_TIME * TPS * 60L;
-    private static final int SAMPLE_INTERVAL = 20;
-    public final RollingAverage tps1 = new RollingAverage(60);
-    public final RollingAverage tps5 = new RollingAverage(60 * 5);
-    public final RollingAverage tps15 = new RollingAverage(60 * 15);
+    private static final long TICK_TIME = 1000000000 / TPS;
+    private static final int SAMPLE_INTERVAL = 100;
     public double[] recentTps = new double[ 3 ]; // PaperSpigot - Fine have your darn compat with bad plugins
 
-    public static class RollingAverage {
-        private final int size;
-        private long time;
-        private double total;
-        private int index = 0;
-        private final double[] samples;
-        private final long[] times;
-
-        RollingAverage(int size) {
-            this.size = size;
-            this.time = size * SEC_IN_NANO;
-            this.total = TPS * SEC_IN_NANO * size;
-            this.samples = new double[size];
-            this.times = new long[size];
-            for (int i = 0; i < size; i++) {
-                this.samples[i] = TPS;
-                this.times[i] = SEC_IN_NANO;
-            }
-        }
-
-        public void add(double x, long t) {
-            time -= times[index];
-            total -= samples[index] * times[index];
-            samples[index] = x;
-            times[index] = t;
-            time += t;
-            total += x * t;
-            if (++index == size) {
-                index = 0;
-            }
-        }
-
-        public double getAverage() {
-            return total / time;
-        }
-    }
     // PaperSpigot End
- 
+
+    private static double calcTps(double avg, double exp, double tps) {
+        return (avg * exp) + (tps * (1 - exp));
+    }
     public void run() {
         try {
             if (this.init()) {
@@ -571,43 +504,27 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
                 // Spigot start
                 // PaperSpigot start - Further improve tick loop
                 Arrays.fill( recentTps, 20 );
-                //long lastTick = System.nanoTime(), catchupTime = 0, curTime, wait, tickSection = lastTick;
-                long start = System.nanoTime(), lastTick = start - TICK_TIME, catchupTime = 0, curTime, wait, tickSection = start;
+                long lastTick = System.nanoTime(), catchupTime = 0, curTime, wait, tickSection = lastTick;
                 // PaperSpigot end
                 while (this.isRunning) {
                     curTime = System.nanoTime();
+                    wait = TICK_TIME - (curTime - lastTick) - catchupTime;
                     // PaperSpigot start - Further improve tick loop
-                    wait = TICK_TIME - (curTime - lastTick);
-                    if (wait > 0) {
-                        if (catchupTime < 2E6) {
-                            wait += Math.abs(catchupTime);
-                        }
-                        if (wait < catchupTime) {
-                            catchupTime -= wait;
-                            wait = 0;
-                        } else if (catchupTime > 2E6) {
-                            wait -= catchupTime;
-                            catchupTime -= catchupTime;
-                        }
-                    }
                     if (wait > 0) {
                         Thread.sleep(wait / 1000000);
-                        wait = TICK_TIME - (curTime - lastTick);
+                        catchupTime = 0;
+                        continue;
+                    } else {
+                        catchupTime = Math.min(1000000000, Math.abs(wait));
                     }
 
-                    catchupTime = Math.min(MAX_CATCHUP_BUFFER, catchupTime - wait);
 
                     if ( ++MinecraftServer.currentTick % SAMPLE_INTERVAL == 0 )
                     {
-                        final long diff = curTime - tickSection;
-                        double currentTps = 1E9 / diff * SAMPLE_INTERVAL;
-                        tps1.add(currentTps, diff);
-                        tps5.add(currentTps, diff);
-                        tps15.add(currentTps, diff);
-                        // Backwards compat with bad plugins
-                        recentTps[0] = tps1.getAverage();
-                        recentTps[1] = tps5.getAverage();
-                        recentTps[2] = tps15.getAverage();
+                        double currentTps = 1E9 / ( curTime - tickSection ) * SAMPLE_INTERVAL;
+                        recentTps[0] = calcTps( recentTps[0], 0.92, currentTps ); // 1/exp(5sec/1min)
+                        recentTps[1] = calcTps( recentTps[1], 0.9835, currentTps ); // 1/exp(5sec/5min)
+                        recentTps[2] = calcTps( recentTps[2], 0.9945, currentTps ); // 1/exp(5sec/15min)
                         tickSection = curTime;
                         // PaperSpigot end
                     }

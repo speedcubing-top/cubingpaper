@@ -11,6 +11,4 @@
 # Bug tracker: http://www.spigotmc.org/go/bugs
 
 command-block-overrides: []
-aliases:
-    icanhasbukkit:
-      - "version $1-"
+aliases: []

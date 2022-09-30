@@ -21,7 +21,7 @@ public class EntityTNTPrimed extends Entity {
     // PaperSpigot end
         this.k = true;
         this.setSize(0.98F, 0.98F);
-        this.loadChunks = world.paperSpigotConfig.loadUnloadedTNTEntities; // PaperSpigot
+        //FlamePaper 0027
     }
 
     public EntityTNTPrimed(org.bukkit.Location loc, World world, double d0, double d1, double d2, EntityLiving entityliving) {
@@ -100,11 +100,7 @@ public class EntityTNTPrimed extends Entity {
         // float f = 4.0F;
 
         // PaperSpigot start - Force load chunks during TNT explosions
-        ChunkProviderServer chunkProviderServer = ((ChunkProviderServer) world.chunkProvider);
-        boolean forceChunkLoad = chunkProviderServer.forceChunkLoad;
-        if (world.paperSpigotConfig.loadUnloadedTNTEntities) {
-            chunkProviderServer.forceChunkLoad = true;
-        }
+        //FlamePaper 0027
         // PaperSpigot end
 
         org.bukkit.craftbukkit.CraftServer server = this.world.getServer();
@@ -118,9 +114,7 @@ public class EntityTNTPrimed extends Entity {
         // CraftBukkit end
 
         // PaperSpigot start - Force load chunks during TNT explosions
-        if (world.paperSpigotConfig.loadUnloadedTNTEntities) {
-            chunkProviderServer.forceChunkLoad = forceChunkLoad;
-        }
+        //FlamePaper 0027
         // PaperSpigot end
     }
 

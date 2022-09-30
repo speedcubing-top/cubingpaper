@@ -1001,6 +1001,21 @@ public final class CraftServer implements Server {
             } catch (ExceptionWorldConflict ex) {
                 getLogger().log(Level.SEVERE, null, ex);
             }
+        //FlamePaper 0003
+        } else {
+            ChunkProviderServer chunkProviderServer = handle.chunkProviderServer;
+            ChunkRegionLoader regionLoader = (ChunkRegionLoader) chunkProviderServer.chunkLoader;
+            regionLoader.b.clear();
+            regionLoader.c.clear();
+            try {
+                FileIOThread.a().b();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+            chunkProviderServer.unloadChunks(true);
+            chunkProviderServer.chunkLoader = null;
+            chunkProviderServer.chunkProvider = null;
+            chunkProviderServer.chunks.clear();
         }
 
         worlds.remove(world.getName().toLowerCase());
@@ -1773,11 +1788,7 @@ public final class CraftServer implements Server {
         // PaperSpigot start - Add getTPS (Further improve tick loop)
         @Override
         public double[] getTPS() {
-            return new double[] {
-                    MinecraftServer.getServer().tps1.getAverage(),
-                    MinecraftServer.getServer().tps5.getAverage(),
-                    MinecraftServer.getServer().tps15.getAverage()
-            };
+            return MinecraftServer.getServer().recentTps;
         }
         // PaperSpigot end
 

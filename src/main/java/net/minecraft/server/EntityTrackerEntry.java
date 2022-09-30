@@ -411,8 +411,11 @@ public class EntityTrackerEntry {
                     }
 
                     // CraftBukkit start - Fix for nonsensical head yaw
+                    //FlamePaper 0007
+                    if(this.tracker instanceof EntityLiving) {
                     this.i = MathHelper.d(this.tracker.getHeadRotation() * 256.0F / 360.0F);
                     this.broadcast(new PacketPlayOutEntityHeadRotation(this.tracker, (byte) i));
+                    }
                     // CraftBukkit end
 
                     if (this.tracker instanceof EntityLiving) {

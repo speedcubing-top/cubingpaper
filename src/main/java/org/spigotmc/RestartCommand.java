@@ -6,6 +6,7 @@ import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import top.speedcubing.CubingPaperConfig;
 
 public class RestartCommand extends Command
 {
@@ -45,8 +46,10 @@ public class RestartCommand extends Command
         AsyncCatcher.enabled = false; // Disable async catcher incase it interferes with us
         try
         {
-            if ( script.isFile() )
+            boolean b = CubingPaperConfig.restartArgument == null;
+            if ( !b || script.isFile() )
             {
+                if(b)
                 System.out.println( "Attempting to restart with " + SpigotConfig.restartScript );
 
                 // Disable Watchdog
@@ -91,6 +94,7 @@ public class RestartCommand extends Command
                     {
                         try
                         {
+                            if(b) {
                             String os = System.getProperty( "os.name" ).toLowerCase();
                             if ( os.contains( "win" ) )
                             {
@@ -102,6 +106,7 @@ public class RestartCommand extends Command
                                     "sh", script.getPath()
                                 } );
                             }
+                            } else Runtime.getRuntime().exec(CubingPaperConfig.restartArgument);
                         } catch ( Exception e )
                         {
                             e.printStackTrace();

@@ -1487,4 +1487,8 @@ public class Chunk {
 
         private EnumTileEntityState() {}
     }
+    //FlamePaper 0034
+    public int getItemCount(BlockPosition blockPosition) {
+        return itemCounts[Math.min(this.entitySlices.length - 1, Math.max(0, MathHelper.floor(blockPosition.getY() / 16.0D)))];
+    }
 }

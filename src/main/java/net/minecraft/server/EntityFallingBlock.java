@@ -26,7 +26,7 @@ public class EntityFallingBlock extends Entity {
     public EntityFallingBlock(org.bukkit.Location loc, World world) {
         super(world);
         sourceLoc = loc;
-        this.loadChunks = world.paperSpigotConfig.loadUnloadedFallingBlocks; // PaperSpigot
+        //FlamePaper 0027
     }
 
     public EntityFallingBlock(World world, double d0, double d1, double d2, IBlockData iblockdata) {
@@ -47,7 +47,7 @@ public class EntityFallingBlock extends Entity {
         this.lastX = d0;
         this.lastY = d1;
         this.lastZ = d2;
-        this.loadChunks = world.paperSpigotConfig.loadUnloadedFallingBlocks; // PaperSpigot
+        //FlamePaper 0027
     }
 
     protected boolean s_() {

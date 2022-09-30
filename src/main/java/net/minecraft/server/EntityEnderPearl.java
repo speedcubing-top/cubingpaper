@@ -12,13 +12,13 @@ public class EntityEnderPearl extends EntityProjectile {
 
     public EntityEnderPearl(World world) {
         super(world);
-        this.loadChunks = world.paperSpigotConfig.loadUnloadedEnderPearls; // PaperSpigot
+        //FlamePaper 0027
     }
 
     public EntityEnderPearl(World world, EntityLiving entityliving) {
         super(world, entityliving);
         this.c = entityliving;
-        this.loadChunks = world.paperSpigotConfig.loadUnloadedEnderPearls; // PaperSpigot
+        //FlamePaper 0027
     }
 
     protected void a(MovingObjectPosition movingobjectposition) {

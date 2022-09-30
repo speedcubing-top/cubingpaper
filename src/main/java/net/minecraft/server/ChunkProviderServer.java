@@ -32,7 +32,8 @@ public class ChunkProviderServer implements IChunkProvider {
     public LongHashSet unloadQueue = new LongHashSet(); // CraftBukkit - LongHashSet
     public Chunk emptyChunk;
     public IChunkProvider chunkProvider;
-    private IChunkLoader chunkLoader;
+    //FlamePaper 0003
+    public IChunkLoader chunkLoader;
     public boolean forceChunkLoad = false; // CraftBukkit - true -> false
     public LongObjectHashMap<Chunk> chunks = new LongObjectHashMap<Chunk>();
     public WorldServer world;
@@ -63,15 +64,7 @@ public class ChunkProviderServer implements IChunkProvider {
         }
         // PaperSpigot end
         // PaperSpigot start - Don't unload chunk if it contains an entity that loads chunks
-        if (chunk != null) {
-            for (List<Entity> entities : chunk.entitySlices) {
-                for (Entity entity : entities) {
-                    if (entity.loadChunks) {
-                        return;
-                    }
-                }
-            }
-        }
+        //FlamePaper 0027
         // PaperSpigot end
         if (this.world.worldProvider.e()) {
             if (!this.world.c(i, j)) {
@@ -261,7 +254,8 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
     public void saveChunkNOP(Chunk chunk) {
-        if (this.chunkLoader != null) {
+        //FlamePaper 0003
+        if (canSave() && this.chunkLoader != null) {
             try {
                 this.chunkLoader.b(this.world, chunk);
             } catch (Exception exception) {
@@ -272,7 +266,8 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
     public void saveChunk(Chunk chunk) {
-        if (this.chunkLoader != null) {
+        //FlamePaper 0003
+        if (canSave() && this.chunkLoader != null) {
             try {
                 chunk.setLastSaved(this.world.getTime());
                 this.chunkLoader.a(this.world, chunk);
@@ -366,8 +361,12 @@ public class ChunkProviderServer implements IChunkProvider {
 
     }
 
+    //FlamePaper 0003
     public boolean unloadChunks() {
-        if (!this.world.savingDisabled) {
+        return unloadChunks(false);
+    }
+    public boolean unloadChunks(boolean force) {
+        if (canSave() || force) {
             // CraftBukkit start
             Server server = this.world.getServer();
             for (int i = 0; i < 100 && !this.unloadQueue.isEmpty(); ++i) {

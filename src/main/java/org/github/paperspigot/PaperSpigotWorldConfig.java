@@ -230,15 +230,7 @@ public class PaperSpigotWorldConfig
         disableEndCredits = getBoolean( "game-mechanics.disable-end-credits", false );
     }
 
-    public boolean loadUnloadedEnderPearls;
-    public boolean loadUnloadedTNTEntities;
-    public boolean loadUnloadedFallingBlocks;
-    private void loadUnloaded()
-    {
-        loadUnloadedEnderPearls = getBoolean( "load-chunks.enderpearls", false );
-        loadUnloadedTNTEntities = getBoolean( "load-chunks.tnt-entities", false );
-        loadUnloadedFallingBlocks = getBoolean( "load-chunks.falling-blocks", false );
-    }
+    //FlamePaper 0027
 
     public boolean generateCanyon;
     public boolean generateCaves;

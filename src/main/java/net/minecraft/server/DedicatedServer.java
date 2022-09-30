@@ -33,7 +33,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
     private RemoteStatusListener m;
     private RemoteControlListener n;
     public PropertyManager propertyManager;
-    private EULA p;
+    //FlamePaper 0022
     private boolean generateStructures;
     private WorldSettings.EnumGamemode r;
     private boolean s;
@@ -122,21 +122,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
 
         DedicatedServer.LOGGER.info("Loading properties");
         this.propertyManager = new PropertyManager(this.options); // CraftBukkit - CLI argument support
-        this.p = new EULA(new File("eula.txt"));
-        // Spigot Start
-        boolean eulaAgreed = Boolean.getBoolean( "com.mojang.eula.agree" );
-        if ( eulaAgreed )
-        {
-            System.err.println( "You have used the Spigot command line EULA agreement flag." );
-            System.err.println( "By using this setting you are indicating your agreement to Mojang's EULA (https://account.mojang.com/documents/minecraft_eula)." );
-            System.err.println( "If you do not agree to the above EULA please stop your server and remove this flag immediately." );
-        }
-        // Spigot End
-        if (!this.p.a() && !eulaAgreed) { // Spigot
-            DedicatedServer.LOGGER.info("You need to agree to the EULA in order to run the server. Go to eula.txt for more info.");
-            this.p.b();
-            return false;
-        } else {
+        //FlamePaper 0022
             if (this.T()) {
                 this.c("127.0.0.1");
             } else {
@@ -313,7 +299,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
 
                 return true;
             }
-        }
+            //FlamePaper 0022
     }
 
     // CraftBukkit start

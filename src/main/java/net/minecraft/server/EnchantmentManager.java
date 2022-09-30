@@ -168,7 +168,9 @@ public class EnchantmentManager {
         if (entity instanceof EntityHuman) {
             a((EnchantmentManager.EnchantmentModifier) EnchantmentManager.d, entityliving.bA());
         }
-
+        //FlamePaper 0005
+        EnchantmentManager.e.a = null;
+        EnchantmentManager.e.b = null;
     }
 
     public static void b(EntityLiving entityliving, Entity entity) {
@@ -181,7 +183,9 @@ public class EnchantmentManager {
         if (entityliving instanceof EntityHuman) {
             a((EnchantmentManager.EnchantmentModifier) EnchantmentManager.e, entityliving.bA());
         }
-
+        //FlamePaper 0005
+        EnchantmentManager.e.a = null;
+        EnchantmentManager.e.b = null;
     }
 
     public static int a(EntityLiving entityliving) {

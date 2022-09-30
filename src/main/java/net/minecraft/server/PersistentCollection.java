@@ -187,4 +187,13 @@ public class PersistentCollection {
             return oshort.shortValue();
         }
     }
+    //FlamePaper 0005
+    public void removeTrackedPlayer(EntityHuman entityhuman) {
+    for(Object o: this.c) {
+            if(o instanceof WorldMap) {
+                WorldMap map = (WorldMap) o;
+                map.untrackPlayer(entityhuman);
+            }
+        }
+    }
 }

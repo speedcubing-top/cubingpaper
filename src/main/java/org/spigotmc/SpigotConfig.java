@@ -34,7 +34,7 @@ import co.aikar.timings.TimingsManager;
 public class SpigotConfig
 {
 
-    private static File CONFIG_FILE;
+    public static File CONFIG_FILE;
     private static final String HEADER = "This is the main configuration file for Spigot.\n"
             + "As you can see, there's tons to configure. Some options may impact gameplay, so use\n"
             + "with caution, and make sure you know what each option does before configuring.\n"
@@ -75,7 +75,7 @@ public class SpigotConfig
 
         version = getInt( "config-version", 8 );
         set( "config-version", 8 );
-        readConfig( SpigotConfig.class, null );
+        readConfig();
     }
 
     public static void registerCommands()
@@ -98,28 +98,30 @@ public class SpigotConfig
         }
     }
 
-    static void readConfig(Class<?> clazz, Object instance)
+    static void readConfig()
     {
-        for ( Method method : clazz.getDeclaredMethods() )
-        {
-            if ( Modifier.isPrivate( method.getModifiers() ) )
-            {
-                if ( method.getParameterTypes().length == 0 && method.getReturnType() == Void.TYPE )
-                {
-                    try
-                    {
-                        method.setAccessible( true );
-                        method.invoke( instance );
-                    } catch ( InvocationTargetException ex )
-                    {
-                        throw Throwables.propagate( ex.getCause() );
-                    } catch ( Exception ex )
-                    {
-                        Bukkit.getLogger().log( Level.SEVERE, "Error invoking " + method, ex );
-                    }
-                }
-            }
-        }
+        logCommands();
+        replaceCommands();
+        silentCommandBlocks();
+        spamExclusions();
+        tabComplete();
+        messages();
+        attributeMaxes();
+        bungee();
+        debug();
+        filterCreativeItems();
+        intCacheLimit();
+        lateBind();
+        movedTooQuicklyThreshold();
+        movedWronglyThreshold();
+        nettyThreads();
+        playerShuffle();
+        watchdog();
+        saveUserCacheOnStopOnly();
+        playerSample();
+        userCacheCap();
+        stats();
+        tpsCommand();
 
         try
         {
@@ -329,10 +331,9 @@ public class SpigotConfig
     public static List<String> spamExclusions;
     private static void spamExclusions()
     {
-        spamExclusions = getList( "commands.spam-exclusions", Arrays.asList( new String[]
-        {
-                "/skill"
-        } ) );
+        spamExclusions = getList( "commands.spam-exclusions",
+                java.util.Collections.emptyList()
+                );
     }
 
     public static boolean silentCommandBlocks;

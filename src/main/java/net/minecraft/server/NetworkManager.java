@@ -239,6 +239,8 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     }
 
     public void close(IChatBaseComponent ichatbasecomponent) {
+        //FlamePaper 0005
+        this.i.clear();
         // Spigot Start
         this.preparing = false;
         // Spigot End
@@ -322,7 +324,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     }
 
     protected void channelRead0(ChannelHandlerContext channelhandlercontext, Packet object) throws Exception { // CraftBukkit - fix decompile error
-        this.a(channelhandlercontext, (Packet) object);
+        //FlamePaper 0013
+        if (g()) {
+            this.a(channelhandlercontext, object);
+        }
     }
 
     static class QueuedPacket {
