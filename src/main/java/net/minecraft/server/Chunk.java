@@ -781,7 +781,8 @@ public class Chunk {
             i = this.entitySlices.length - 1;
         }
 
-        this.entitySlices[i].remove(entity);
+        //Taco 0020
+        if (!this.entitySlices[i].remove(entity)) return;
         // PaperSpigot start - update counts
         if (entity instanceof EntityItem) {
             itemCounts[i]--;

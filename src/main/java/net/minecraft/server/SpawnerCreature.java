@@ -23,19 +23,8 @@ public final class SpawnerCreature {
     // Spigot start - get entity count only from chunks being processed in b
     private int getEntityCount(WorldServer server, Class oClass)
     {
-        int i = 0;
-        Iterator<Long> it = this.b.iterator();
-        while ( it.hasNext() )
-        {
-            Long coord = it.next();
-            int x = LongHash.msw( coord );
-            int z = LongHash.lsw( coord );
-            if ( !server.chunkProviderServer.unloadQueue.contains( coord ) && server.isChunkLoaded( x, z, true ) )
-            {
-                i += server.getChunkAt( x, z ).entityCount.get( oClass );
-            }
-        }
-        return i;
+        //Taco 0020
+        return server.chunkProviderServer.chunks.values().stream().collect(java.util.stream.Collectors.summingInt(c -> c.entityCount.get(oClass)));
     }
     // Spigot end
 
@@ -116,10 +105,8 @@ public final class SpawnerCreature {
                 // CraftBukkit end
 
                 if ((!enumcreaturetype.d() || flag1) && (enumcreaturetype.d() || flag) && (!enumcreaturetype.e() || flag2)) {
-                    k = worldserver.a(enumcreaturetype.a());
-                    int l1 = limit * i / a; // CraftBukkit - use per-world limits
-
-                    if ((mobcnt = getEntityCount(worldserver, enumcreaturetype.a())) <= limit * i / 256) {
+                    //Taco 0020
+                    if ((mobcnt = getEntityCount(worldserver, enumcreaturetype.a())) <= limit * i / 289) {
                         Iterator iterator1 = this.b.iterator();
 
                         int moblimit = (limit * i / 256) - mobcnt + 1; // Spigot - up to 1 more than limit

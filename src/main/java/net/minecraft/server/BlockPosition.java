@@ -220,6 +220,10 @@ public class BlockPosition extends BaseBlockPosition {
     }
 
     public static final class MutableBlockPosition extends BlockPosition {
+        //Taco 0009
+        public BlockPosition.MutableBlockPosition setValues(int x, int y, int z) {
+            return c(x, y, z);
+        }
 
         // PaperSpigot start - remove our overriding variables
         /*

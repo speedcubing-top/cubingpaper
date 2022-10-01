@@ -136,7 +136,8 @@ public class AntiXray
                     replaceWithTypeId = (byte) CraftMagicNumbers.getId(Blocks.STONE);
                     break;
             }
-
+            //Taco 0009
+            BlockPosition.MutableBlockPosition pos = new BlockPosition.MutableBlockPosition();
             // Chunks can have up to 16 sections
             for ( int i = 0; i < 16; i++ )
             {
@@ -165,14 +166,16 @@ public class AntiXray
                                 if ( obfuscateBlocks[blockId] )
                                 {
                                     // The world isn't loaded, bail out
-                                    if ( !isLoaded( world, new BlockPosition( startX + x, ( i << 4 ) + y, startZ + z ), initialRadius ) )
+                                    //Taco 0009
+                                    pos.setValues(startX + x, ( i << 4 ) + y, startZ + z);
+                                    if (!isLoaded(world, pos, initialRadius))
                                     {
                                         index++;
                                         continue;
                                     }
                                     // On the otherhand, if radius is 0, or the nearby blocks are all non air, we can obfuscate
-                                    if ( !hasTransparentBlockAdjacent( world, new BlockPosition( startX + x, ( i << 4 ) + y, startZ + z ), initialRadius ) )
-                                    {
+                                    //Taco 0009
+                                    if (!hasTransparentBlockAdjacent(world,pos,initialRadius)) {
                                         int newId = blockId;
                                         switch ( world.spigotConfig.engineMode )
                                         {
@@ -206,54 +209,71 @@ public class AntiXray
 
     private void updateNearbyBlocks(World world, BlockPosition position, int radius, boolean updateSelf)
     {
+        //Taco 0009
+        int startX = position.getX() - radius;
+        int endX = position.getX() + radius;
+        int startY = Math.max(0, position.getY() - radius);
+        int endY = Math.min(255, position.getY() + radius);
+        int startZ = position.getZ() - radius;
+        int endZ = position.getZ() + radius;
+        BlockPosition.MutableBlockPosition adjacent = new BlockPosition.MutableBlockPosition();
+        for (int x = startX; x <= endX; x++) {
+            for (int y = startY; y <= endY; y++) {
+                for (int z = startZ; z <= endZ; z++) {
+                    adjacent.setValues(x, y, z);
+                    if (!updateSelf && x == position.getX() & y == position.getY() & z == position.getZ()) continue;
+                    if (world.isLoaded(adjacent)) updateBlock(world, adjacent);
+                }
+            }
+        }
+    }
+    public static Block getType(World world, BlockPosition pos) {
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
+        net.minecraft.server.Chunk chunk = world.getChunkIfLoaded(x >> 4, z >> 4);
+        if (chunk == null) return Blocks.AIR;
+        int sectionId = y >> 4;
+        if (sectionId < 0 || sectionId > 15) return Blocks.AIR;
+        net.minecraft.server.ChunkSection section = chunk.getSections()[sectionId];
+        if (section == null) return Blocks.AIR; // Handle empty chunks
+        x &= 0xF;
+        y &= 0xF;
+        z &= 0xF;
+        int combinedId = section.getIdArray()[(y << 8) | (z << 4) | x];
+        int blockId = combinedId >> 4;
+        return net.techcable.tacospigot.utils.BlockHelper.getBlock(blockId);
+    }
+    private void updateBlock(World world, BlockPosition position){
         // If the block in question is loaded
-        if ( world.isLoaded( position ) )
-        {
+    //Taco 0009
             // Get block id
-            Block block = world.getType(position).getBlock();
+            //Taco 0009
 
             // See if it needs update
-            if ( updateSelf && obfuscateBlocks[Block.getId( block )] )
+            if (obfuscateBlocks[Block.getId( getType(world, position) )] )
             {
                 // Send the update
                 world.notify( position );
             }
 
             // Check other blocks for updates
-            if ( radius > 0 )
-            {
-                updateNearbyBlocks( world, position.east(), radius - 1, true );
-                updateNearbyBlocks( world, position.west(), radius - 1, true );
-                updateNearbyBlocks( world, position.up(), radius - 1, true );
-                updateNearbyBlocks( world, position.down(), radius - 1, true );
-                updateNearbyBlocks( world, position.south(), radius - 1, true );
-                updateNearbyBlocks( world, position.north(), radius - 1, true );
-            }
-        }
+            //Taco 0009
     }
 
     private static boolean isLoaded(World world, BlockPosition position, int radius)
     {
-        return world.isLoaded( position )
-                && ( radius == 0 ||
-                ( isLoaded( world, position.east(), radius - 1 )
-                && isLoaded( world, position.west(), radius - 1 )
-                && isLoaded( world, position.up(), radius - 1 )
-                && isLoaded( world, position.down(), radius - 1 )
-                && isLoaded( world, position.south(), radius - 1 )
-                && isLoaded( world, position.north(), radius - 1 ) ) );
+        //Taco 0009
+        return net.techcable.tacospigot.utils.BlockHelper.isAllAdjacentBlocksLoaded(world, position, radius);
     }
 
     private static boolean hasTransparentBlockAdjacent(World world, BlockPosition position, int radius)
     {
-        return !isSolidBlock(world.getType(position, false).getBlock()) /* isSolidBlock */
-                || ( radius > 0
-                && ( hasTransparentBlockAdjacent( world, position.east(), radius - 1 )
-                || hasTransparentBlockAdjacent( world, position.west(), radius - 1 )
-                || hasTransparentBlockAdjacent( world, position.up(), radius - 1 )
-                || hasTransparentBlockAdjacent( world, position.down(), radius - 1 )
-                || hasTransparentBlockAdjacent( world, position.south(), radius - 1 )
-                || hasTransparentBlockAdjacent( world, position.north(), radius - 1 ) ) );
+        //Taco 0009
+        return !net.techcable.tacospigot.utils.BlockHelper.isAllAdjacentBlocksFillPredicate(world, position, radius, (w, p) -> {
+            Block block = getType(w, p);
+            return isSolidBlock(block);
+        });
     }
 
     private static boolean isSolidBlock(Block block) {

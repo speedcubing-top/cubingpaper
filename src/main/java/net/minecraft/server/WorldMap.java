@@ -13,6 +13,7 @@ import java.util.UUID;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.map.CraftMapView;
+import top.speedcubing.CubingPaperConfig;
 // CraftBukkit end
 
 public class WorldMap extends PersistentBase {
@@ -148,6 +149,9 @@ public class WorldMap extends PersistentBase {
             this.decorations.remove(entityhuman.getUniqueID()); // Spigot
         }
 
+        //FlamePaper 0026
+        boolean allowDecorations = CubingPaperConfig.allowMapDecorations;
+        if (allowDecorations)
         for (int i = 0; i < this.g.size(); ++i) {
             WorldMap.WorldMapHumanTracker worldmap_worldmaphumantracker1 = (WorldMap.WorldMapHumanTracker) this.g.get(i);
 
@@ -161,6 +165,8 @@ public class WorldMap extends PersistentBase {
             }
         }
 
+        //FlamePaper 0026
+        if (allowDecorations)
         if (itemstack.y()) {
             EntityItemFrame entityitemframe = itemstack.z();
             BlockPosition blockposition = entityitemframe.getBlockPosition();
@@ -168,6 +174,8 @@ public class WorldMap extends PersistentBase {
             this.a(1, entityhuman.world, UUID.nameUUIDFromBytes(("frame-" + entityitemframe.getId()).getBytes(Charsets.US_ASCII)), (double) blockposition.getX(), (double) blockposition.getZ(), (double) (entityitemframe.direction.b() * 90)); // Spigot
         }
 
+        //FlamePaper 0026
+        if (allowDecorations)
         if (itemstack.hasTag() && itemstack.getTag().hasKeyOfType("Decorations", 9)) {
             NBTTagList nbttaglist = itemstack.getTag().getList("Decorations", 10);
 
