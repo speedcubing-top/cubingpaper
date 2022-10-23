@@ -43,8 +43,9 @@ public class VersionCommand extends BukkitCommand {
         if (!testPermission(sender)) return true;
 
         if (args.length == 0) {
-            sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ")");
-            sendVersion(sender);
+            sender.sendMessage("§cThis server is running §bCubingPaper§c.");
+//            sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ")");
+//            sendVersion(sender);
         } else {
             StringBuilder name = new StringBuilder();
 

@@ -20,8 +20,7 @@ public class PaperSpigotWorldConfig
 
     public void init()
     {
-        this.verbose = getBoolean( "verbose", true );
-
+        this.verbose = false;
         log( "-------- World Settings For [" + worldName + "] --------" );
         PaperSpigotConfig.readConfig( PaperSpigotWorldConfig.class, this );
     }

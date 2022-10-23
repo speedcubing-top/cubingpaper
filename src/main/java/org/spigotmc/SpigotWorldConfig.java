@@ -22,7 +22,8 @@ public class SpigotWorldConfig
 
     public void init()
     {
-        this.verbose = getBoolean( "verbose", true );
+        this.verbose = false;
+        Bukkit.getLogger().info("Loading World Settings: "+worldName);
 
         log( "-------- World Settings For [" + worldName + "] --------" );
         antiXray();
@@ -34,14 +35,15 @@ public class SpigotWorldConfig
         trackingRange();
         growthModifiers();
         hangingTickFrequency();
+        hopperAmount = getInt( "hopper-amount", 1 );
         initHunger();
         itemDespawnRate();
         bulkChunkCount();
         maxEntityCollision();
         maxTickTimes();
         maxTntPerTick();
-        itemMerge();
         expMerge();
+        itemMerge();
         mobSpawnRange();
         nerfSpawnerMobs();
         lightUpdates();
@@ -139,10 +141,10 @@ public class SpigotWorldConfig
         caneModifier = getAndValidateGrowth( "Cane" );
         melonModifier = getAndValidateGrowth( "Melon" );
         mushroomModifier = getAndValidateGrowth( "Mushroom" );
+        wartModifier = getAndValidateGrowth( "NetherWart" );
         pumpkinModifier = getAndValidateGrowth( "Pumpkin" );
         saplingModifier = getAndValidateGrowth( "Sapling" );
         wheatModifier = getAndValidateGrowth( "Wheat" );
-        wartModifier = getAndValidateGrowth( "NetherWart" );
     }
 
     public double itemMerge;
@@ -204,14 +206,12 @@ public class SpigotWorldConfig
     public int hopperAmount;
     private void hoppers()
     {
+        hopperCheck = getInt( "ticks-per.hopper-check", hopperTransfer );
         // Set the tick delay between hopper item movements
         hopperTransfer = getInt( "ticks-per.hopper-transfer", 8 );
         // Set the tick delay between checking for items after the associated
         // container is empty. Default to the hopperTransfer value to prevent
         // hopper sorting machines from becoming out of sync.
-        hopperCheck = getInt( "ticks-per.hopper-check", hopperTransfer );
-        hopperAmount = getInt( "hopper-amount", 1 );
-        log( "Hopper Transfer: " + hopperTransfer + " Hopper Check: " + hopperCheck + " Hopper Amount: " + hopperAmount );
     }
 
     public boolean randomLightUpdates;
@@ -341,10 +341,10 @@ public class SpigotWorldConfig
     public float regenExhaustion;
     private void initHunger()
     {
-        walkExhaustion = (float) getDouble( "hunger.walk-exhaustion", 0.2 );
-        sprintExhaustion = (float) getDouble( "hunger.sprint-exhaustion", 0.8 );
         combatExhaustion = (float) getDouble( "hunger.combat-exhaustion", 0.3 );
         regenExhaustion = (float) getDouble( "hunger.regen-exhaustion", 3 );
+        sprintExhaustion = (float) getDouble( "hunger.sprint-exhaustion", 0.8 );
+        walkExhaustion = (float) getDouble( "hunger.walk-exhaustion", 0.2 );
     }
 
     public int currentPrimedTnt = 0;
@@ -368,8 +368,8 @@ public class SpigotWorldConfig
     public int entityMaxTickTime;
     private void maxTickTimes()
     {
-        tileMaxTickTime = getInt("max-tick-time.tile", 50);
         entityMaxTickTime = getInt("max-tick-time.entity", 50);
+        tileMaxTickTime = getInt("max-tick-time.tile", 50);
         log("Tile Max Tick Time: " + tileMaxTickTime + "ms Entity max Tick Time: " + entityMaxTickTime + "ms");
     }
 }

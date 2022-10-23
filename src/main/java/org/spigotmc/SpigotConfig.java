@@ -117,10 +117,9 @@ public class SpigotConfig
         nettyThreads();
         playerShuffle();
         watchdog();
-        saveUserCacheOnStopOnly();
-        playerSample();
         userCacheCap();
         stats();
+        timings();
         tpsCommand();
 
         try
@@ -207,11 +206,12 @@ public class SpigotConfig
             set( "messages.outdated-server", outdatedServerMessage );
         }
 
-        whitelistMessage = transform( getString( "messages.whitelist", "You are not whitelisted on this server!" ) );
-        unknownCommandMessage = transform( getString( "messages.unknown-command", "Unknown command. Type \"/help\" for help." ) );
-        serverFullMessage = transform( getString( "messages.server-full", "The server is full!" ) );
         outdatedClientMessage = transform( getString( "messages.outdated-client", outdatedClientMessage ) );
         outdatedServerMessage = transform( getString( "messages.outdated-server", outdatedServerMessage ) );
+        restartMessage = transform( getString( "messages.restart", "Server is restarting" ) );
+        serverFullMessage = transform( getString( "messages.server-full", "The server is full!" ) );
+        unknownCommandMessage = transform( getString( "messages.unknown-command", "Unknown command. Type \"/help\" for help." ) );
+        whitelistMessage = transform( getString( "messages.whitelist", "You are not whitelisted on this server!" ) );
     }
 
     public static int timeoutTime = 60;
@@ -220,10 +220,11 @@ public class SpigotConfig
     public static String restartMessage;
     private static void watchdog()
     {
-        timeoutTime = getInt( "settings.timeout-time", timeoutTime );
         restartOnCrash = getBoolean( "settings.restart-on-crash", restartOnCrash );
         restartScript = getString( "settings.restart-script", restartScript );
-        restartMessage = transform( getString( "messages.restart", "Server is restarting" ) );
+        saveUserCacheOnStopOnly();
+        playerSample();
+        timeoutTime = getInt( "settings.timeout-time", timeoutTime );
         commands.put( "restart", new RestartCommand( "restart" ) );
         WatchdogThread.doStart( timeoutTime, restartOnCrash );
     }
@@ -241,11 +242,11 @@ public class SpigotConfig
     private static void timings()
     {
         boolean timings = getBoolean( "timings.enabled", true );
-        boolean verboseTimings = getBoolean( "timings.verbose", true );
-        TimingsManager.privacy = getBoolean( "timings.server-name-privacy", false );
         TimingsManager.hiddenConfigs = getList( "timings.hidden-config-entries", Lists.newArrayList("database", "settings.bungeecord-addresses"));
         int timingHistoryInterval = getInt( "timings.history-interval", 300 );
         int timingHistoryLength = getInt( "timings.history-length", 3600 );
+        TimingsManager.privacy = getBoolean( "timings.server-name-privacy", false );
+        boolean verboseTimings = getBoolean( "timings.verbose", true );
 
 
         Timings.setVerboseTimingsEnabled( verboseTimings );
@@ -395,12 +396,12 @@ public class SpigotConfig
     public static double attackDamage = 2048;
     private static void attributeMaxes()
     {
+        attackDamage = getDouble( "settings.attribute.attackDamage.max", attackDamage );
+        ( (AttributeRanged) GenericAttributes.ATTACK_DAMAGE ).b = attackDamage;
         maxHealth = getDouble( "settings.attribute.maxHealth.max", maxHealth );
         ( (AttributeRanged) GenericAttributes.maxHealth ).b = maxHealth;
         movementSpeed = getDouble( "settings.attribute.movementSpeed.max", movementSpeed );
         ( (AttributeRanged) GenericAttributes.MOVEMENT_SPEED ).b = movementSpeed;
-        attackDamage = getDouble( "settings.attribute.attackDamage.max", attackDamage );
-        ( (AttributeRanged) GenericAttributes.ATTACK_DAMAGE ).b = attackDamage;
     }
 
     public static boolean debug;
