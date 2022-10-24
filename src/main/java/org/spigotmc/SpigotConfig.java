@@ -34,6 +34,7 @@ import co.aikar.timings.TimingsManager;
 public class SpigotConfig
 {
 
+    //CubingPaper
     public static File CONFIG_FILE;
     private static final String HEADER = "This is the main configuration file for Spigot.\n"
             + "As you can see, there's tons to configure. Some options may impact gameplay, so use\n"
@@ -75,7 +76,7 @@ public class SpigotConfig
 
         version = getInt( "config-version", 8 );
         set( "config-version", 8 );
-        readConfig();
+        readConfig( SpigotConfig.class, null );
     }
 
     public static void registerCommands()
@@ -98,8 +99,9 @@ public class SpigotConfig
         }
     }
 
-    static void readConfig()
+    static void readConfig(Class<?> clazz, Object instance)
     {
+        //CubingPaper
         logCommands();
         replaceCommands();
         silentCommandBlocks();
@@ -332,6 +334,7 @@ public class SpigotConfig
     public static List<String> spamExclusions;
     private static void spamExclusions()
     {
+        //CubingPaper
         spamExclusions = getList( "commands.spam-exclusions",
                 java.util.Collections.emptyList()
                 );

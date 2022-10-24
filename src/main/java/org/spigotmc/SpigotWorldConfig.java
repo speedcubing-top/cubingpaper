@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
-import static org.spigotmc.SpigotConfig.CONFIG_FILE;
 
 public class SpigotWorldConfig
 {
@@ -22,10 +21,12 @@ public class SpigotWorldConfig
 
     public void init()
     {
+        //CubingPaper - Stop Logging these
         this.verbose = false;
         Bukkit.getLogger().info("Loading World Settings: "+worldName);
 
         log( "-------- World Settings For [" + worldName + "] --------" );
+        //CubingPaper
         antiXray();
         arrowDespawnRate();
         enableZombiePigmenPortalSpawns();
@@ -54,9 +55,9 @@ public class SpigotWorldConfig
         witherSpawnSoundRadius();
         zombieAggressiveTowardsVillager();
         try
-        { config.save( CONFIG_FILE );
+        { config.save(  org.spigotmc.SpigotConfig.CONFIG_FILE );
         } catch ( java.io.IOException ex )
-        { Bukkit.getLogger().log(java.util.logging.Level.SEVERE, "Could not save " + CONFIG_FILE, ex );
+        { Bukkit.getLogger().log(java.util.logging.Level.SEVERE, "Could not save " + org.spigotmc.SpigotConfig.CONFIG_FILE, ex );
         }
     }
 
