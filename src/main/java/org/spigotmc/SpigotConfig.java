@@ -210,6 +210,7 @@ public class SpigotConfig
 
         outdatedClientMessage = transform( getString( "messages.outdated-client", outdatedClientMessage ) );
         outdatedServerMessage = transform( getString( "messages.outdated-server", outdatedServerMessage ) );
+        //CubingPaper
         restartMessage = transform( getString( "messages.restart", "Server is restarting" ) );
         serverFullMessage = transform( getString( "messages.server-full", "The server is full!" ) );
         unknownCommandMessage = transform( getString( "messages.unknown-command", "Unknown command. Type \"/help\" for help." ) );
@@ -224,6 +225,7 @@ public class SpigotConfig
     {
         restartOnCrash = getBoolean( "settings.restart-on-crash", restartOnCrash );
         restartScript = getString( "settings.restart-script", restartScript );
+        //CubingPaper
         saveUserCacheOnStopOnly();
         playerSample();
         timeoutTime = getInt( "settings.timeout-time", timeoutTime );
@@ -247,6 +249,7 @@ public class SpigotConfig
         TimingsManager.hiddenConfigs = getList( "timings.hidden-config-entries", Lists.newArrayList("database", "settings.bungeecord-addresses"));
         int timingHistoryInterval = getInt( "timings.history-interval", 300 );
         int timingHistoryLength = getInt( "timings.history-length", 3600 );
+        //CubingPaper
         TimingsManager.privacy = getBoolean( "timings.server-name-privacy", false );
         boolean verboseTimings = getBoolean( "timings.verbose", true );
 
@@ -399,6 +402,7 @@ public class SpigotConfig
     public static double attackDamage = 2048;
     private static void attributeMaxes()
     {
+        //CubingPaper
         attackDamage = getDouble( "settings.attribute.attackDamage.max", attackDamage );
         ( (AttributeRanged) GenericAttributes.ATTACK_DAMAGE ).b = attackDamage;
         maxHealth = getDouble( "settings.attribute.maxHealth.max", maxHealth );
