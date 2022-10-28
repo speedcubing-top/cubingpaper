@@ -46,7 +46,7 @@ public class RestartCommand extends Command
         try
         {
             //CubingPaper
-            boolean b = top.speedcubing.CubingPaperConfig.restartArgument == null;
+            boolean b = top.speedcubing.server.CubingPaperConfig.restartArgument == null;
             if ( !b || script.isFile() )
             {
                 //CubingPaper
@@ -109,7 +109,7 @@ public class RestartCommand extends Command
                                 } );
                             }
                             //CubingPaper
-                            } else Runtime.getRuntime().exec(top.speedcubing.CubingPaperConfig.restartArgument);
+                            } else Runtime.getRuntime().exec(top.speedcubing.server.CubingPaperConfig.restartArgument);
                         } catch ( Exception e )
                         {
                             e.printStackTrace();

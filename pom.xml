@@ -30,6 +30,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.84.Final</version>
+        </dependency>
+        <dependency>
             <groupId>net.sf.trove4j</groupId>
             <artifactId>trove4j</artifactId>
             <version>3.0.3</version>
@@ -188,6 +193,7 @@
                                     <artifact>org.spigotmc:minecraft-server:**</artifact>
                                     <excludes>
                                         <exclude>org/apache/logging/log4j/**</exclude>
+                                        <exclude>io/netty/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -221,24 +227,6 @@
                                     <shadedPattern>net.minecraft.server.v${minecraft_version}</shadedPattern>
                                 </relocation>
                             </relocations>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- Gotta go after shade plugin -->
-            <plugin>
-                <groupId>net.md-5</groupId>
-                <artifactId>specialsource-maven-plugin</artifactId>
-		<version>1.2.4</version> <!-- paper - bump log4j -->
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>remap</goal>
-                        </goals>
-                        <configuration>
-                            <srgIn>${project.basedir}/deprecation-mappings.csrg</srgIn>
-                            <accessIn>${project.basedir}/deprecation-mappings.at</accessIn>
                         </configuration>
                     </execution>
                 </executions>

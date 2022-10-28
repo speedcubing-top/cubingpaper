@@ -21,7 +21,6 @@ import net.minecraft.server.IChatBaseComponent.ChatSerializer;
 import net.minecraft.server.IChatBaseComponent;
 import net.minecraft.server.NBTTagString;
 import org.bukkit.craftbukkit.util.CraftChatMessage;
-import top.speedcubing.CubingPaperConfig;
 
 // Spigot start
 import static org.spigotmc.ValidateUtils.*;
@@ -36,7 +35,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
     static final ItemMetaKey GENERATION = new ItemMetaKey("generation");
     static final int MAX_PAGE_LENGTH = 340;
     static final int MAX_TITLE_LENGTH = 32;
-    static final int MAX_PAGES = CubingPaperConfig.bookMaxPages;
+    static final int MAX_PAGES = top.speedcubing.server.CubingPaperConfig.bookMaxPages;
     static final int MAX_AUTHOR_LENGTH = 16;
 
     protected String title;
@@ -86,7 +85,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
             NBTTagList pages = tag.getList(BOOK_PAGES.NBT, MAX_PAGES);
 
             //FlamePaper 0015
-            for (int i = 0; i < Math.min(pages.size(), CubingPaperConfig.bookMaxPages); i++) {
+            for (int i = 0; i < Math.min(pages.size(), top.speedcubing.server.CubingPaperConfig.bookMaxPages); i++) {
                 String page = pages.getString(i);
                 if (resolved) {
                     try {

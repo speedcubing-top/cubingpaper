@@ -1,4 +1,4 @@
-package top.speedcubing;
+package top.speedcubing.server;
 
 public class CubingPaperConfig {
     //Cubing

@@ -56,7 +56,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.StandardMessenger;
 import org.bukkit.util.Vector;
 import org.github.paperspigot.exception.ServerInternalException;
-import top.speedcubing.CubingPaperConfig;
 
 public class CraftWorld implements World {
     public static final int CUSTOM_DIMENSION_OFFSET = 10;
@@ -1396,7 +1395,7 @@ public class CraftWorld implements World {
 
         //FlamePaper 0030
         int viewChunks = ((getHandle().getServer().getViewDistance() * 2) + 1);
-        int chunkGCLoadThreshold = CubingPaperConfig.adaptativeChunkGC ? (world.keepSpawnInMemory ? 256 : 0) + getPlayers().size() * (viewChunks * viewChunks) : server.chunkGCLoadThresh;
+        int chunkGCLoadThreshold = top.speedcubing.server.CubingPaperConfig.adaptativeChunkGC ? (world.keepSpawnInMemory ? 256 : 0) + getPlayers().size() * (viewChunks * viewChunks) : server.chunkGCLoadThresh;
         if (chunkLoadCount > chunkGCLoadThreshold && chunkGCLoadThreshold > 0) {
             chunkLoadCount = 0;
         } else if (chunkGCTickCount >= server.chunkGCPeriod && server.chunkGCPeriod > 0) {

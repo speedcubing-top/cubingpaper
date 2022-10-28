@@ -115,7 +115,8 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
         }
 
         this.close(chatmessage);
-        if (MinecraftServer.getServer().isDebugging()) throwable.printStackTrace(); // Spigot
+        //FlamePaper NETTY
+        throwable.printStackTrace();
     }
 
     protected void a(ChannelHandlerContext channelhandlercontext, Packet packet) throws Exception {

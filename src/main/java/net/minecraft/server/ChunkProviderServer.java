@@ -32,8 +32,7 @@ public class ChunkProviderServer implements IChunkProvider {
     public LongHashSet unloadQueue = new LongHashSet(); // CraftBukkit - LongHashSet
     public Chunk emptyChunk;
     public IChunkProvider chunkProvider;
-    //FlamePaper 0003
-    public IChunkLoader chunkLoader;
+    private IChunkLoader chunkLoader;
     public boolean forceChunkLoad = false; // CraftBukkit - true -> false
     public LongObjectHashMap<Chunk> chunks = new LongObjectHashMap<Chunk>();
     public WorldServer world;
@@ -254,7 +253,7 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
     public void saveChunkNOP(Chunk chunk) {
-        //FlamePaper 0003
+        //FlamePaper NEW
         if (canSave() && this.chunkLoader != null) {
             try {
                 this.chunkLoader.b(this.world, chunk);
@@ -266,7 +265,7 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
     public void saveChunk(Chunk chunk) {
-        //FlamePaper 0003
+        //FlamePaper NEW
         if (canSave() && this.chunkLoader != null) {
             try {
                 chunk.setLastSaved(this.world.getTime());
@@ -361,7 +360,7 @@ public class ChunkProviderServer implements IChunkProvider {
 
     }
 
-    //FlamePaper 0003
+    //FlamePaper NEW
     public boolean unloadChunks() {
         return unloadChunks(false);
     }

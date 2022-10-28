@@ -13,7 +13,6 @@ import java.util.UUID;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.map.CraftMapView;
-import top.speedcubing.CubingPaperConfig;
 // CraftBukkit end
 
 public class WorldMap extends PersistentBase {
@@ -150,7 +149,7 @@ public class WorldMap extends PersistentBase {
         }
 
         //FlamePaper 0026
-        boolean allowDecorations = CubingPaperConfig.allowMapDecorations;
+        boolean allowDecorations = top.speedcubing.server.CubingPaperConfig.allowMapDecorations;
         if (allowDecorations)
         for (int i = 0; i < this.g.size(); ++i) {
             WorldMap.WorldMapHumanTracker worldmap_worldmaphumantracker1 = (WorldMap.WorldMapHumanTracker) this.g.get(i);
