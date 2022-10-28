@@ -63,7 +63,7 @@ public class ChunkProviderServer implements IChunkProvider {
         }
         // PaperSpigot end
         // PaperSpigot start - Don't unload chunk if it contains an entity that loads chunks
-        //FlamePaper 0027
+        //FlamePaper 0029
         // PaperSpigot end
         if (this.world.worldProvider.e()) {
             if (!this.world.c(i, j)) {
@@ -253,7 +253,7 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
     public void saveChunkNOP(Chunk chunk) {
-        //FlamePaper NEW
+        //FlamePaper 0005
         if (canSave() && this.chunkLoader != null) {
             try {
                 this.chunkLoader.b(this.world, chunk);
@@ -265,7 +265,7 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
     public void saveChunk(Chunk chunk) {
-        //FlamePaper NEW
+        //FlamePaper 0005
         if (canSave() && this.chunkLoader != null) {
             try {
                 chunk.setLastSaved(this.world.getTime());
@@ -360,7 +360,7 @@ public class ChunkProviderServer implements IChunkProvider {
 
     }
 
-    //FlamePaper NEW
+    //FlamePaper 0005
     public boolean unloadChunks() {
         return unloadChunks(false);
     }

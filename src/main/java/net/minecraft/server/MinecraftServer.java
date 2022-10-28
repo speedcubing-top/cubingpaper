@@ -329,13 +329,13 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
     }
 
     protected void k() {
-        //FlamePaper 0011
+        //FlamePaper 0013
 
         this.b("menu.generatingTerrain");
-        //FlamePaper 0011
+        //FlamePaper 0013
 
         // CraftBukkit start - fire WorldLoadEvent and handle whether or not to keep the spawn in memory
-        //FlamePaper 0011
+        //FlamePaper 0013
 
         for (WorldServer world : this.worlds) {
             this.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldLoadEvent(world.getWorld()));

@@ -26,7 +26,7 @@ public class EntityFallingBlock extends Entity {
     public EntityFallingBlock(org.bukkit.Location loc, World world) {
         super(world);
         sourceLoc = loc;
-        //FlamePaper 0027
+        //FlamePaper 0029
     }
 
     public EntityFallingBlock(World world, double d0, double d1, double d2, IBlockData iblockdata) {
@@ -47,7 +47,7 @@ public class EntityFallingBlock extends Entity {
         this.lastX = d0;
         this.lastY = d1;
         this.lastZ = d2;
-        //FlamePaper 0027
+        //FlamePaper 0029
     }
 
     protected boolean s_() {

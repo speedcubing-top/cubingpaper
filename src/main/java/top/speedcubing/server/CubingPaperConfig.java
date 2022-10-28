@@ -1,7 +1,7 @@
 package top.speedcubing.server;
 
 public class CubingPaperConfig {
-    //Cubing
+    //CubingPaper - Configurations
     public static String[] restartArgument;
     public static boolean fixGhostBlock = true;
     //FlamePaper

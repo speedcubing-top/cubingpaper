@@ -174,7 +174,7 @@ public class PaperSpigotConfig
         Bukkit.getLogger().info( "Data value allowed items: " + StringUtils.join(dataValueAllowedItems, ", ") );
     }
 
-    //FlamePaper 0015
+    //FlamePaper 0017
 
     public static boolean warnForExcessiveVelocity;
     private static void excessiveVelocityWarning()

@@ -115,7 +115,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
         }
 
         this.close(chatmessage);
-        //FlamePaper NETTY
+        //FlamePaper 0004
         throwable.printStackTrace();
     }
 
@@ -240,7 +240,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     }
 
     public void close(IChatBaseComponent ichatbasecomponent) {
-        //FlamePaper 0005
+        //FlamePaper 0007
         this.i.clear();
         // Spigot Start
         this.preparing = false;
@@ -325,7 +325,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     }
 
     protected void channelRead0(ChannelHandlerContext channelhandlercontext, Packet object) throws Exception { // CraftBukkit - fix decompile error
-        //FlamePaper 0013
+        //FlamePaper 0015
         if (g()) {
             this.a(channelhandlercontext, object);
         }

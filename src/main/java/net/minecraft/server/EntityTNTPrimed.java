@@ -21,7 +21,7 @@ public class EntityTNTPrimed extends Entity {
     // PaperSpigot end
         this.k = true;
         this.setSize(0.98F, 0.98F);
-        //FlamePaper 0027
+        //FlamePaper 0029
     }
 
     public EntityTNTPrimed(org.bukkit.Location loc, World world, double d0, double d1, double d2, EntityLiving entityliving) {
@@ -100,7 +100,7 @@ public class EntityTNTPrimed extends Entity {
         // float f = 4.0F;
 
         // PaperSpigot start - Force load chunks during TNT explosions
-        //FlamePaper 0027
+        //FlamePaper 0029
         // PaperSpigot end
 
         org.bukkit.craftbukkit.CraftServer server = this.world.getServer();
@@ -114,7 +114,7 @@ public class EntityTNTPrimed extends Entity {
         // CraftBukkit end
 
         // PaperSpigot start - Force load chunks during TNT explosions
-        //FlamePaper 0027
+        //FlamePaper 0029
         // PaperSpigot end
     }
 

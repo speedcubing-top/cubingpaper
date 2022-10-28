@@ -96,7 +96,7 @@ public class ItemBucket extends Item {
                     if (this.a(world, blockposition1) && !entityhuman.abilities.canInstantlyBuild) {
                         entityhuman.b(StatisticList.USE_ITEM_COUNT[Item.getId(this)]);
                         // PaperSpigot start - Stackable Buckets
-                        //FlamePaper 0028
+                        //FlamePaper 0030
                         // PaperSpigot end
                         return CraftItemStack.asNMSCopy(event.getItemStack()); // CraftBukkit
                     }

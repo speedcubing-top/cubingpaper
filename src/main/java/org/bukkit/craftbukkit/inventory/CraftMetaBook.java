@@ -63,12 +63,12 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
         super(tag);
 
         if (tag.hasKey(BOOK_TITLE.NBT)) {
-            //FlamePaper 0015
+            //FlamePaper 0017
             this.title = limit(tag.getString(BOOK_TITLE.NBT),MAX_TITLE_LENGTH);
         }
 
         if (tag.hasKey(BOOK_AUTHOR.NBT)) {
-            //FlamePaper 0015
+            //FlamePaper 0017
             this.title = limit(tag.getString(BOOK_AUTHOR.NBT),MAX_AUTHOR_LENGTH);
         }
 
@@ -84,7 +84,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
         if (tag.hasKey(BOOK_PAGES.NBT) && handlePages) {
             NBTTagList pages = tag.getList(BOOK_PAGES.NBT, MAX_PAGES);
 
-            //FlamePaper 0015
+            //FlamePaper 0017
             for (int i = 0; i < Math.min(pages.size(), top.speedcubing.server.CubingPaperConfig.bookMaxPages); i++) {
                 String page = pages.getString(i);
                 if (resolved) {
@@ -95,7 +95,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
                         // Ignore and treat as an old book
                     }
                 }
-                //FlamePaper 0015
+                //FlamePaper 0017
                 addPage(limit(page,MAX_PAGE_LENGTH));
             }
         }
@@ -110,15 +110,15 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
 
         Iterable<?> pages = SerializableMeta.getObject(Iterable.class, map, BOOK_PAGES.BUKKIT, true);
         if(pages != null) {
-            //FlamePaper 0015
+            //FlamePaper 0017
             int pageCount = 0;
             for (Object page : pages) {
-                //FlamePaper 0015
+                //FlamePaper 0017
                 if(pageCount < MAX_PAGES) {
                 if (page instanceof String) {
                     addPage((String) page);
                 }
-                    //FlamePaper 0015
+                    //FlamePaper 0017
                     pageCount++;
                 } else break;
             }
@@ -199,12 +199,12 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
     public boolean setTitle(final String title) {
         if (title == null) {
             this.title = null;
-            //FlamePaper 0015
+            //FlamePaper 0017
         } else {
             this.title = title.substring(0, Math.min(title.length(), MAX_PAGE_LENGTH));
         }
 
-        //FlamePaper 0015
+        //FlamePaper 0017
         return true;
     }
 
@@ -226,7 +226,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
             throw new IllegalArgumentException("Invalid page number " + page + "/" + pages.size());
         }
 
-        //FlamePaper 0015
+        //FlamePaper 0017
         String newText = text == null ? "" : text.substring(0, Math.min(text.length(), MAX_PAGE_LENGTH));
         pages.set(page - 1, CraftChatMessage.fromString(newText, true)[0]);
     }
@@ -238,7 +238,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
     }
 
     public void addPage(final String... pages) {
-        //FlamePaper 0015
+        //FlamePaper 0017
         for (int i = 0; i < Math.min(pages.length, MAX_PAGES); i++) {
             if (getPageCount() < MAX_PAGES) {
                 String page = pages[i];
@@ -249,7 +249,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
             }
 
             this.pages.add(CraftChatMessage.fromString(page, true)[0]);
-                //FlamePaper 0015
+                //FlamePaper 0017
             } else break;
         }
     }
@@ -276,7 +276,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
 
     public void setPages(List<String> pages) {
         this.pages.clear();
-        //FlamePaper 0015
+        //FlamePaper 0017
         addPage(pages.toArray(new String[0]));
     }
 

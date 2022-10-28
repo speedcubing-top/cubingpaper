@@ -231,7 +231,7 @@ public class PaperSpigotWorldConfig
         disableEndCredits = getBoolean( "game-mechanics.disable-end-credits", false );
     }
 
-    //FlamePaper 0027
+    //FlamePaper 0029
 
     public boolean generateCanyon;
     public boolean generateCaves;

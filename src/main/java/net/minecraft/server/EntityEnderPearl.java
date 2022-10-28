@@ -12,13 +12,13 @@ public class EntityEnderPearl extends EntityProjectile {
 
     public EntityEnderPearl(World world) {
         super(world);
-        //FlamePaper 0027
+        //FlamePaper 0029
     }
 
     public EntityEnderPearl(World world, EntityLiving entityliving) {
         super(world, entityliving);
         this.c = entityliving;
-        //FlamePaper 0027
+        //FlamePaper 0029
     }
 
     protected void a(MovingObjectPosition movingobjectposition) {

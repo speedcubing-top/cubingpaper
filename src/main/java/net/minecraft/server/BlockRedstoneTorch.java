@@ -10,10 +10,10 @@ import org.bukkit.event.block.BlockRedstoneEvent; // CraftBukkit
 
 public class BlockRedstoneTorch extends BlockTorch {
 
-    //FlamePaper 0012
+    //FlamePaper 0014
     private final boolean isOn;
 
-    //FlamePaper 0012
+    //FlamePaper 0014
 
     protected BlockRedstoneTorch(boolean flag) {
         this.isOn = flag;
@@ -25,23 +25,23 @@ public class BlockRedstoneTorch extends BlockTorch {
         return 2;
     }
 
-    //FlamePaper 0012
+    //FlamePaper 0014
     public void applyPhysics(World world, BlockPosition blockposition) {
         if (this.isOn) {
             // PaperSpigot start - Fix cannons
-            //FlamePaper 0012
+            //FlamePaper 0014
                 world.applyPhysics(blockposition.shift(EnumDirection.UP), this);
-            //FlamePaper 0012
+            //FlamePaper 0014
         }
 
     }
 
-    //FlamePaper 0012
+    //FlamePaper 0014
     public void onPlace(World world, BlockPosition blockposition, IBlockData iblockdata) {
         applyPhysics(world, blockposition);
     }
     public void remove(World world, BlockPosition blockposition, IBlockData iblockdata) {
-        //FlamePaper 0012
+        //FlamePaper 0014
         applyPhysics(world, blockposition);
     }
 
@@ -59,7 +59,7 @@ public class BlockRedstoneTorch extends BlockTorch {
 
     public void b(World world, BlockPosition blockposition, IBlockData iblockdata, Random random) {
         boolean flag = this.g(world, blockposition, iblockdata);
-        //FlamePaper 0012
+        //FlamePaper 0014
         if (this.isOn != flag) {
             return;
         }
@@ -73,16 +73,16 @@ public class BlockRedstoneTorch extends BlockTorch {
         // CraftBukkit end
 
         if (this.isOn) {
-            //FlamePaper 0012
+            //FlamePaper 0014
                     event.setNewCurrent(0);
                     manager.callEvent(event);
                     if (event.getNewCurrent() != 0) {
                         return;
-                        //FlamePaper 0012
+                        //FlamePaper 0014
                 }
                 // CraftBukkit end
                 world.setTypeAndData(blockposition, Blocks.UNLIT_REDSTONE_TORCH.getBlockData().set(BlockRedstoneTorch.FACING, iblockdata.get(BlockRedstoneTorch.FACING)), 3);
-                //FlamePaper 0012
+                //FlamePaper 0014
             } else {
             // CraftBukkit start
             if (oldCurrent != 15) {

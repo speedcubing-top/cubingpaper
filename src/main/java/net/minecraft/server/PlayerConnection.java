@@ -1664,7 +1664,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
                         case DEFAULT:
                             itemstack = this.player.activeContainer.clickItem(packetplayinwindowclick.b(), packetplayinwindowclick.c(), packetplayinwindowclick.f(), this.player);
                             // PaperSpigot start - Stackable Buckets
-                            //FlamePaper 0028
+                            //FlamePaper 0030
                             // PaperSpigot end
                             break;
                         case DENY:

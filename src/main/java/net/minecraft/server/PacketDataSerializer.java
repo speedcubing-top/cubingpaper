@@ -223,7 +223,7 @@ public class PacketDataSerializer extends ByteBuf {
         } else if (j < 0) {
             throw new DecoderException("The received encoded string buffer length is less than zero! Weird string!");
         } else {
-            //FlamePaper NETTY
+            //FlamePaper 0004
             String s = new String(io.netty.buffer.ByteBufUtil.getBytes(this, this.readerIndex(), j), Charset.forName("UTF-8"));
             this.readerIndex(readerIndex() + j);
 
@@ -246,7 +246,7 @@ public class PacketDataSerializer extends ByteBuf {
             return this;
         }
     }
-    //FlamePaper NETTY
+    //FlamePaper 0004
     public int refCnt() {
         return a.refCnt();
     }

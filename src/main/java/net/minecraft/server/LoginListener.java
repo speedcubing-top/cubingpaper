@@ -152,7 +152,7 @@ public class LoginListener implements PacketLoginInListener, IUpdatePlayerListBo
     }
 
     public String d() {
-        //FlamePaper 0010
+        //FlamePaper 0012
         String socketAddress = networkManager == null ? null : (networkManager.getSocketAddress() == null ? null : networkManager.getSocketAddress().toString());
         return this.i != null ? this.i.toString() + " (" + socketAddress + ")" : socketAddress;
     }

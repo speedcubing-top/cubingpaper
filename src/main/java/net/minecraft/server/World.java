@@ -442,7 +442,7 @@ public abstract class World implements IBlockAccess {
 
     // CraftBukkit start - Split off from original setTypeAndData(int i, int j, int k, Block block, int l, int i1) method in order to directly send client and physic updates
     public void notifyAndUpdatePhysics(BlockPosition blockposition, Chunk chunk, Block oldBlock, Block newBLock, int flag) {
-        //FlamePaper 0006
+        //FlamePaper 0008
         if ((flag & 2) != 0 && (!this.isClientSide || (flag & 4) == 0) && (chunk == null || chunk.isReady())) {
             this.notify(blockposition);
         }
@@ -686,7 +686,7 @@ public abstract class World implements IBlockAccess {
                 if (blockposition.getY() >= 256) {
                     blockposition = new BlockPosition(blockposition.getX(), 255, blockposition.getZ());
                 }
-                //FlamePaper 0008
+                //FlamePaper 0010
                 if (!this.isLoaded(blockposition)) return 0;
 
                 Chunk chunk = this.getChunkAtWorldCoords(blockposition);
@@ -1096,7 +1096,7 @@ public abstract class World implements IBlockAccess {
         entity.die();
         if (entity instanceof EntityHuman) {
             this.players.remove(entity);
-            //FlamePaper 0005
+            //FlamePaper 0007
             this.worldMaps.removeTrackedPlayer((EntityHuman) entity);
             // Spigot start
             for ( Object o : worldMaps.c )
@@ -1126,7 +1126,7 @@ public abstract class World implements IBlockAccess {
         entity.die();
         if (entity instanceof EntityHuman) {
             this.players.remove(entity);
-            //FlamePaper 0005
+            //FlamePaper 0007
             this.worldMaps.removeTrackedPlayer((EntityHuman) entity);
             this.everyoneSleeping();
         }
@@ -1181,10 +1181,10 @@ public abstract class World implements IBlockAccess {
                 if ( chunk == null )
                 {
                     // PaperSpigot start
-                    //FlamePaper 0027
+                    //FlamePaper 0029
                         entity.inUnloadedChunk = true; // PaperSpigot - Remove entities in unloaded chunks
                         continue;
-                    //FlamePaper 0027
+                    //FlamePaper 0029
                     // PaperSpigot end
                 }
                 int cz = chunkz << 4;
@@ -1682,7 +1682,7 @@ public abstract class World implements IBlockAccess {
             int i1 = MathHelper.floor(entity.locZ / 16.0D);
 
             if (!entity.ad || entity.ae != k || entity.af != l || entity.ag != i1) {
-                //FlamePaper 0027
+                //FlamePaper 0029
                 if (entity.ad && this.isChunkLoaded(entity.ae, entity.ag, true)) {
                     this.getChunkAt(entity.ae, entity.ag).a(entity, entity.af);
                 }

@@ -106,7 +106,7 @@ public abstract class Container {
     }
 
     public Slot getSlot(int i) {
-        //FlamePaper 0004
+        //FlamePaper 0006
         final int lastIndex = this.c.size() - 1;
         if (i > lastIndex) {
             i = lastIndex;

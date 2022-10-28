@@ -43,6 +43,7 @@ public class VersionCommand extends BukkitCommand {
         if (!testPermission(sender)) return true;
 
         if (args.length == 0) {
+            //CubingPaper - Fast Versioning
             sender.sendMessage("§cThis server is running §bCubingPaper§c.");
         } else {
             StringBuilder name = new StringBuilder();

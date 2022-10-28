@@ -187,7 +187,7 @@ public class PersistentCollection {
             return oshort.shortValue();
         }
     }
-    //FlamePaper 0005
+    //FlamePaper 0007
     public void removeTrackedPlayer(EntityHuman entityhuman) {
     for(Object o: this.c) {
             if(o instanceof WorldMap) {

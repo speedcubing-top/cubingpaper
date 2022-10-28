@@ -33,7 +33,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
     private RemoteStatusListener m;
     private RemoteControlListener n;
     public PropertyManager propertyManager;
-    //FlamePaper 0022
+    //FlamePaper 0024
     private boolean generateStructures;
     private WorldSettings.EnumGamemode r;
     private boolean s;
@@ -122,7 +122,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
 
         DedicatedServer.LOGGER.info("Loading properties");
         this.propertyManager = new PropertyManager(this.options); // CraftBukkit - CLI argument support
-        //FlamePaper 0022
+        //FlamePaper 0024
             if (this.T()) {
                 this.c("127.0.0.1");
             } else {
@@ -299,7 +299,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
 
                 return true;
             }
-            //FlamePaper 0022
+            //FlamePaper 0024
     }
 
     // CraftBukkit start
