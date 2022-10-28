@@ -34,7 +34,7 @@ import co.aikar.timings.TimingsManager;
 public class SpigotConfig
 {
 
-    //CubingPaper
+    //CubingPaper - Fix Random Config Order
     public static File CONFIG_FILE;
     private static final String HEADER = "This is the main configuration file for Spigot.\n"
             + "As you can see, there's tons to configure. Some options may impact gameplay, so use\n"
@@ -101,7 +101,7 @@ public class SpigotConfig
 
     static void readConfig(Class<?> clazz, Object instance)
     {
-        //CubingPaper
+        //CubingPaper - Fix Random Config Order
         logCommands();
         replaceCommands();
         silentCommandBlocks();
@@ -210,7 +210,7 @@ public class SpigotConfig
 
         outdatedClientMessage = transform( getString( "messages.outdated-client", outdatedClientMessage ) );
         outdatedServerMessage = transform( getString( "messages.outdated-server", outdatedServerMessage ) );
-        //CubingPaper
+        //CubingPaper - Fix Random Config Order
         restartMessage = transform( getString( "messages.restart", "Server is restarting" ) );
         serverFullMessage = transform( getString( "messages.server-full", "The server is full!" ) );
         unknownCommandMessage = transform( getString( "messages.unknown-command", "Unknown command. Type \"/help\" for help." ) );
@@ -225,7 +225,7 @@ public class SpigotConfig
     {
         restartOnCrash = getBoolean( "settings.restart-on-crash", restartOnCrash );
         restartScript = getString( "settings.restart-script", restartScript );
-        //CubingPaper
+        //CubingPaper - Fix Random Config Order
         saveUserCacheOnStopOnly();
         playerSample();
         timeoutTime = getInt( "settings.timeout-time", timeoutTime );
@@ -249,7 +249,7 @@ public class SpigotConfig
         TimingsManager.hiddenConfigs = getList( "timings.hidden-config-entries", Lists.newArrayList("database", "settings.bungeecord-addresses"));
         int timingHistoryInterval = getInt( "timings.history-interval", 300 );
         int timingHistoryLength = getInt( "timings.history-length", 3600 );
-        //CubingPaper
+        //CubingPaper - Fix Random Config Order
         TimingsManager.privacy = getBoolean( "timings.server-name-privacy", false );
         boolean verboseTimings = getBoolean( "timings.verbose", true );
 
@@ -337,7 +337,7 @@ public class SpigotConfig
     public static List<String> spamExclusions;
     private static void spamExclusions()
     {
-        //CubingPaper
+        //CubingPaper - Fix MMC Exploits
         spamExclusions = getList( "commands.spam-exclusions",
                 java.util.Collections.emptyList()
                 );
@@ -402,7 +402,7 @@ public class SpigotConfig
     public static double attackDamage = 2048;
     private static void attributeMaxes()
     {
-        //CubingPaper
+        //CubingPaper - Fix Random Config Order
         attackDamage = getDouble( "settings.attribute.attackDamage.max", attackDamage );
         ( (AttributeRanged) GenericAttributes.ATTACK_DAMAGE ).b = attackDamage;
         maxHealth = getDouble( "settings.attribute.maxHealth.max", maxHealth );

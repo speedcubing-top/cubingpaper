@@ -146,6 +146,7 @@ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlay
                         break;
               //FlamePaper 0014
             }
+
             //FlamePaper 0014
         }
 
@@ -181,6 +182,7 @@ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlay
                 this.i = false;
             }
         }
+
 
         //FlamePaper 0014
         if (!this.world.isClientSide && getLevel() == 4 && i < getLevel()) {

@@ -111,6 +111,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
     public org.bukkit.command.ConsoleCommandSender console;
     public org.bukkit.command.RemoteConsoleCommandSender remoteConsole;
     public ConsoleReader reader;
+    //CubingSpigot - Don't optimize tick
     public static int currentTick = (int) (System.currentTimeMillis() / 50); // PaperSpigot - Further improve tick loop
     public final Thread primaryThread;
     public java.util.Queue<Runnable> processQueue = new java.util.concurrent.ConcurrentLinkedQueue<Runnable>();
@@ -482,15 +483,18 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
 
     // PaperSpigot start - Further improve tick loop
     private static final int TPS = 20;
+    //CubingSpigot - Don't optimize tick
     private static final long TICK_TIME = 1000000000 / TPS;
     private static final int SAMPLE_INTERVAL = 100;
     public double[] recentTps = new double[ 3 ]; // PaperSpigot - Fine have your darn compat with bad plugins
+    //CubingSpigot - Don't optimize tick
 
-    // PaperSpigot End
-
+    //CubingSpigot - Don't optimize tick
     private static double calcTps(double avg, double exp, double tps) {
         return (avg * exp) + (tps * (1 - exp));
     }
+    // PaperSpigot End
+
     public void run() {
         try {
             if (this.init()) {
@@ -504,14 +508,18 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
                 // Spigot start
                 // PaperSpigot start - Further improve tick loop
                 Arrays.fill( recentTps, 20 );
+                //long lastTick = System.nanoTime(), catchupTime = 0, curTime, wait, tickSection = lastTick;
+                //CubingSpigot - Don't optimize tick
                 long lastTick = System.nanoTime(), catchupTime = 0, curTime, wait, tickSection = lastTick;
                 // PaperSpigot end
                 while (this.isRunning) {
                     curTime = System.nanoTime();
-                    wait = TICK_TIME - (curTime - lastTick) - catchupTime;
                     // PaperSpigot start - Further improve tick loop
+                    //CubingSpigot - Don't optimize tick
+                    wait = TICK_TIME - (curTime - lastTick) - catchupTime;
                     if (wait > 0) {
                         Thread.sleep(wait / 1000000);
+                        //CubingSpigot - Don't optimize tick
                         catchupTime = 0;
                         continue;
                     } else {
@@ -521,6 +529,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
 
                     if ( ++MinecraftServer.currentTick % SAMPLE_INTERVAL == 0 )
                     {
+                        //CubingSpigot - Don't optimize tick
                         double currentTps = 1E9 / ( curTime - tickSection ) * SAMPLE_INTERVAL;
                         recentTps[0] = calcTps( recentTps[0], 0.92, currentTps ); // 1/exp(5sec/1min)
                         recentTps[1] = calcTps( recentTps[1], 0.9835, currentTps ); // 1/exp(5sec/5min)

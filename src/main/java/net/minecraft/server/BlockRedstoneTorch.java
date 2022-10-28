@@ -28,6 +28,7 @@ public class BlockRedstoneTorch extends BlockTorch {
     //FlamePaper 0012
     public void applyPhysics(World world, BlockPosition blockposition) {
         if (this.isOn) {
+            // PaperSpigot start - Fix cannons
             //FlamePaper 0012
                 world.applyPhysics(blockposition.shift(EnumDirection.UP), this);
             //FlamePaper 0012

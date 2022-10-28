@@ -22,6 +22,7 @@ public class PaperSpigotWorldConfig
     {
         //CubingPaper - Stop Logging these
         this.verbose = false;
+
         log( "-------- World Settings For [" + worldName + "] --------" );
         PaperSpigotConfig.readConfig( PaperSpigotWorldConfig.class, this );
     }

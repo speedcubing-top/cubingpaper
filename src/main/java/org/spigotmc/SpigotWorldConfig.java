@@ -26,7 +26,7 @@ public class SpigotWorldConfig
         Bukkit.getLogger().info("Loading World Settings: "+worldName);
 
         log( "-------- World Settings For [" + worldName + "] --------" );
-        //CubingPaper
+        //CubingPaper - Fix Random Config Order
         antiXray();
         arrowDespawnRate();
         enableZombiePigmenPortalSpawns();
@@ -142,7 +142,7 @@ public class SpigotWorldConfig
         caneModifier = getAndValidateGrowth( "Cane" );
         melonModifier = getAndValidateGrowth( "Melon" );
         mushroomModifier = getAndValidateGrowth( "Mushroom" );
-        //CubingPaper
+        //CubingPaper - Fix Random Config Order
         wartModifier = getAndValidateGrowth( "NetherWart" );
         pumpkinModifier = getAndValidateGrowth( "Pumpkin" );
         saplingModifier = getAndValidateGrowth( "Sapling" );
@@ -208,7 +208,7 @@ public class SpigotWorldConfig
     public int hopperAmount;
     private void hoppers()
     {
-        //CubingPaper
+        //CubingPaper - Fix Random Config Order
         hopperCheck = getInt( "ticks-per.hopper-check", hopperTransfer );
         // Set the tick delay between hopper item movements
         hopperTransfer = getInt( "ticks-per.hopper-transfer", 8 );
@@ -346,7 +346,7 @@ public class SpigotWorldConfig
     {
         combatExhaustion = (float) getDouble( "hunger.combat-exhaustion", 0.3 );
         regenExhaustion = (float) getDouble( "hunger.regen-exhaustion", 3 );
-        //CubingPaper
+        //CubingPaper - Fix Random Config Order
         sprintExhaustion = (float) getDouble( "hunger.sprint-exhaustion", 0.8 );
         walkExhaustion = (float) getDouble( "hunger.walk-exhaustion", 0.2 );
     }
@@ -373,7 +373,7 @@ public class SpigotWorldConfig
     private void maxTickTimes()
     {
         entityMaxTickTime = getInt("max-tick-time.entity", 50);
-        //CubingPaper
+        //CubingPaper - Fix Random Config Order
         tileMaxTickTime = getInt("max-tick-time.tile", 50);
         log("Tile Max Tick Time: " + tileMaxTickTime + "ms Entity max Tick Time: " + entityMaxTickTime + "ms");
     }

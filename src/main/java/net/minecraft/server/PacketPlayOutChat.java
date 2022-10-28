@@ -28,11 +28,10 @@ public class PacketPlayOutChat implements Packet<PacketListenerPlayOut> {
         // Spigot start
         if (components != null) {
             //Taco 0012
-            if (this.components.length == 1) {
+            if (this.components.length == 1)
                 packetdataserializer.a(net.md_5.bungee.chat.ComponentSerializer.toString(this.components[0]));
-            } else {
+            else
                 packetdataserializer.a(net.md_5.bungee.chat.ComponentSerializer.toString(this.components));
-            }
         } else {
             packetdataserializer.a(this.a);
         }

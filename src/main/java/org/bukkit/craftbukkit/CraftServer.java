@@ -1004,6 +1004,7 @@ public final class CraftServer implements Server {
         } else {
             handle.chunkProviderServer.unloadChunks(true);
         }
+
         worlds.remove(world.getName().toLowerCase());
         console.worlds.remove(console.worlds.indexOf(handle));
 

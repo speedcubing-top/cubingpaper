@@ -45,11 +45,11 @@ public class RestartCommand extends Command
         AsyncCatcher.enabled = false; // Disable async catcher incase it interferes with us
         try
         {
-            //CubingPaper
+            //CubingPaper - Customized Restart Arguments
             boolean b = top.speedcubing.server.CubingPaperConfig.restartArgument == null;
             if ( !b || script.isFile() )
             {
-                //CubingPaper
+                //CubingPaper - Customized Restart Arguments
                 if(b)
                 System.out.println( "Attempting to restart with " + SpigotConfig.restartScript );
 
@@ -95,7 +95,7 @@ public class RestartCommand extends Command
                     {
                         try
                         {
-                            //CubingPaper
+                            //CubingPaper - Customized Restart Arguments
                             if(b) {
                             String os = System.getProperty( "os.name" ).toLowerCase();
                             if ( os.contains( "win" ) )
@@ -108,7 +108,7 @@ public class RestartCommand extends Command
                                     "sh", script.getPath()
                                 } );
                             }
-                            //CubingPaper
+                            //CubingPaper - Customized Restart Arguments
                             } else Runtime.getRuntime().exec(top.speedcubing.server.CubingPaperConfig.restartArgument);
                         } catch ( Exception e )
                         {
