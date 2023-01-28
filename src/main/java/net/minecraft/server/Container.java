@@ -106,11 +106,10 @@ public abstract class Container {
     }
 
     public Slot getSlot(int i) {
-        //FlamePaper 0006
+        //FlamePaper - Return-last-slot-by-default
         final int lastIndex = this.c.size() - 1;
-        if (i > lastIndex) {
+        if (i > lastIndex)
             i = lastIndex;
-        }
         return (Slot) this.c.get(i);
     }
 
@@ -248,23 +247,7 @@ public abstract class Container {
                             }
                         }
                     }
-                } else if (k == 1) {
-                    if (i < 0) {
-                        return null;
-                    }
-
-                    slot2 = (Slot) this.c.get(i);
-                    if (slot2 != null && slot2.isAllowed(entityhuman)) {
-                        itemstack1 = this.b(entityhuman, i);
-                        if (itemstack1 != null) {
-                            Item item = itemstack1.getItem();
-
-                            itemstack = itemstack1.cloneItemStack();
-                            if (slot2.getItem() != null && slot2.getItem().getItem() == item) {
-                                this.a(i, j, true, entityhuman);
-                            }
-                        }
-                    }
+                //FlamePaper - Dont-Handle-Overflow-Inventory-Clicks
                 } else {
                     if (i < 0) {
                         return null;

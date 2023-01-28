@@ -143,23 +143,9 @@ public class BlockRedstoneWire extends Block {
 
             this.R.add(blockposition);
             // PaperSpigot start - Fix cannons
-            if (world.paperSpigotConfig.fixCannons) {
-                this.R.add(blockposition.shift(EnumDirection.WEST));
-                this.R.add(blockposition.shift(EnumDirection.EAST));
-                this.R.add(blockposition.shift(EnumDirection.DOWN));
-                this.R.add(blockposition.shift(EnumDirection.UP));
-                this.R.add(blockposition.shift(EnumDirection.NORTH));
-                this.R.add(blockposition.shift(EnumDirection.SOUTH));
-                return iblockdata;
-            }
-            // PaperSpigot end
-            EnumDirection[] aenumdirection = EnumDirection.values();
-            int i1 = aenumdirection.length;
-
-            for (int j1 = 0; j1 < i1; ++j1) {
-                EnumDirection enumdirection1 = aenumdirection[j1];
-
-                this.R.add(blockposition.shift(enumdirection1));
+            //FlamePaper - Simplify-Cannons
+            for (EnumDirection direction : EnumDirection.values()) {
+                this.R.add(blockposition.shift(direction));
             }
         }
 

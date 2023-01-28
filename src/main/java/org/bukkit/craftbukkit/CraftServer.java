@@ -1001,9 +1001,9 @@ public final class CraftServer implements Server {
             } catch (ExceptionWorldConflict ex) {
                 getLogger().log(Level.SEVERE, null, ex);
             }
-        } else {
-            handle.chunkProviderServer.unloadChunks(true);
         }
+        //Flamepaper - Unload-chunks-from-unsaveable-worlds
+        handle.chunkProviderServer.unloadChunks(true);
 
         worlds.remove(world.getName().toLowerCase());
         console.worlds.remove(console.worlds.indexOf(handle));

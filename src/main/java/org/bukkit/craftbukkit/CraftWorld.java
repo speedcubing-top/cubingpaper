@@ -1393,7 +1393,7 @@ public class CraftWorld implements World {
     public void processChunkGC() {
         chunkGCTickCount++;
 
-        //FlamePaper 0032
+        //FlamePaper - Adaptative-chunk-GC
         int viewChunks = ((getHandle().getServer().getViewDistance() * 2) + 1);
         int chunkGCLoadThreshold = top.speedcubing.server.CubingPaperConfig.adaptativeChunkGC ? (world.keepSpawnInMemory ? 256 : 0) + getPlayers().size() * (viewChunks * viewChunks) : server.chunkGCLoadThresh;
         if (chunkLoadCount > chunkGCLoadThreshold && chunkGCLoadThreshold > 0) {

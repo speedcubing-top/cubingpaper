@@ -9,7 +9,7 @@ import org.bukkit.Bukkit;
 
 public final class Versioning {
     public static String getBukkitVersion() {
-        //FlamePaper 0031
+        //FlamePaper - Fast-Versioning
         return "1.8.8-R0.1";
     }
 }

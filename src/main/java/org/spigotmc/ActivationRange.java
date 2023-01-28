@@ -128,10 +128,9 @@ public class ActivationRange
             {
                 for ( int j1 = k; j1 <= l; ++j1 )
                 {
-                    if ( world.getWorld().isChunkLoaded( i1, j1 ) )
-                    {
-                        activateChunkEntities( world.getChunkAt( i1, j1 ) );
-                    }
+                    //FlamePaper - Fix-Activation-Range-Double-Chunk-Lookup
+                    Chunk chunk = world.getChunkIfLoaded( i1, j1 );
+                    if ( chunk != null ) activateChunkEntities( chunk );
                 }
             }
         }
@@ -252,7 +251,7 @@ public class ActivationRange
     {
         SpigotTimings.checkIfActiveTimer.startTiming();
         // Never safe to skip fireworks or entities not yet added to chunk
-        //FlamePaper 0029
+        //FlamePaper - Disable-entities-loading-chunks
         if ( !entity.isAddedToChunk() || entity instanceof EntityFireworks ) {
             SpigotTimings.checkIfActiveTimer.stopTiming();
             return true;

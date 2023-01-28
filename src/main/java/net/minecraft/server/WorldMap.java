@@ -148,7 +148,7 @@ public class WorldMap extends PersistentBase {
             this.decorations.remove(entityhuman.getUniqueID()); // Spigot
         }
 
-        //FlamePaper 0028
+        //FlamePaper - Option-for-map-decorators
         boolean allowDecorations = top.speedcubing.server.CubingPaperConfig.allowMapDecorations;
         if (allowDecorations)
         for (int i = 0; i < this.g.size(); ++i) {
@@ -164,7 +164,7 @@ public class WorldMap extends PersistentBase {
             }
         }
 
-        //FlamePaper 0028
+        //FlamePaper - Option-for-map-decorators
         if (allowDecorations)
         if (itemstack.y()) {
             EntityItemFrame entityitemframe = itemstack.z();
@@ -173,7 +173,7 @@ public class WorldMap extends PersistentBase {
             this.a(1, entityhuman.world, UUID.nameUUIDFromBytes(("frame-" + entityitemframe.getId()).getBytes(Charsets.US_ASCII)), (double) blockposition.getX(), (double) blockposition.getZ(), (double) (entityitemframe.direction.b() * 90)); // Spigot
         }
 
-        //FlamePaper 0028
+        //FlamePaper - Option-for-map-decorators
         if (allowDecorations)
         if (itemstack.hasTag() && itemstack.getTag().hasKeyOfType("Decorations", 9)) {
             NBTTagList nbttaglist = itemstack.getTag().getList("Decorations", 10);
@@ -320,7 +320,7 @@ public class WorldMap extends PersistentBase {
 
         }
     }
-    //FlamePaper 0007
+    //FlamePaper - Fix-multiple-memory-leaks
     public void untrackPlayer(EntityHuman entityhuman) {
         if(this.i.containsKey(entityhuman)) {
             this.i.remove(entityhuman);

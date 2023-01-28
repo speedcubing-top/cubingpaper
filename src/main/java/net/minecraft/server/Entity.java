@@ -130,7 +130,7 @@ public abstract class Entity implements ICommandListener {
     public org.bukkit.projectiles.ProjectileSource projectileSource; // CraftBukkit - For projectiles only
     public boolean forceExplosionKnockback; // CraftBukkit - SPIGOT-949
     public boolean inUnloadedChunk = false; // PaperSpigot - Remove entities in unloaded chunks
-    //FlamePaper 0029
+    //FlamePaper - Disable-entities-loading-chunks
 
     // Spigot start
     public Timing tickTimer = SpigotTimings.getEntityTimings(this); // Spigot
@@ -431,8 +431,8 @@ public abstract class Entity implements ICommandListener {
 
 
     public void move(double d0, double d1, double d2) {
-        //FlamePaper 0029
-        //FlamePaper 0026
+        //FlamePaper - Disable-Unloaded-Chunk-Movement
+        //FlamePaper - Disable-entities-loading-chunks
         if (!((ChunkProviderServer) world.chunkProvider).isChunkLoaded((int) locX >> 4, (int) locZ >> 4)) {
             this.a(this.getBoundingBox().c(d0, d1, d2));
             this.recalcPosition();
@@ -1205,6 +1205,10 @@ public abstract class Entity implements ICommandListener {
 
     public void e(NBTTagCompound nbttagcompound) {
         try {
+            //FlamePaper - Reset-NaN-Entity-Values
+            if (Double.isNaN(locX)) this.locX = 0;
+            if (Double.isNaN(locY)) this.locY = 0;
+            if (Double.isNaN(locZ)) this.locZ = 0;
             nbttagcompound.set("Pos", this.a(new double[] { this.locX, this.locY, this.locZ}));
             nbttagcompound.set("Motion", this.a(new double[] { this.motX, this.motY, this.motZ}));
 

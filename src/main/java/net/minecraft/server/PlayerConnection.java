@@ -1664,7 +1664,17 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
                         case DEFAULT:
                             itemstack = this.player.activeContainer.clickItem(packetplayinwindowclick.b(), packetplayinwindowclick.c(), packetplayinwindowclick.f(), this.player);
                             // PaperSpigot start - Stackable Buckets
-                            //FlamePaper 0030
+                            if (itemstack != null &&
+                                    ((itemstack.getItem() == Items.LAVA_BUCKET && PaperSpigotConfig.stackableLavaBuckets) ||
+                                            (itemstack.getItem() == Items.WATER_BUCKET && PaperSpigotConfig.stackableWaterBuckets) ||
+                                            (itemstack.getItem() == Items.MILK_BUCKET && PaperSpigotConfig.stackableMilkBuckets))) {
+                                if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+                                    this.player.updateInventory(this.player.activeContainer);
+                                } else {
+                                    this.player.playerConnection.sendPacket(new PacketPlayOutSetSlot(-1, -1, this.player.inventory.getCarried()));
+                                    this.player.playerConnection.sendPacket(new PacketPlayOutSetSlot(this.player.activeContainer.windowId, packetplayinwindowclick.b(), this.player.activeContainer.getSlot(packetplayinwindowclick.b()).getItem()));
+                                }
+                            }
                             // PaperSpigot end
                             break;
                         case DENY:
@@ -2029,7 +2039,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
                     return;
                 }
             } catch (Exception exception1) {
-                PlayerConnection.c.error("Couldn\'t sign book", exception1);
+                //FlamePaper - Supress-Invalid-Book-Exceptions
                 this.disconnect("Invalid book data!"); // CraftBukkit
                 return;
             } finally {

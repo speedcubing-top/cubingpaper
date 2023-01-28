@@ -174,7 +174,25 @@ public class PaperSpigotConfig
         Bukkit.getLogger().info( "Data value allowed items: " + StringUtils.join(dataValueAllowedItems, ", ") );
     }
 
-    //FlamePaper 0017
+    //FlamePaper - Fix-Book-Exploits
+    //FlamePaper - Simplify-Cannons
+    public static boolean stackableLavaBuckets;
+    private static void stackableLavaBuckets()
+    {
+        stackableLavaBuckets = getBoolean( "stackable-buckets.lava", true );
+    }
+
+    public static boolean stackableWaterBuckets;
+    private static void stackableWaterBuckets()
+    {
+        stackableWaterBuckets = getBoolean( "stackable-buckets.water", true );
+    }
+
+    public static boolean stackableMilkBuckets;
+    private static void stackableMilkBuckets()
+    {
+        stackableMilkBuckets = getBoolean( "stackable-buckets.milk", true );
+    }
 
     public static boolean warnForExcessiveVelocity;
     private static void excessiveVelocityWarning()

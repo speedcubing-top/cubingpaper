@@ -442,7 +442,7 @@ public abstract class World implements IBlockAccess {
 
     // CraftBukkit start - Split off from original setTypeAndData(int i, int j, int k, Block block, int l, int i1) method in order to directly send client and physic updates
     public void notifyAndUpdatePhysics(BlockPosition blockposition, Chunk chunk, Block oldBlock, Block newBLock, int flag) {
-        //FlamePaper 0008
+        //FlamePaper - Fix-sending-irrelevant-block-updates-to-the-client
         if ((flag & 2) != 0 && (!this.isClientSide || (flag & 4) == 0) && (chunk == null || chunk.isReady())) {
             this.notify(blockposition);
         }
@@ -645,6 +645,8 @@ public abstract class World implements IBlockAccess {
             if (blockposition.getY() >= 256) {
                 blockposition = new BlockPosition(blockposition.getX(), 255, blockposition.getZ());
             }
+            //FlamePaper - //FlamePaper Do-not-load-chunks-for-light-checks
+            if (!this.isLoaded(blockposition)) return 0;
 
             return this.getChunkAtWorldCoords(blockposition).a(blockposition, 0);
         }
@@ -686,7 +688,7 @@ public abstract class World implements IBlockAccess {
                 if (blockposition.getY() >= 256) {
                     blockposition = new BlockPosition(blockposition.getX(), 255, blockposition.getZ());
                 }
-                //FlamePaper 0010
+                //FlamePaper - Do-not-load-chunks-for-light-checks
                 if (!this.isLoaded(blockposition)) return 0;
 
                 Chunk chunk = this.getChunkAtWorldCoords(blockposition);
@@ -1096,7 +1098,7 @@ public abstract class World implements IBlockAccess {
         entity.die();
         if (entity instanceof EntityHuman) {
             this.players.remove(entity);
-            //FlamePaper 0007
+            //FlamePaper - Fix-multiple-memory-leaks
             this.worldMaps.removeTrackedPlayer((EntityHuman) entity);
             // Spigot start
             for ( Object o : worldMaps.c )
@@ -1126,7 +1128,7 @@ public abstract class World implements IBlockAccess {
         entity.die();
         if (entity instanceof EntityHuman) {
             this.players.remove(entity);
-            //FlamePaper 0007
+            //FlamePaper - Fix-multiple-memory-leaks
             this.worldMaps.removeTrackedPlayer((EntityHuman) entity);
             this.everyoneSleeping();
         }
@@ -1181,10 +1183,10 @@ public abstract class World implements IBlockAccess {
                 if ( chunk == null )
                 {
                     // PaperSpigot start
-                    //FlamePaper 0029
+                    //FlamePaper - Disable-entities-loading-chunks
                         entity.inUnloadedChunk = true; // PaperSpigot - Remove entities in unloaded chunks
                         continue;
-                    //FlamePaper 0029
+                    //FlamePaper - Disable-entities-loading-chunks
                     // PaperSpigot end
                 }
                 int cz = chunkz << 4;
@@ -1682,7 +1684,7 @@ public abstract class World implements IBlockAccess {
             int i1 = MathHelper.floor(entity.locZ / 16.0D);
 
             if (!entity.ad || entity.ae != k || entity.af != l || entity.ag != i1) {
-                //FlamePaper 0029
+                //FlamePaper - Disable-entities-loading-chunks
                 if (entity.ad && this.isChunkLoaded(entity.ae, entity.ag, true)) {
                     this.getChunkAt(entity.ae, entity.ag).a(entity, entity.af);
                 }

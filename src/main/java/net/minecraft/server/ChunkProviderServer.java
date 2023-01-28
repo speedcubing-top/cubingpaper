@@ -63,7 +63,7 @@ public class ChunkProviderServer implements IChunkProvider {
         }
         // PaperSpigot end
         // PaperSpigot start - Don't unload chunk if it contains an entity that loads chunks
-        //FlamePaper 0029
+        //FlamePaper - Disable-entities-loading-chunks
         // PaperSpigot end
         if (this.world.worldProvider.e()) {
             if (!this.world.c(i, j)) {
@@ -253,7 +253,7 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
     public void saveChunkNOP(Chunk chunk) {
-        //FlamePaper 0005
+        //FlamePaper - Unload-chunks-from-unsaveable-worlds
         if (canSave() && this.chunkLoader != null) {
             try {
                 this.chunkLoader.b(this.world, chunk);
@@ -265,7 +265,7 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
     public void saveChunk(Chunk chunk) {
-        //FlamePaper 0005
+        //FlamePaper - Unload-chunks-from-unsaveable-worlds
         if (canSave() && this.chunkLoader != null) {
             try {
                 chunk.setLastSaved(this.world.getTime());
@@ -360,7 +360,7 @@ public class ChunkProviderServer implements IChunkProvider {
 
     }
 
-    //FlamePaper 0005
+    //FlamePaper - Unload-chunks-from-unsaveable-worlds
     public boolean unloadChunks() {
         return unloadChunks(false);
     }

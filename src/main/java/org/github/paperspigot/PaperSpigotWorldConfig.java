@@ -231,7 +231,7 @@ public class PaperSpigotWorldConfig
         disableEndCredits = getBoolean( "game-mechanics.disable-end-credits", false );
     }
 
-    //FlamePaper 0029
+    //FlamePaper - Disable-entities-loading-chunks
 
     public boolean generateCanyon;
     public boolean generateCaves;
@@ -260,39 +260,10 @@ public class PaperSpigotWorldConfig
     public boolean fixCannons;
     private void fixCannons()
     {
-        // TODO: Remove migrations after most users have upgraded.
-        if ( PaperSpigotConfig.version < 9 )
-        {
-            // Migrate default value
+        //FlamePaper - Simplify-Cannons
 
-            boolean value = config.getBoolean( "world-settings.default.fix-cannons", false );
-            if ( !value ) value = config.getBoolean( "world-settings.default.tnt-gameplay.fix-directional-bias", false );
-            if ( !value ) value = !config.getBoolean( "world-settings.default.tnt-gameplay.moves-in-water", true );
-            if ( !value ) value = config.getBoolean( "world-settings.default.tnt-gameplay.legacy-explosion-height", false );
-            if ( value ) config.set( "world-settings.default.fix-cannons", true );
-
-            if ( config.contains( "world-settings.default.tnt-gameplay" ) )
-            {
-                config.getDefaults().set( "world-settings.default.tnt-gameplay", null);
-                config.set( "world-settings.default.tnt-gameplay", null );
-            }
-
-            // Migrate world setting
-
-            value = config.getBoolean( "world-settings." + worldName + ".fix-cannons", false );
-            if ( !value ) value = config.getBoolean( "world-settings." + worldName + ".tnt-gameplay.fix-directional-bias", false );
-            if ( !value ) value = !config.getBoolean( "world-settings." + worldName + ".tnt-gameplay.moves-in-water", true );
-            if ( !value ) value = config.getBoolean( "world-settings." + worldName + ".tnt-gameplay.legacy-explosion-height", false );
-            if ( value ) config.set( "world-settings." + worldName + ".fix-cannons", true );
-
-            if ( config.contains( "world-settings." + worldName + ".tnt-gameplay" ) )
-            {
-                config.getDefaults().set( "world-settings." + worldName + ".tnt-gameplay", null);
-                config.set( "world-settings." + worldName + ".tnt-gameplay", null );
-            }
-        }
-
-        fixCannons = getBoolean( "fix-cannons", false );
+        //FlamePaper - Simplify-Cannons
+        fixCannons = getBoolean( "fix-cannons", true );
         log( "Fix TNT cannons: " + fixCannons );
     }
 
@@ -305,7 +276,8 @@ public class PaperSpigotWorldConfig
     public boolean optimizeExplosions;
     private void optimizeExplosions()
     {
-        optimizeExplosions = getBoolean( "optimize-explosions", false );
+        //FlamePaper - Simplify-Cannons
+        optimizeExplosions = getBoolean( "optimize-explosions", true );
     }
 
     public boolean fastDrainLava;

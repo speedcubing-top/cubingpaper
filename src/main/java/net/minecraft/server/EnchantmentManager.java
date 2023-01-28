@@ -169,7 +169,7 @@ public class EnchantmentManager {
             a((EnchantmentManager.EnchantmentModifier) EnchantmentManager.d, entityliving.bA());
         }
 
-        //FlamePaper 0007
+        //FlamePaper - Fix-multiple-memory-leaks
         EnchantmentManager.e.a = null;
         EnchantmentManager.e.b = null;
     }
@@ -185,7 +185,7 @@ public class EnchantmentManager {
             a((EnchantmentManager.EnchantmentModifier) EnchantmentManager.e, entityliving.bA());
         }
 
-        //FlamePaper 0007
+        //FlamePaper - Fix-multiple-memory-leaks
         EnchantmentManager.e.a = null;
         EnchantmentManager.e.b = null;
     }

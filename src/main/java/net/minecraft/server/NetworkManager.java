@@ -115,12 +115,11 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
         }
 
         this.close(chatmessage);
-        //FlamePaper 0004
-        throwable.printStackTrace();
     }
 
     protected void a(ChannelHandlerContext channelhandlercontext, Packet packet) throws Exception {
-        if (this.channel.isOpen()) {
+        //FlamePaper - Use-isActive-instead-of-isOpen
+        if (this.channel.isActive()) {
             try {
                 packet.a(this.m);
             } catch (CancelledPacketHandleException cancelledpackethandleexception) {
@@ -210,7 +209,8 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     }
 
     private void m() {
-        if (this.channel != null && this.channel.isOpen()) {
+        //FlamePaper - Use-isActive-instead-of-isOpen
+        if (this.channel != null && this.channel.isActive()) {
             this.j.readLock().lock();
 
             try {
@@ -240,12 +240,13 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     }
 
     public void close(IChatBaseComponent ichatbasecomponent) {
-        //FlamePaper 0007
+        //FlamePaper - Fix-multiple-memory-leaks
         this.i.clear();
         // Spigot Start
         this.preparing = false;
         // Spigot End
-        if (this.channel.isOpen()) {
+        //FlamePaper - Use-isActive-instead-of-isOpen
+        if (this.channel.isActive()) {
             this.channel.close(); // We can't wait as this may be called from an event loop.
             this.n = ichatbasecomponent;
         }
@@ -263,7 +264,8 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     }
 
     public boolean g() {
-        return this.channel != null && this.channel.isOpen();
+        //FlamePaper - Use-isActive-instead-of-isOpen
+        return this.channel != null && this.channel.isActive();
     }
 
     public boolean h() {
@@ -308,7 +310,8 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     }
 
     public void l() {
-        if (this.channel != null && !this.channel.isOpen()) {
+        //FlamePaper - Use-isActive-instead-of-isOpen
+        if (this.channel != null && !this.channel.isActive()) {
             if (!this.p) {
                 this.p = true;
                 if (this.j() != null) {
@@ -325,10 +328,9 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     }
 
     protected void channelRead0(ChannelHandlerContext channelhandlercontext, Packet object) throws Exception { // CraftBukkit - fix decompile error
-        //FlamePaper 0015
-        if (g()) {
+        //FlamePaper - Check-channel-before-reading
+        if (g())
             this.a(channelhandlercontext, object);
-        }
     }
 
     static class QueuedPacket {

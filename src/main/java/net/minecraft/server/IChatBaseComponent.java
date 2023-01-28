@@ -27,18 +27,20 @@ public interface IChatBaseComponent extends Iterable<IChatBaseComponent> {
 
     public static class ChatSerializer implements JsonDeserializer<IChatBaseComponent>, JsonSerializer<IChatBaseComponent> {
 
-        private static final int CHATCOMPONENT_LIMIT = 128;
         private static final Gson a;
 
         public ChatSerializer() {
         }
 
+        //FlamePaper - Limit-ChatComponents
+        private static final int CHATCOMPONENT_LIMIT = 128;
         public IChatBaseComponent a(int extraCount, String lastElement, JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException {
             if (jsonelement.isJsonPrimitive()) {
                 return new ChatComponentText(jsonelement.getAsString());
             } else if (!jsonelement.isJsonObject()) {
                 if (jsonelement.isJsonArray()) {
                     JsonArray jsonarray = jsonelement.getAsJsonArray();
+                    //FlamePaper - Limit-ChatComponents
                     if (jsonarray.size() > CHATCOMPONENT_LIMIT) {
                         throw new JsonParseException("Too many ChatComponent array elements");
                     }
@@ -47,6 +49,7 @@ public interface IChatBaseComponent extends Iterable<IChatBaseComponent> {
 
                     while (iterator.hasNext()) {
                         JsonElement jsonelement1 = (JsonElement) iterator.next();
+                        //FlamePaper - Limit-ChatComponents
                         if (jsonelement1.isJsonArray()) {
                             throw new JsonParseException("Stacked ChatComponent array");
                         }
@@ -74,6 +77,7 @@ public interface IChatBaseComponent extends Iterable<IChatBaseComponent> {
 
                     if (jsonobject.has("with")) {
                         JsonArray jsonarray1 = jsonobject.getAsJsonArray("with");
+                        //FlamePaper - Limit-ChatComponents
                         if (jsonarray1.size() > CHATCOMPONENT_LIMIT) {
                             throw new JsonParseException("Too many ChatComponent array elements in with");
                         }
@@ -83,6 +87,7 @@ public interface IChatBaseComponent extends Iterable<IChatBaseComponent> {
                         Object[] aobject = new Object[jsonarray1.size()];
 
                         for (int i = 0; i < aobject.length; ++i) {
+                            //FlamePaper - Limit-ChatComponents
                             if (jsonarray1.get(i).isJsonArray()) {
                                 throw new JsonParseException("Stacked ChatComponent array in with element");
                             }
@@ -121,6 +126,7 @@ public interface IChatBaseComponent extends Iterable<IChatBaseComponent> {
 
                 if (jsonobject.has("extra")) {
                     JsonArray jsonarray2 = jsonobject.getAsJsonArray("extra");
+                    //FlamePaper - Limit-ChatComponents
                     if (jsonarray2.size() > CHATCOMPONENT_LIMIT) {
                         throw new JsonParseException("Too many ChatComponent array elements in extra");
                     }
@@ -132,6 +138,7 @@ public interface IChatBaseComponent extends Iterable<IChatBaseComponent> {
                     }
 
                     for (int j = 0; j < jsonarray2.size(); ++j) {
+                        //FlamePaper - Limit-ChatComponents
                         if (jsonarray2.get(j).isJsonArray()) {
                             throw new JsonParseException("Stacked ChatComponent array in extra element");
                         }
@@ -145,6 +152,7 @@ public interface IChatBaseComponent extends Iterable<IChatBaseComponent> {
         }
 
         public IChatBaseComponent a(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException {
+            //FlamePaper - Limit-ChatComponents
             return a(0, null, jsonelement, type, jsondeserializationcontext);
         }
 

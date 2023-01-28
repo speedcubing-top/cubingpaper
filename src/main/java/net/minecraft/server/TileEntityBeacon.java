@@ -21,7 +21,7 @@ import org.github.paperspigot.event.block.BeaconEffectEvent;
 public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlayerListBox, IInventory {
 
     public static final MobEffectList[][] a = new MobEffectList[][] { { MobEffectList.FASTER_MOVEMENT, MobEffectList.FASTER_DIG}, { MobEffectList.RESISTANCE, MobEffectList.JUMP}, { MobEffectList.INCREASE_DAMAGE}, { MobEffectList.REGENERATION}};
-    //FlamePaper 0016
+    //FlamePaper - Remove-unused-code-from-beacons
     public boolean isEnabled() {
         return i;
     }
@@ -98,7 +98,7 @@ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlay
             PotionEffect primaryEffect = new PotionEffect(PotionEffectType.getById(this.k), 180, b0, true, true);
             // PaperSpigot end
 
-            //FlamePaper 0016
+            //FlamePaper - Remove-unused-code-from-beacons
             for (EntityHuman entityhuman : list) {
                 // PaperSpigot start - BeaconEffectEvent
                 BeaconEffectEvent event = new BeaconEffectEvent(block, primaryEffect, (Player) entityhuman.getBukkitEntity(), true);
@@ -109,11 +109,11 @@ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlay
                 // PaperSpigot end
             }
 
-            //FlamePaper 0016
+            //FlamePaper - Remove-unused-code-from-beacons
             if (getLevel() >= 4 && this.k != this.l && this.l > 0) {
                 PotionEffect secondaryEffect = new PotionEffect(PotionEffectType.getById(this.l), 180, 0, true, true); // PaperSpigot
 
-                //FlamePaper 0016
+                //FlamePaper - Remove-unused-code-from-beacons
                 for (EntityHuman entityhuman : list) {
                     // PaperSpigot start - BeaconEffectEvent
                     BeaconEffectEvent event = new BeaconEffectEvent(block, secondaryEffect, (Player) entityhuman.getBukkitEntity(), false);
@@ -129,28 +129,28 @@ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlay
     }
 
     private void B() {
-        //FlamePaper 0016
+        //FlamePaper - Remove-unused-code-from-beacons
         int i = getLevel();
         int j = this.position.getX();
         int k = this.position.getY();
         int l = this.position.getZ();
-        //FlamePaper 0016
+        //FlamePaper - Remove-unused-code-from-beacons
         setLevel(0);
         setEnabled(true);
         BlockPosition.MutableBlockPosition blockposition_mutableblockposition = new BlockPosition.MutableBlockPosition();
-        //FlamePaper 0016
+        //FlamePaper - Remove-unused-code-from-beacons
         for (int y = k + 1; y < 256; ++y) {
              Block block = this.world.getType(blockposition_mutableblockposition.c(j, y, l)).getBlock();
           if (block != Blocks.STAINED_GLASS && block != Blocks.STAINED_GLASS_PANE && block.p() >= 15 && block != Blocks.BEDROCK) {
                 setEnabled(false);
                         break;
-              //FlamePaper 0016
+              //FlamePaper - Remove-unused-code-from-beacons
             }
 
-            //FlamePaper 0016
+            //FlamePaper - Remove-unused-code-from-beacons
         }
 
-        //FlamePaper 0016
+        //FlamePaper - Remove-unused-code-from-beacons
         if (isEnabled()) {
             for (int i1 = 1; i1 <= 4; setLevel(i1++)) {
                 int j1 = k - i1;
@@ -177,14 +177,14 @@ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlay
                 }
             }
 
-            //FlamePaper 0016
+            //FlamePaper - Remove-unused-code-from-beacons
             if (getLevel() == 0) {
                 this.i = false;
             }
         }
 
 
-        //FlamePaper 0016
+        //FlamePaper - Remove-unused-code-from-beacons
         if (!this.world.isClientSide && getLevel() == 4 && i < getLevel()) {
             AxisAlignedBB bb = new AxisAlignedBB(j, k, l, j, k - 4, l).grow(10.0D, 5.0D, 10.0D);
             for (EntityHuman entityhuman : this.world.a(EntityHuman.class, bb)) {
@@ -215,7 +215,7 @@ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlay
         super.a(nbttagcompound);
         this.k = this.h(nbttagcompound.getInt("Primary"));
         this.l = this.h(nbttagcompound.getInt("Secondary"));
-        //FlamePaper 0016
+        //FlamePaper - Remove-unused-code-from-beacons
         setLevel(nbttagcompound.getInt("Levels"));
     }
 
@@ -223,7 +223,7 @@ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlay
         super.b(nbttagcompound);
         nbttagcompound.setInt("Primary", this.k);
         nbttagcompound.setInt("Secondary", this.l);
-        //FlamePaper 0016
+        //FlamePaper - Remove-unused-code-from-beacons
         nbttagcompound.setInt("Levels", getLevel());
     }
 
@@ -308,7 +308,7 @@ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlay
     public int getProperty(int i) {
         switch (i) {
         case 0:
-            //FlamePaper 0016
+            //FlamePaper - Remove-unused-code-from-beacons
             return getLevel();
 
         case 1:
@@ -325,7 +325,7 @@ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlay
     public void b(int i, int j) {
         switch (i) {
         case 0:
-            //FlamePaper 0016
+            //FlamePaper - Remove-unused-code-from-beacons
             setLevel(j);
             break;
 
@@ -356,5 +356,5 @@ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlay
         }
     }
 
-    //FlamePaper 0016
+    //FlamePaper - Remove-unused-code-from-beacons
 }

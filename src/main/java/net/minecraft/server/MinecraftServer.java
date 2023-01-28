@@ -1,8 +1,8 @@
 package net.minecraft.server;
 
+import co.aikar.timings.SpigotTimings;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
@@ -14,38 +14,27 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
-import java.awt.GraphicsEnvironment;
+import jline.console.ConsoleReader;
+import joptsimple.OptionSet;
+import org.apache.commons.lang3.Validate;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.bukkit.craftbukkit.Main;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.Proxy;
 import java.security.KeyPair;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
-import javax.imageio.ImageIO;
-import org.apache.commons.lang3.Validate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-// CraftBukkit start
-import java.io.IOException;
-
-import jline.console.ConsoleReader;
-import joptsimple.OptionSet;
-
-import org.bukkit.craftbukkit.Main;
-import co.aikar.timings.SpigotTimings; // Spigot
 // CraftBukkit end
 
 public abstract class MinecraftServer implements Runnable, ICommandListener, IAsyncTaskHandler, IMojangStatistics {
@@ -119,7 +108,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
     // CraftBukkit end
 
     public MinecraftServer(OptionSet options, Proxy proxy, File file1) {
-        io.netty.util.ResourceLeakDetector.setEnabled( false ); // Spigot - disable
+        io.netty.util.ResourceLeakDetector.setEnabled(false); // Spigot - disable
         this.e = proxy;
         MinecraftServer.l = this;
         // this.universe = file; // CraftBukkit
@@ -174,7 +163,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
             this.getConvertable().convert(s, new IProgressUpdate() {
                 private long b = System.currentTimeMillis();
 
-                public void a(String s) {}
+                public void a(String s) {
+                }
 
                 public void a(int i) {
                     if (System.currentTimeMillis() - this.b >= 1000L) {
@@ -184,7 +174,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
 
                 }
 
-                public void c(String s) {}
+                public void c(String s) {
+                }
             });
         }
 
@@ -329,13 +320,10 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
     }
 
     protected void k() {
-        //FlamePaper 0013
+        //FlamePaper - Disable-startup-chunk-loading
 
         this.b("menu.generatingTerrain");
-        //FlamePaper 0013
-
-        // CraftBukkit start - fire WorldLoadEvent and handle whether or not to keep the spawn in memory
-        //FlamePaper 0013
+        //FlamePaper - Disable-startup-chunk-loading
 
         for (WorldServer world : this.worlds) {
             this.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldLoadEvent(world.getWorld()));
@@ -414,7 +402,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
 
     public void stop() throws ExceptionWorldConflict { // CraftBukkit - added throws
         // CraftBukkit start - prevent double stopping on multiple threads
-        synchronized(stopLock) {
+        synchronized (stopLock) {
             if (hasStopped) return;
             hasStopped = true;
         }
@@ -436,7 +424,10 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
                 MinecraftServer.LOGGER.info("Saving players");
                 this.v.savePlayers();
                 this.v.u();
-                try { Thread.sleep(100); } catch (InterruptedException ex) {} // CraftBukkit - SPIGOT-625 - give server at least a chance to send packets
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                } // CraftBukkit - SPIGOT-625 - give server at least a chance to send packets
             }
 
             if (this.worldServer != null) {
@@ -456,8 +447,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
                 this.n.e();
             }
             // Spigot start
-            if( org.spigotmc.SpigotConfig.saveUserCacheOnStopOnly )
-            {
+            if (org.spigotmc.SpigotConfig.saveUserCacheOnStopOnly) {
                 LOGGER.info("Saving usercache.json");
                 this.Z.c();
             }
@@ -486,7 +476,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
     //CubingSpigot - Don't optimize tick
     private static final long TICK_TIME = 1000000000 / TPS;
     private static final int SAMPLE_INTERVAL = 100;
-    public double[] recentTps = new double[ 3 ]; // PaperSpigot - Fine have your darn compat with bad plugins
+    public double[] recentTps = new double[3]; // PaperSpigot - Fine have your darn compat with bad plugins
     //CubingSpigot - Don't optimize tick
 
     //CubingSpigot - Don't optimize tick
@@ -507,7 +497,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
 
                 // Spigot start
                 // PaperSpigot start - Further improve tick loop
-                Arrays.fill( recentTps, 20 );
+                Arrays.fill(recentTps, 20);
                 //long lastTick = System.nanoTime(), catchupTime = 0, curTime, wait, tickSection = lastTick;
                 //CubingSpigot - Don't optimize tick
                 long lastTick = System.nanoTime(), catchupTime = 0, curTime, wait, tickSection = lastTick;
@@ -527,13 +517,12 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
                     }
 
 
-                    if ( ++MinecraftServer.currentTick % SAMPLE_INTERVAL == 0 )
-                    {
+                    if (++MinecraftServer.currentTick % SAMPLE_INTERVAL == 0) {
                         //CubingSpigot - Don't optimize tick
-                        double currentTps = 1E9 / ( curTime - tickSection ) * SAMPLE_INTERVAL;
-                        recentTps[0] = calcTps( recentTps[0], 0.92, currentTps ); // 1/exp(5sec/1min)
-                        recentTps[1] = calcTps( recentTps[1], 0.9835, currentTps ); // 1/exp(5sec/5min)
-                        recentTps[2] = calcTps( recentTps[2], 0.9945, currentTps ); // 1/exp(5sec/15min)
+                        double currentTps = 1E9 / (curTime - tickSection) * SAMPLE_INTERVAL;
+                        recentTps[0] = calcTps(recentTps[0], 0.92, currentTps); // 1/exp(5sec/1min)
+                        recentTps[1] = calcTps(recentTps[1], 0.9835, currentTps); // 1/exp(5sec/5min)
+                        recentTps[2] = calcTps(recentTps[2], 0.9945, currentTps); // 1/exp(5sec/15min)
                         tickSection = curTime;
                         // PaperSpigot end
                     }
@@ -549,9 +538,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
         } catch (Throwable throwable) {
             MinecraftServer.LOGGER.error("Encountered an unexpected exception", throwable);
             // Spigot Start
-            if ( throwable.getCause() != null )
-            {
-                MinecraftServer.LOGGER.error( "\tCause of unexpected exception was", throwable.getCause() );
+            if (throwable.getCause() != null) {
+                MinecraftServer.LOGGER.error("\tCause of unexpected exception was", throwable.getCause());
             }
             // Spigot End
             CrashReport crashreport = null;
@@ -620,9 +608,11 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
         return new File(".");
     }
 
-    protected void a(CrashReport crashreport) {}
+    protected void a(CrashReport crashreport) {
+    }
 
-    protected void z() {}
+    protected void z() {
+    }
 
     protected void A() throws ExceptionWorldConflict { // CraftBukkit - added throws
         co.aikar.timings.TimingsManager.FULL_SERVER_TICK.startTiming(); // Spigot
@@ -698,7 +688,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
         int count = this.j.size();
         while (count-- > 0 && (entry = this.j.poll()) != null) {
             SystemUtils.a(entry, MinecraftServer.LOGGER);
-         }
+        }
         // Spigot end
         SpigotTimings.minecraftSchedulerTimer.stopTiming(); // Spigot
 
@@ -736,9 +726,9 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
             long j = System.nanoTime();
 
             // if (i == 0 || this.getAllowNether()) {
-                WorldServer worldserver = this.worlds.get(i);
+            WorldServer worldserver = this.worlds.get(i);
 
-                this.methodProfiler.a(worldserver.getWorldData().getName());
+            this.methodProfiler.a(worldserver.getWorldData().getName());
                 /* Drop global time updates
                 if (this.ticks % 20 == 0) {
                     this.methodProfiler.a("timeSync");
@@ -747,50 +737,50 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
                 }
                 // CraftBukkit end */
 
-                this.methodProfiler.a("tick");
+            this.methodProfiler.a("tick");
 
-                CrashReport crashreport;
+            CrashReport crashreport;
 
+            try {
+                worldserver.timings.doTick.startTiming(); // Spigot
+                worldserver.doTick();
+                worldserver.timings.doTick.stopTiming(); // Spigot
+            } catch (Throwable throwable) {
+                // Spigot Start
                 try {
-                    worldserver.timings.doTick.startTiming(); // Spigot
-                    worldserver.doTick();
-                    worldserver.timings.doTick.stopTiming(); // Spigot
-                } catch (Throwable throwable) {
-                    // Spigot Start
-                    try {
                     crashreport = CrashReport.a(throwable, "Exception ticking world");
-                    } catch (Throwable t){
-                        throw new RuntimeException("Error generating crash report", t);
-                    }
-                    // Spigot End
-                    worldserver.a(crashreport);
-                    throw new ReportedException(crashreport);
+                } catch (Throwable t) {
+                    throw new RuntimeException("Error generating crash report", t);
                 }
+                // Spigot End
+                worldserver.a(crashreport);
+                throw new ReportedException(crashreport);
+            }
 
+            try {
+                worldserver.timings.tickEntities.startTiming(); // Spigot
+                worldserver.tickEntities();
+                worldserver.timings.tickEntities.stopTiming(); // Spigot
+            } catch (Throwable throwable1) {
+                // Spigot Start
                 try {
-                    worldserver.timings.tickEntities.startTiming(); // Spigot
-                    worldserver.tickEntities();
-                    worldserver.timings.tickEntities.stopTiming(); // Spigot
-                } catch (Throwable throwable1) {
-                    // Spigot Start
-                    try {
                     crashreport = CrashReport.a(throwable1, "Exception ticking world entities");
-                    } catch (Throwable t){
-                        throw new RuntimeException("Error generating crash report", t);
-                    }
-                    // Spigot End
-                    worldserver.a(crashreport);
-                    throw new ReportedException(crashreport);
+                } catch (Throwable t) {
+                    throw new RuntimeException("Error generating crash report", t);
                 }
+                // Spigot End
+                worldserver.a(crashreport);
+                throw new ReportedException(crashreport);
+            }
 
-                this.methodProfiler.b();
-                this.methodProfiler.a("tracker");
-                worldserver.timings.tracker.startTiming(); // Spigot
-                worldserver.getTracker().updatePlayers();
-                worldserver.timings.tracker.stopTiming(); // Spigot
-                this.methodProfiler.b();
-                this.methodProfiler.b();
-                worldserver.explosionDensityCache.clear(); // PaperSpigot - Optimize explosions
+            this.methodProfiler.b();
+            this.methodProfiler.a("tracker");
+            worldserver.timings.tracker.startTiming(); // Spigot
+            worldserver.getTracker().updatePlayers();
+            worldserver.timings.tracker.stopTiming(); // Spigot
+            this.methodProfiler.b();
+            this.methodProfiler.b();
+            worldserver.explosionDensityCache.clear(); // PaperSpigot - Optimize explosions
             // } // CraftBukkit
 
             // this.i[i][this.ticks % 100] = System.nanoTime() - j; // CraftBukkit
@@ -1193,7 +1183,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
         for (int i = 0; i < this.worlds.size(); ++i) {
             WorldServer worldserver = this.worlds.get(i);
             // CraftBukkit end
-            
+
             if (worldserver != null) {
                 worldserver.saveLevel();
             }
@@ -1349,10 +1339,10 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
     }
 
     // Spigot Start
-    public ServerConnection getServerConnection()
-    {
+    public ServerConnection getServerConnection() {
         return this.q;
     }
+
     // Spigot End
     public ServerConnection aq() {
         return this.q == null ? this.q = new ServerConnection(this) : this.q; // Spigot
@@ -1473,7 +1463,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
         return getServer().worlds.get(0).getGameRules().getBoolean("sendCommandFeedback");
     }
 
-    public void a(CommandObjectiveExecutor.EnumCommandResult commandobjectiveexecutor_enumcommandresult, int i) {}
+    public void a(CommandObjectiveExecutor.EnumCommandResult commandobjectiveexecutor_enumcommandresult, int i) {
+    }
 
     public int aI() {
         return 29999984;

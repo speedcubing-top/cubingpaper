@@ -370,7 +370,8 @@ public class PlayerInteractManager {
             int j = itemstack.getData();
             ItemStack itemstack1 = itemstack.a(world, entityhuman);
 
-            if (itemstack1 == itemstack && (itemstack1 == null || itemstack1.count == i && itemstack1.l() <= 0 && itemstack1.getData() == j)) {
+            //FlamePaper - Fix-Null-ItemUse-Exploit
+            if (itemstack1 == null || (itemstack1 == itemstack && itemstack1.count == i && itemstack1.l() <= 0 && itemstack1.getData() == j)) {
                 return false;
             } else {
                 entityhuman.inventory.items[entityhuman.inventory.itemInHandIndex] = itemstack1;

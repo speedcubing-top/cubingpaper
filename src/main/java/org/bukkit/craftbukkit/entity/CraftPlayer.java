@@ -1374,7 +1374,8 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public double getHealth() {
-        return health;
+        //FlamePaper - Reset-NaN-Entity-Values
+        return Double.isNaN(health) ? 0.0D : health;
     }
 
     public void setRealHealth(double health) {

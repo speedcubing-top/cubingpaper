@@ -21,6 +21,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import org.bukkit.craftbukkit.inventory.CraftItemStack; // CraftBukkit
@@ -223,9 +224,9 @@ public class PacketDataSerializer extends ByteBuf {
         } else if (j < 0) {
             throw new DecoderException("The received encoded string buffer length is less than zero! Weird string!");
         } else {
-            //FlamePaper 0004
-            String s = new String(io.netty.buffer.ByteBufUtil.getBytes(this, this.readerIndex(), j), Charset.forName("UTF-8"));
-            this.readerIndex(readerIndex() + j);
+            //FlamePaper 0003
+            String s = toString(readerIndex(), j, StandardCharsets.UTF_8);
+            readerIndex(readerIndex() + j);
 
             if (s.length() > i) {
                 throw new DecoderException("The received string length is longer than maximum allowed (" + j + " > " + i + ")");
@@ -246,7 +247,7 @@ public class PacketDataSerializer extends ByteBuf {
             return this;
         }
     }
-    //FlamePaper 0004
+    //FlamePaper 0003
     public int refCnt() {
         return a.refCnt();
     }

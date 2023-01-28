@@ -73,24 +73,12 @@ public abstract class BlockDiodeAbstract extends BlockDirectional {
             this.b(world, blockposition, iblockdata, 0);
             world.setAir(blockposition);
             // PaperSpigot start - Fix cannons
-            if (world.paperSpigotConfig.fixCannons) {
-                world.applyPhysics(blockposition.shift(EnumDirection.EAST), this);
-                world.applyPhysics(blockposition.shift(EnumDirection.WEST), this);
-                world.applyPhysics(blockposition.shift(EnumDirection.SOUTH), this);
-                world.applyPhysics(blockposition.shift(EnumDirection.NORTH), this);
-                world.applyPhysics(blockposition.shift(EnumDirection.DOWN), this);
-                world.applyPhysics(blockposition.shift(EnumDirection.UP), this);
-                return;
+            //FlamePaper - Simplify-Cannons
+            for (EnumDirection direction : EnumDirection.values()) {
+                world.applyPhysics(blockposition.shift(direction), this);
             }
             // PaperSpigot end
-            EnumDirection[] aenumdirection = EnumDirection.values();
-            int i = aenumdirection.length;
-
-            for (int j = 0; j < i; ++j) {
-                EnumDirection enumdirection = aenumdirection[j];
-
-                world.applyPhysics(blockposition.shift(enumdirection), this);
-            }
+            //FlamePaper - Simplify-Cannons
 
         }
     }
