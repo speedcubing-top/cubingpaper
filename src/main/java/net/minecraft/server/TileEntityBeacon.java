@@ -80,19 +80,23 @@ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlay
     }
 
     private void A() {
+        //FlamePaper - Remove-unused-code-from-beacons
         if (isEnabled() && getLevel() > 0 && !this.world.isClientSide && this.k > 0) {
             double radius = getLevel() * 10 + 10;
             byte b0 = 0;
 
+            //FlamePaper - Remove-unused-code-from-beacons
             if (getLevel() >= 4 && this.k == this.l) {
                 b0 = 1;
             }
 
+            //FlamePaper - Remove-unused-code-from-beacons
             int i = this.position.getX();
             int j = this.position.getY();
             int k = this.position.getZ();
             AxisAlignedBB axisalignedbb = new AxisAlignedBB(i, j, k, i + 1, j + 1, k + 1).grow(radius, radius, radius).a(0.0D, this.world.getHeight(), 0.0D);
             List<EntityHuman> list = this.world.a(EntityHuman.class, axisalignedbb);
+
             // PaperSpigot start
             org.bukkit.block.Block block = world.getWorld().getBlockAt(position.getX(), position.getY(), position.getZ());
             PotionEffect primaryEffect = new PotionEffect(PotionEffectType.getById(this.k), 180, b0, true, true);

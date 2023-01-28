@@ -299,7 +299,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
 
                 return true;
             }
-            //FlamePaper - Simplify-Cannons
+            //FlamePaper - Skip-Eula
     }
 
     // CraftBukkit start

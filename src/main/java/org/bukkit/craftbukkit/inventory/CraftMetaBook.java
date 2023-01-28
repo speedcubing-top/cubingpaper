@@ -33,9 +33,9 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
     static final ItemMetaKey BOOK_PAGES = new ItemMetaKey("pages");
     static final ItemMetaKey RESOLVED = new ItemMetaKey("resolved");
     static final ItemMetaKey GENERATION = new ItemMetaKey("generation");
+    //FlamePaper - Fix-Book-Exploits
     static final int MAX_PAGE_LENGTH = 340;
     static final int MAX_TITLE_LENGTH = 32;
-    static final int MAX_PAGES = top.speedcubing.server.CubingPaperConfig.bookMaxPages;
     static final int MAX_AUTHOR_LENGTH = 16;
 
     protected String title;
@@ -82,7 +82,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
         }
 
         if (tag.hasKey(BOOK_PAGES.NBT) && handlePages) {
-            NBTTagList pages = tag.getList(BOOK_PAGES.NBT, MAX_PAGES);
+            NBTTagList pages = tag.getList(BOOK_PAGES.NBT, 8);
 
             //FlamePaper - Fix-Book-Exploits
             for (int i = 0; i < Math.min(pages.size(), top.speedcubing.server.CubingPaperConfig.bookMaxPages); i++) {
@@ -114,7 +114,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
             int pageCount = 0;
             for (Object page : pages) {
                 //FlamePaper - Fix-Book-Exploits
-                if(pageCount < MAX_PAGES) {
+                if(pageCount < top.speedcubing.server.CubingPaperConfig.bookMaxPages) {
                 if (page instanceof String) {
                     addPage((String) page);
                 }
@@ -239,8 +239,8 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
 
     public void addPage(final String... pages) {
         //FlamePaper - Fix-Book-Exploits
-        for (int i = 0; i < Math.min(pages.length, MAX_PAGES); i++) {
-            if (getPageCount() < MAX_PAGES) {
+        for (int i = 0; i < Math.min(pages.length, top.speedcubing.server.CubingPaperConfig.bookMaxPages); i++) {
+            if (getPageCount() < top.speedcubing.server.CubingPaperConfig.bookMaxPages) {
                 String page = pages[i];
             if (page == null) {
                 page = "";
