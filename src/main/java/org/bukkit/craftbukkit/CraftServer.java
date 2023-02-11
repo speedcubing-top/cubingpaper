@@ -1775,6 +1775,7 @@ public final class CraftServer implements Server {
         // PaperSpigot start - Add getTPS (Further improve tick loop)
         @Override
         public double[] getTPS() {
+            //CubingSpigot - Don't optimize tick
             return MinecraftServer.getServer().recentTps;
         }
         // PaperSpigot end
