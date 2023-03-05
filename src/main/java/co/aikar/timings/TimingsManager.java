@@ -121,6 +121,8 @@ public final class TimingsManager {
                     timings.reset(true);
                 }
             }
+            //CubingPaper - stop logging these
+            if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
             Bukkit.getLogger().log(Level.INFO, "Timings Reset");
             HISTORY.clear();
             needsFullReset = false;

@@ -21,8 +21,8 @@ public class SpigotWorldConfig
 
     public void init()
     {
-        //CubingPaper - Stop Logging these
-        this.verbose = false;
+        //CubingPaper - stop logging these
+        this.verbose = !top.speedcubing.server.CubingPaperConfig.cleanLogs;
         Bukkit.getLogger().info("Loading World Settings: "+worldName);
 
         log( "-------- World Settings For [" + worldName + "] --------" );

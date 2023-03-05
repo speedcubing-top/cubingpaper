@@ -20,7 +20,7 @@ public class PaperSpigotWorldConfig
 
     public void init()
     {
-        //CubingPaper - Stop Logging these
+        //CubingPaper - stop logging these
         this.verbose = false;
 
         log( "-------- World Settings For [" + worldName + "] --------" );

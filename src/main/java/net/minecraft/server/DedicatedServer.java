@@ -115,12 +115,15 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
 
         thread.setDaemon(true);
         thread.start();
+        //CubingPaper - stop logging these
+        if(!top.speedcubing.server.CubingPaperConfig.cleanLogs) {
         DedicatedServer.LOGGER.info("Starting minecraft server version 1.8.8");
         if (Runtime.getRuntime().maxMemory() / 1024L / 1024L < 512L) {
             DedicatedServer.LOGGER.warn("To start the server with more ram, launch it as \"java -Xmx1024M -Xms1024M -jar minecraft_server.jar\"");
         }
 
         DedicatedServer.LOGGER.info("Loading properties");
+        }
         this.propertyManager = new PropertyManager(this.options); // CraftBukkit - CLI argument support
         //FlamePaper - Skip-Eula
             if (this.T()) {
@@ -148,6 +151,8 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
             int i = this.propertyManager.getInt("gamemode", WorldSettings.EnumGamemode.SURVIVAL.getId());
 
             this.r = WorldSettings.a(i);
+            //CubingPaper - stop logging these
+            if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
             DedicatedServer.LOGGER.info("Default game type: " + this.r);
             InetAddress inetaddress = null;
 
@@ -168,8 +173,12 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
             org.github.paperspigot.PaperSpigotConfig.registerCommands();
             // PaperSpigot end
 
+            //CubingPaper - stop logging these
+            if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
             DedicatedServer.LOGGER.info("Generating keypair");
             this.a(MinecraftEncryption.b());
+            //CubingPaper - stop logging these
+            if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
             DedicatedServer.LOGGER.info("Starting Minecraft server on " + (this.getServerIp().length() == 0 ? "*" : this.getServerIp()) + ":" + this.R());
 
         if (!org.spigotmc.SpigotConfig.lateBind) {
@@ -189,6 +198,8 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
             server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.STARTUP);
             // Spigot End
 
+            //CubingPaper - stop logging these
+            if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
             if (!this.getOnlineMode()) {
                 DedicatedServer.LOGGER.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
                 DedicatedServer.LOGGER.warn("The server will make no attempt to authenticate usernames. Beware.");
@@ -249,12 +260,18 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
                 this.c((this.getMaxBuildHeight() + 8) / 16 * 16);
                 this.c(MathHelper.clamp(this.getMaxBuildHeight(), 64, 256));
                 this.propertyManager.setProperty("max-build-height", Integer.valueOf(this.getMaxBuildHeight()));
+                //CubingPaper - stop logging these
+                if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
                 DedicatedServer.LOGGER.info("Preparing level \"" + this.U() + "\"");
                 this.a(this.U(), this.U(), k, worldtype, s2);
                 long i1 = System.nanoTime() - j;
                 String s3 = String.format("%.3fs", new Object[] { Double.valueOf((double) i1 / 1.0E9D)});
 
-                DedicatedServer.LOGGER.info("Done (" + s3 + ")! For help, type \"help\" or \"?\"");
+                //CubingPaper - stop logging these
+                DedicatedServer.LOGGER.info("Online-Mode: "+ getOnlineMode());
+                DedicatedServer.LOGGER.info("BungeeCord: " + org.spigotmc.SpigotConfig.bungee);
+                DedicatedServer.LOGGER.info("Launch-Time: " + s3);
+                DedicatedServer.LOGGER.info("Listening on " + getServerIp() + ":" + R());
                 if (this.propertyManager.getBoolean("enable-query", false)) {
                     DedicatedServer.LOGGER.info("Starting GS4 status listener");
                     this.m = new RemoteStatusListener(this);
@@ -523,6 +540,8 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
     }
 
     protected boolean aR() {
+        //CubingPaper - stop logging these
+        if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
         server.getLogger().info( "**** Beginning UUID conversion, this may take A LONG time ****"); // Spigot, let the user know whats up!
         boolean flag = false;
 

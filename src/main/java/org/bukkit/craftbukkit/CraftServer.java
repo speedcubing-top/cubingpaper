@@ -813,6 +813,8 @@ public final class CraftServer implements Server {
         }
 
         if (perms == null) {
+            //CubingPaper - stop logging these
+            if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
             getLogger().log(Level.INFO, "Server permissions file " + file + " is empty, ignoring it");
             return;
         }
@@ -932,6 +934,8 @@ public final class CraftServer implements Server {
         }
 
         pluginManager.callEvent(new WorldInitEvent(internal.getWorld()));
+        //CubingPaper - stop logging these
+        if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
         System.out.print("Preparing start region for level " + (console.worlds.size() - 1) + " (Seed: " + internal.getSeed() + ")");
 
         if (internal.getWorld().getKeepSpawnInMemory()) {

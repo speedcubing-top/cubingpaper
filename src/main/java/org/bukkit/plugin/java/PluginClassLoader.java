@@ -38,6 +38,8 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
                 method.setAccessible( true );
                 method.invoke( null );
                 method.setAccessible( oldAccessible );
+                //CubingPaper - stop logging these
+                if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
                 org.bukkit.Bukkit.getLogger().log( java.util.logging.Level.INFO, "Set PluginClassLoader as parallel capable" );
             }
         } catch ( NoSuchMethodException ex )

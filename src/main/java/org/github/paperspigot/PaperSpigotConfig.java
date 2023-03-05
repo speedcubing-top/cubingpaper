@@ -171,6 +171,8 @@ public class PaperSpigotConfig
     private static void dataValueAllowedItems()
     {
         dataValueAllowedItems = new HashSet<Integer>( getList( "data-value-allowed-items", Collections.emptyList() ) );
+        //CubingPaper - stop logging these
+        if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
         Bukkit.getLogger().info( "Data value allowed items: " + StringUtils.join(dataValueAllowedItems, ", ") );
     }
 
