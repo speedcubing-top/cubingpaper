@@ -355,6 +355,8 @@ public abstract class PlayerList {
     }
 
     public String disconnect(EntityPlayer entityplayer) { // CraftBukkit - return string
+        //FlamePaper - Unmount-vehicle-upon-exit
+        entityplayer.mount(null);
         entityplayer.b(StatisticList.f);
 
         // CraftBukkit start - Quitting must be before we do final save of data, in case plugins need to modify it

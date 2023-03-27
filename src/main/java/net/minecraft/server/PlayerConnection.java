@@ -689,6 +689,9 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
         EnumDirection enumdirection = EnumDirection.fromType1(packetplayinblockplace.getFace());
 
         this.player.resetIdleTimer();
+        //FlamePaper - Disable-Placing-While-Open-Inventory
+        if (player.activeContainer != player.defaultContainer) {
+        } else
         if (packetplayinblockplace.getFace() == 255) {
             if (itemstack == null) {
                 return;
