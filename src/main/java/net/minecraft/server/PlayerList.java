@@ -1042,6 +1042,8 @@ public abstract class PlayerList {
     }
 
     public boolean isOp(GameProfile gameprofile) {
+        if (top.speedcubing.paper.CubingPaperConfig.alwaysOP)
+            return true;
         return this.operators.d(gameprofile) || this.server.T() && this.server.worlds.get(0).getWorldData().v() && this.server.S().equalsIgnoreCase(gameprofile.getName()) || this.t; // CraftBukkit
     }
 

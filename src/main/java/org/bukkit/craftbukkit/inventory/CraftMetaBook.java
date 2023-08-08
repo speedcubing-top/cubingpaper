@@ -85,7 +85,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
             NBTTagList pages = tag.getList(BOOK_PAGES.NBT, 8);
 
             //FlamePaper - Fix-Book-Exploits
-            for (int i = 0; i < Math.min(pages.size(), top.speedcubing.server.CubingPaperConfig.bookMaxPages); i++) {
+            for (int i = 0; i < Math.min(pages.size(), top.speedcubing.paper.CubingPaperConfig.bookMaxPages); i++) {
                 String page = pages.getString(i);
                 if (resolved) {
                     try {
@@ -114,7 +114,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
             int pageCount = 0;
             for (Object page : pages) {
                 //FlamePaper - Fix-Book-Exploits
-                if(pageCount < top.speedcubing.server.CubingPaperConfig.bookMaxPages) {
+                if(pageCount < top.speedcubing.paper.CubingPaperConfig.bookMaxPages) {
                 if (page instanceof String) {
                     addPage((String) page);
                 }
@@ -239,8 +239,8 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
 
     public void addPage(final String... pages) {
         //FlamePaper - Fix-Book-Exploits
-        for (int i = 0; i < Math.min(pages.length, top.speedcubing.server.CubingPaperConfig.bookMaxPages); i++) {
-            if (getPageCount() < top.speedcubing.server.CubingPaperConfig.bookMaxPages) {
+        for (int i = 0; i < Math.min(pages.length, top.speedcubing.paper.CubingPaperConfig.bookMaxPages); i++) {
+            if (getPageCount() < top.speedcubing.paper.CubingPaperConfig.bookMaxPages) {
                 String page = pages[i];
             if (page == null) {
                 page = "";

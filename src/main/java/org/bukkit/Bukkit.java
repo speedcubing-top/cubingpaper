@@ -77,7 +77,7 @@ public final class Bukkit {
 
         Bukkit.server = server;
         //CubingPaper - stop logging these
-        if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
+        if(!top.speedcubing.paper.CubingPaperConfig.cleanLogs)
         server.getLogger().info("This server is running " + getName() + " version " + getVersion() + " (Implementing API version " + getBukkitVersion() + ")");
     }
 

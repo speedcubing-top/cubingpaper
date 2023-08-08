@@ -78,13 +78,13 @@ public class ServerConnection {
                 oclass = EpollServerSocketChannel.class;
                 lazyinitvar = ServerConnection.b;
                 //CubingPaper - stop logging these
-                if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
+                if(!top.speedcubing.paper.CubingPaperConfig.cleanLogs)
                 ServerConnection.e.info("Using epoll channel type");
             } else {
                 oclass = NioServerSocketChannel.class;
                 lazyinitvar = ServerConnection.a;
                 //CubingPaper - stop logging these
-                if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
+                if(!top.speedcubing.paper.CubingPaperConfig.cleanLogs)
                 ServerConnection.e.info("Using default channel type");
             }
 

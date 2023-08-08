@@ -753,7 +753,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
         } else {
             // CraftBukkit start - Check if we can actually do something over this large a distance
             //CubingPaper - Fix Ghost Block
-            if(!top.speedcubing.server.CubingPaperConfig.fixGhostBlock) {
+            if(!top.speedcubing.paper.CubingPaperConfig.fixGhostBlock) {
             Location eyeLoc = this.getPlayer().getEyeLocation();
             double reachDistance = NumberConversions.square(eyeLoc.getX() - blockposition.getX()) + NumberConversions.square(eyeLoc.getY() - blockposition.getY()) + NumberConversions.square(eyeLoc.getZ() - blockposition.getZ());
             if (reachDistance > (this.getPlayer().getGameMode() == org.bukkit.GameMode.CREATIVE ? CREATIVE_PLACE_DISTANCE_SQUARED : SURVIVAL_PLACE_DISTANCE_SQUARED)) {

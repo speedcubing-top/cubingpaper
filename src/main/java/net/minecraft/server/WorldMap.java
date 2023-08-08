@@ -149,7 +149,7 @@ public class WorldMap extends PersistentBase {
         }
 
         //FlamePaper - Option-for-map-decorators
-        boolean allowDecorations = top.speedcubing.server.CubingPaperConfig.allowMapDecorations;
+        boolean allowDecorations = top.speedcubing.paper.CubingPaperConfig.allowMapDecorations;
         if (allowDecorations)
         for (int i = 0; i < this.g.size(); ++i) {
             WorldMap.WorldMapHumanTracker worldmap_worldmaphumantracker1 = (WorldMap.WorldMapHumanTracker) this.g.get(i);

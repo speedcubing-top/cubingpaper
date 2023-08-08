@@ -116,7 +116,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
         thread.setDaemon(true);
         thread.start();
         //CubingPaper - stop logging these
-        if(!top.speedcubing.server.CubingPaperConfig.cleanLogs) {
+        if(!top.speedcubing.paper.CubingPaperConfig.cleanLogs) {
         DedicatedServer.LOGGER.info("Starting minecraft server version 1.8.8");
         if (Runtime.getRuntime().maxMemory() / 1024L / 1024L < 512L) {
             DedicatedServer.LOGGER.warn("To start the server with more ram, launch it as \"java -Xmx1024M -Xms1024M -jar minecraft_server.jar\"");
@@ -152,7 +152,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
 
             this.r = WorldSettings.a(i);
             //CubingPaper - stop logging these
-            if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
+            if(!top.speedcubing.paper.CubingPaperConfig.cleanLogs)
             DedicatedServer.LOGGER.info("Default game type: " + this.r);
             InetAddress inetaddress = null;
 
@@ -174,11 +174,11 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
             // PaperSpigot end
 
             //CubingPaper - stop logging these
-            if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
+            if(!top.speedcubing.paper.CubingPaperConfig.cleanLogs)
             DedicatedServer.LOGGER.info("Generating keypair");
             this.a(MinecraftEncryption.b());
             //CubingPaper - stop logging these
-            if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
+            if(!top.speedcubing.paper.CubingPaperConfig.cleanLogs)
             DedicatedServer.LOGGER.info("Starting Minecraft server on " + (this.getServerIp().length() == 0 ? "*" : this.getServerIp()) + ":" + this.R());
 
         if (!org.spigotmc.SpigotConfig.lateBind) {
@@ -199,7 +199,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
             // Spigot End
 
             //CubingPaper - stop logging these
-            if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
+            if(!top.speedcubing.paper.CubingPaperConfig.cleanLogs)
             if (!this.getOnlineMode()) {
                 DedicatedServer.LOGGER.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
                 DedicatedServer.LOGGER.warn("The server will make no attempt to authenticate usernames. Beware.");
@@ -261,7 +261,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
                 this.c(MathHelper.clamp(this.getMaxBuildHeight(), 64, 256));
                 this.propertyManager.setProperty("max-build-height", Integer.valueOf(this.getMaxBuildHeight()));
                 //CubingPaper - stop logging these
-                if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
+                if(!top.speedcubing.paper.CubingPaperConfig.cleanLogs)
                 DedicatedServer.LOGGER.info("Preparing level \"" + this.U() + "\"");
                 this.a(this.U(), this.U(), k, worldtype, s2);
                 long i1 = System.nanoTime() - j;
@@ -541,7 +541,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
 
     protected boolean aR() {
         //CubingPaper - stop logging these
-        if(!top.speedcubing.server.CubingPaperConfig.cleanLogs)
+        if(!top.speedcubing.paper.CubingPaperConfig.cleanLogs)
         server.getLogger().info( "**** Beginning UUID conversion, this may take A LONG time ****"); // Spigot, let the user know whats up!
         boolean flag = false;
 
