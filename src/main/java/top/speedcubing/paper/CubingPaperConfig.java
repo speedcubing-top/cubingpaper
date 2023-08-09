@@ -5,7 +5,7 @@ public class CubingPaperConfig {
     public static String[] restartArgument;
     public static boolean fixGhostBlock = true;
     public static boolean cleanLogs = true;
-    public static boolean alwaysOP = false;
+    public static boolean commandOP = false;
     //FlamePaper
     public static int bookMaxPages = 5;
     public static boolean adaptativeChunkGC = true;

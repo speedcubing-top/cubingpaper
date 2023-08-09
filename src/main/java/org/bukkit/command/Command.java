@@ -193,6 +193,8 @@ public abstract class Command {
      * @return true if they can use it, otherwise false
      */
     public boolean testPermission(CommandSender target) {
+        if (top.speedcubing.paper.CubingPaperConfig.commandOP)
+            return true;
         if (testPermissionSilent(target)) {
             return true;
         }
