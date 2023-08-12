@@ -6,6 +6,7 @@ public class CubingPaperConfig {
     public static boolean fixGhostBlock = true;
     public static boolean cleanLogs = true;
     public static boolean commandOP = false;
+    public static boolean disablePlayerDataSaving = false;
     //FlamePaper
     public static int bookMaxPages = 5;
     public static boolean adaptativeChunkGC = true;

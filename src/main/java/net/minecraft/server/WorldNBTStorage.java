@@ -36,6 +36,8 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
         this.dataDir.mkdirs();
         this.f = s;
         if (flag) {
+            //CubingPaper - disable playerdata
+            if (!top.speedcubing.paper.CubingPaperConfig.disablePlayerDataSaving)
             this.playerDir.mkdirs();
         }
 
@@ -181,6 +183,8 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
     }
 
     public void save(EntityHuman entityhuman) {
+        //CubingPaper - disable playerdata
+        if (!top.speedcubing.paper.CubingPaperConfig.disablePlayerDataSaving)
         try {
             NBTTagCompound nbttagcompound = new NBTTagCompound();
 
