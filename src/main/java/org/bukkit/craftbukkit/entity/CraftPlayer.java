@@ -101,6 +101,12 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         if (value == isOp()) return;
 
         if (value) {
+            if (!top.speedcubing.paper.CubingPaperConfig.disableOpsJson) {
+                server.getHandle().getOPs().add(new OpListEntry(getProfile(), this.server.getServer().getPropertyManager().getInt("op-permission-level", 4), server.getHandle().getOPs().b(getProfile())));
+                Player player = server.getPlayer(getProfile().getId());
+                if (player != null)
+                    player.recalculatePermissions();
+            } else
             server.getHandle().addOp(getProfile());
         } else {
             server.getHandle().removeOp(getProfile());

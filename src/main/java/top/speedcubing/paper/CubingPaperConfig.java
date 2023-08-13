@@ -7,6 +7,7 @@ public class CubingPaperConfig {
     public static boolean cleanLogs = true;
     public static boolean commandOP = false;
     public static boolean disablePlayerDataSaving = false;
+    public static boolean disableOpsJson = false;
     //FlamePaper
     public static int bookMaxPages = 5;
     public static boolean adaptativeChunkGC = true;
