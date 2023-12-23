@@ -266,12 +266,13 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
                 this.a(this.U(), this.U(), k, worldtype, s2);
                 long i1 = System.nanoTime() - j;
                 String s3 = String.format("%.3fs", new Object[] { Double.valueOf((double) i1 / 1.0E9D)});
-
                 //CubingPaper - stop logging these
                 DedicatedServer.LOGGER.info("Online-Mode: "+ getOnlineMode());
                 DedicatedServer.LOGGER.info("BungeeCord: " + org.spigotmc.SpigotConfig.bungee);
                 DedicatedServer.LOGGER.info("Launch-Time: " + s3);
                 DedicatedServer.LOGGER.info("Listening on " + getServerIp() + ":" + R());
+
+                DedicatedServer.LOGGER.info("Done (" + s3 + ")! For help, type \"help\" or \"?\"");
                 if (this.propertyManager.getBoolean("enable-query", false)) {
                     DedicatedServer.LOGGER.info("Starting GS4 status listener");
                     this.m = new RemoteStatusListener(this);
