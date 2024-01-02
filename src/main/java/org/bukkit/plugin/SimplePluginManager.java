@@ -298,6 +298,16 @@ public final class SimplePluginManager implements PluginManager {
             }
         }
 
+        List<Plugin> pl = new ArrayList<>();
+        for(Plugin p : result){
+            if(p.getDescription().getLoadBefore().contains("*")) {
+                pl.add(p);
+            }
+        }
+        for(Plugin p : pl) {
+            result.remove(p);
+            result.add(0,p);
+        }
         return result.toArray(new Plugin[result.size()]);
     }
 
