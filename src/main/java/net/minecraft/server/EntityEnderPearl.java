@@ -38,6 +38,21 @@ public class EntityEnderPearl extends EntityProjectile {
         }
         // PaperSpigot end
 
+        //FlamePaper - Pearl-through-blocks
+        BlockPosition blockPosition = movingobjectposition.a();
+
+        if (blockPosition != null) {
+            IBlockData blockData = world.getType(blockPosition);
+            Block block = blockData.getBlock();
+            boolean collides =
+                top.speedcubing.paper.CubingPaperConfig.pearlPassthroughTripwire && block == Blocks.TRIPWIRE
+                || top.speedcubing.paper.CubingPaperConfig.pearlPassthroughFenceGate && block == Blocks.FENCE_GATE && ((Boolean) blockData.get(BlockFenceGate.OPEN)).booleanValue()
+                || top.speedcubing.paper.CubingPaperConfig.pearlPassthroughSlab && (block == Blocks.STONE_SLAB || block == Blocks.WOODEN_SLAB || block == Blocks.STONE_SLAB2);
+
+            if (collides) {
+                return;
+            }
+        }
         for (int i = 0; i < 32; ++i) {
             this.world.addParticle(EnumParticle.PORTAL, this.locX, this.locY + this.random.nextDouble() * 2.0D, this.locZ, this.random.nextGaussian(), 0.0D, this.random.nextGaussian(), new int[0]);
         }

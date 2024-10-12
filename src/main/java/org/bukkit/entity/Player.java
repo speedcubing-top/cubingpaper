@@ -339,6 +339,8 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @param component the components to send
      */
+    //TacoAPI - Add-BaseComponent-sendMessage-methods-to-CommandSend
+    @Override
     public void sendMessage(net.md_5.bungee.api.chat.BaseComponent component);
 
     /**
@@ -346,6 +348,8 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @param components the components to send
      */
+    //TacoAPI - Add-BaseComponent-sendMessage-methods-to-CommandSend
+    @Override
     public void sendMessage(net.md_5.bungee.api.chat.BaseComponent... components);
 
     /**

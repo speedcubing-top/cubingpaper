@@ -91,6 +91,16 @@ public abstract class MobSpawnerAbstract {
                 boolean flag = false;
 
                 for (int i = 0; i < this.spawnCount; ++i) {
+                    //Taco - Implement-SpawnerPreSpawnEvent
+                    // TacoSpigot start
+                    net.techcable.tacospigot.event.entity.SpawnerPreSpawnEvent event = new net.techcable.tacospigot.event.entity.SpawnerPreSpawnEvent( new org.bukkit.Location(this.a().getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ()), org.bukkit.entity.EntityType.fromName(this.getMobName()));
+                    this.a().getServer().getPluginManager().callEvent(event);
+
+                    if (event.isCancelled()) {
+                        flag = true;
+                        break;
+                    }
+                    // TacoSpigot end
                     Entity entity = EntityTypes.createEntityByName(this.getMobName(), this.a());
 
                     if (entity == null) {

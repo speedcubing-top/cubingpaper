@@ -261,7 +261,7 @@
                         </goals>
                         <configuration>
                             <srgIn>${project.basedir}/deprecation-mappings.csrg</srgIn>
-                            <accessIn>${project.basedir}/deprecation-mappings.at</accessIn>
+                            <!-- FlamePaper - Update-Deprecation-Mappings -->
                         </configuration>
                     </execution>
                 </executions>

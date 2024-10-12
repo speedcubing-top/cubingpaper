@@ -10,6 +10,13 @@
     "adaptative-chunk-gc": true,
     "allow-map-decorations": false,
     "book.max_pages": 5,
+    "disconnect-spam.enabled": false,
+    "disconnect-spam.addition": 5,
+    "pearl-passthrough.fence_gate": true,
+    "pearl-passthrough.tripwire": true,
+    "pearl-passthrough.slab": true,
+    "tnt.optimize-movement": false,
+    "tnt.optimize-liquid-explosions": true,
     "knockback.friction": 2.0,
     "knockback.horizontal": 0.4,
     "knockback.vertical": 0.4,
@@ -18,6 +25,10 @@
     "knockback.extra-vertical": 0.1,
 
     "armor-stand.optimize-movement": false,
-    "redstone-fire-BlockPhysicsEvent": true
+    "redstone-fire-BlockPhysicsEvent": true,
+    "allow-non-player-entities-on-scoreboards": false,
+    "grass-ignores-light": false,
+    "disable-falling-block-stacking-at-256": false,
+    "fix-east-west-cannoning": false
   }
 }

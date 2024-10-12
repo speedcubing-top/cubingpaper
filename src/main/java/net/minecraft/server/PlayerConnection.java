@@ -1050,7 +1050,8 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
             // Spigot end
             // CraftBukkit start - replaced with thread safe throttle
             // this.chatThrottle += 20;
-            if (counted && chatSpamField.addAndGet(this, 20) > 200 && !this.minecraftServer.getPlayerList().isOp(this.player.getProfile())) { // Spigot
+            //FlamePaper - Disconnect-Spam-Options
+            if (top.speedcubing.paper.CubingPaperConfig.disconnectSpam && counted && chatSpamField.addAndGet(this, top.speedcubing.paper.CubingPaperConfig.disconnectSpamAddition) > 200 && !this.minecraftServer.getPlayerList().isOp(this.player.getProfile())) { // Spigot
                 if (!isSync) {
                     Waitable waitable = new Waitable() {
                         @Override
@@ -1069,7 +1070,8 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
                     } catch (ExecutionException e) {
                         throw new RuntimeException(e);
                     }
-                } else {
+                //FlamePaper - Disconnect-Spam-Options
+                } else if (top.speedcubing.paper.CubingPaperConfig.disconnectSpam) {
                     this.disconnect("disconnect.spam");
                 }
                 // CraftBukkit end
@@ -1952,7 +1954,8 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
     public void a(PacketPlayInTabComplete packetplayintabcomplete) {
         PlayerConnectionUtils.ensureMainThread(packetplayintabcomplete, this, this.player.u());
         // CraftBukkit start
-        if (chatSpamField.addAndGet(this, 10) > 500 && !this.minecraftServer.getPlayerList().isOp(this.player.getProfile())) {
+        //FlamePaper - Disconnect-Spam-Options
+        if (top.speedcubing.paper.CubingPaperConfig.disconnectSpam && chatSpamField.addAndGet(this, top.speedcubing.paper.CubingPaperConfig.disconnectSpamAddition) > 500 && !this.minecraftServer.getPlayerList().isOp(this.player.getProfile())) {
             this.disconnect("disconnect.spam");
             return;
         }

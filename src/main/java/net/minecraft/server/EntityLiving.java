@@ -1826,6 +1826,8 @@ public abstract class EntityLiving extends Entity {
     }
 
     public ScoreboardTeamBase getScoreboardTeam() {
+        //Taco - Disable-Scoreboards-for-non-players-by-default
+        if (!top.speedcubing.paper.CubingPaperConfig.nonPlayerEntitiesOnScoreboards && !(this instanceof EntityHuman)) return null; // TacoSpigot
         return this.world.getScoreboard().getPlayerTeam(this.getUniqueID().toString());
     }
 

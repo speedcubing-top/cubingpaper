@@ -31,6 +31,17 @@ public class PacketDataSerializer extends ByteBuf {
     private final ByteBuf a;
 
     public PacketDataSerializer(ByteBuf bytebuf) {
+        //Taco - Limit-the-length-of-buffered-bytes-to-read
+        /*
+         * By default, we limit the size of the received byte array to Short.MAX_VALUE, which is 31 KB.
+         * However, we make an exception when ProtocolSupport is installed, to allow 1.7 clients to work,
+         * and limit them to 31 MEGABYTES as they seem to need to send larger packets sometimes.
+         * Although a 31 MB limit leaves the server slightly vulnerable,
+         * it's still much better than the old system of having no limit,
+         * which would leave the server vulnerable to packets up to 2 GIGABYTES in size.
+         */
+        this.allowLargePackets = net.techcable.tacospigot.CompatHacks.hasProtocolSupport();
+        // TacoSpigot end
         this.a = bytebuf;
     }
 
@@ -51,7 +62,10 @@ public class PacketDataSerializer extends ByteBuf {
 
     // Paper start
     public byte[] a() {
-        return readByteArray(Short.MAX_VALUE);
+        //Taco - Limit-the-length-of-buffered-bytes-to-read
+        // TacoSpigot start
+        int limit = allowLargePackets ? LARGE_PACKET_LIMIT : DEFAULT_LIMIT;
+        return readByteArray(limit);
     }
 
     public byte[]readByteArray(int limit) {
@@ -1023,4 +1037,9 @@ public class PacketDataSerializer extends ByteBuf {
     public ByteBuf touch(Object hint) {
         return a.touch(hint);
     }
+
+    //Taco - Limit-the-length-of-buffered-bytes-to-read
+    private final boolean allowLargePackets;
+    private static final int DEFAULT_LIMIT = Short.MAX_VALUE;
+    private static final int LARGE_PACKET_LIMIT = Short.MAX_VALUE * 1024;
 }
