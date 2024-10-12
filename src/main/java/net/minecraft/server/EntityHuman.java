@@ -1003,7 +1003,14 @@ public abstract class EntityHuman extends EntityLiving {
 
                     if (flag2) {
                         if (i > 0) {
-                            entity.g((double) (-MathHelper.sin(this.yaw * 3.1415927F / 180.0F) * (float) i * 0.5F), 0.1D, (double) (MathHelper.cos(this.yaw * 3.1415927F / 180.0F) * (float) i * 0.5F));
+                            //FlamePaper - Customizable-knockback
+                            // FlamePaper start - Customizable knockback
+                            entity.g(
+                                (double) (-MathHelper.sin(this.yaw * 3.1415927F / 180.0F) * (float) i *
+                                    top.speedcubing.paper.CubingPaperConfig.knockbackExtraHorizontal), top.speedcubing.paper.CubingPaperConfig.knockbackExtraVertical,
+                                (double) (MathHelper.cos(this.yaw * 3.1415927F / 180.0F) * (float) i *
+                                        top.speedcubing.paper.CubingPaperConfig.knockbackExtraHorizontal));
+                            // FlamePaper end
                             this.motX *= 0.6D;
                             this.motZ *= 0.6D;
                             this.setSprinting(false);

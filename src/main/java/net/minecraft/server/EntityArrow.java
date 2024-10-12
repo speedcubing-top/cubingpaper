@@ -227,7 +227,14 @@ public class EntityArrow extends Entity implements IProjectile {
                 }
             }
             // PaperSpigot end
-
+            //TacoAPI - Add-ArrowCollideEvent
+            // TacoSpigot start - call better event
+            if (movingobjectposition != null && movingobjectposition.entity != null) {
+                net.techcable.tacospigot.event.entity.ArrowCollideEvent collideEvent = new net.techcable.tacospigot.event.entity.ArrowCollideEvent((org.bukkit.entity.Arrow) getBukkitEntity(), movingobjectposition.entity.getBukkitEntity());
+                org.bukkit.Bukkit.getPluginManager().callEvent(collideEvent);
+                if (collideEvent.isCancelled()) movingobjectposition = null;
+            }
+            // TacoSpigot end
             if (movingobjectposition != null) {
                 org.bukkit.craftbukkit.event.CraftEventFactory.callProjectileHitEvent(this); // CraftBukkit - Call event
                 if (movingobjectposition.entity != null) {

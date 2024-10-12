@@ -12,6 +12,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import net.minecraft.server.MinecraftServer;
+import org.github.paperspigot.KnockbackCommand;
+import org.github.paperspigot.PaperSpigotConfig;
 import org.spigotmc.SpigotConfig;
 
 public class CubingPaperConfig {
@@ -30,6 +33,12 @@ public class CubingPaperConfig {
     public static boolean adaptativeChunkGC = false;
     public static boolean allowMapDecorations = true;
     public static int bookMaxPages = 5;
+    public static double knockbackFriction;
+    public static double knockbackHorizontal;
+    public static double knockbackVertical;
+    public static double knockbackVerticalLimit;
+    public static double knockbackExtraHorizontal;
+    public static double knockbackExtraVertical;
 
     //Taco
     public static boolean optimizeArmorStandMovement = false; //world
@@ -45,20 +54,30 @@ public class CubingPaperConfig {
             JsonObject settings = config.getAsJsonObject("settings");
 
             //CubingPaper - Configurations
-            cleanLogs = settings.get("cleanLogs").getAsBoolean();
-            commandOP = settings.get("commandOP").getAsBoolean();
-            limitBlockPlaceDistance = settings.get("limitBlockPlaceDistance").getAsBoolean();
-            opsJson = settings.get("opsJson").getAsBoolean();
-            playerDataSaving = settings.get("playerDataSaving").getAsBoolean();
+            cleanLogs = settings.get("clean-logs").getAsBoolean();
+            commandOP = settings.get("command-op").getAsBoolean();
+            limitBlockPlaceDistance = settings.get("block-place-distance-limit").getAsBoolean();
+            opsJson = settings.get("ops.json").getAsBoolean();
+            playerDataSaving = settings.get("player-data-saving").getAsBoolean();
             SpigotConfig.disableStatSaving = !playerDataSaving;
 
-            String r = settings.get("restartCommand").getAsString();
+            String r = settings.get("restart-command").getAsString();
             restartArgument = r.isEmpty() ? null : r.split(" ");
 
             //FlamePaper
-            adaptativeChunkGC = settings.get("adaptativeChunkGC").getAsBoolean();
-            allowMapDecorations = settings.get("allowMapDecorations").getAsBoolean();
-            bookMaxPages = settings.get("bookMaxPages").getAsInt();
+            adaptativeChunkGC = settings.get("adaptative-chunk-gc").getAsBoolean();
+            allowMapDecorations = settings.get("allow-map-decorations").getAsBoolean();
+            bookMaxPages = settings.get("book.max_pages").getAsInt();
+            knockbackFriction = settings.get( "knockback.friction").getAsDouble();
+            knockbackHorizontal = settings.get( "knockback.horizontal").getAsDouble();
+            knockbackVertical = settings.get( "knockback.vertical").getAsDouble();
+            knockbackVerticalLimit = settings.get( "knockback.vertical-limit").getAsDouble();
+            knockbackExtraHorizontal = settings.get( "knockback.extra-horizontal").getAsDouble();
+            knockbackExtraVertical = settings.get( "knockback.extra-vertical").getAsDouble();
+
+            MinecraftServer.getServer().server.getCommandMap().register( "knockback", "PaperSpigot", new KnockbackCommand( "knockback", knockbackFriction,
+                    knockbackHorizontal, knockbackVertical, knockbackVerticalLimit, knockbackExtraHorizontal,
+                    knockbackExtraVertical));
 
             optimizeArmorStandMovement = settings.get("armor-stand.optimize-movement").getAsBoolean();
             isRedstoneFireBPE = settings.get("redstone-fire-BlockPhysicsEvent").getAsBoolean();

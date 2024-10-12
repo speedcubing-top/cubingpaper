@@ -1,15 +1,21 @@
 {
   "settings": {
-    "cleanLogs": true,
-    "commandOP": true,
-    "limitBlockPlaceDistance": true,
-    "opsJson": false,
-    "playerDataSaving": false,
-    "restartCommand": "",
+    "clean-logs": true,
+    "command-op": true,
+    "block-place-distance-limit": true,
+    "ops.json": false,
+    "player-data-saving": false,
+    "restart-command": "",
 
-    "adaptativeChunkGC": true,
-    "allowMapDecorations": false,
-    "bookMaxPages": 5,
+    "adaptative-chunk-gc": true,
+    "allow-map-decorations": false,
+    "book.max_pages": 5,
+    "knockback.friction": 2.0,
+    "knockback.horizontal": 0.4,
+    "knockback.vertical": 0.4,
+    "knockback.vertical-limit": 0.4,
+    "knockback.extra-horizontal": 0.5,
+    "knockback.extra-vertical": 0.1,
 
     "armor-stand.optimize-movement": false,
     "redstone-fire-BlockPhysicsEvent": true

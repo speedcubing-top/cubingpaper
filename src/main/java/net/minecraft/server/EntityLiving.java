@@ -897,19 +897,21 @@ public abstract class EntityLiving extends Entity {
     public void a(Entity entity, float f, double d0, double d1) {
         if (this.random.nextDouble() >= this.getAttributeInstance(GenericAttributes.c).getValue()) {
             this.ai = true;
-            float f1 = MathHelper.sqrt(d0 * d0 + d1 * d1);
-            float f2 = 0.4F;
+            //FlamePaper - Customizable-knockback
+            // FlamePaper start - Customizable knockback
+            double magnitude = MathHelper.sqrt(d0 * d0 + d1 * d1);
 
-            this.motX /= 2.0D;
-            this.motY /= 2.0D;
-            this.motZ /= 2.0D;
-            this.motX -= d0 / (double) f1 * (double) f2;
-            this.motY += (double) f2;
-            this.motZ -= d1 / (double) f1 * (double) f2;
-            if (this.motY > 0.4000000059604645D) {
-                this.motY = 0.4000000059604645D;
+            this.motX /= top.speedcubing.paper.CubingPaperConfig.knockbackFriction;
+            this.motY /= top.speedcubing.paper.CubingPaperConfig.knockbackFriction;
+            this.motZ /= top.speedcubing.paper.CubingPaperConfig.knockbackFriction;
+            this.motX -= d0 / magnitude * top.speedcubing.paper.CubingPaperConfig.knockbackHorizontal;
+            this.motY += top.speedcubing.paper.CubingPaperConfig.knockbackVertical;
+            this.motZ -= d1 / magnitude * top.speedcubing.paper.CubingPaperConfig.knockbackHorizontal;
+
+            if (this.motY > top.speedcubing.paper.CubingPaperConfig.knockbackVerticalLimit) {
+                this.motY = top.speedcubing.paper.CubingPaperConfig.knockbackVerticalLimit;
             }
-
+            // FlamePaper end - Customizable knockback
         }
     }
 
