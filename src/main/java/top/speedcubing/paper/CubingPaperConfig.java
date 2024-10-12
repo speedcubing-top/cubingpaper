@@ -33,12 +33,12 @@ public class CubingPaperConfig {
     public static boolean adaptativeChunkGC = false;
     public static boolean allowMapDecorations = true;
     public static int bookMaxPages = 5;
-    public static double knockbackFriction;
-    public static double knockbackHorizontal;
-    public static double knockbackVertical;
-    public static double knockbackVerticalLimit;
-    public static double knockbackExtraHorizontal;
-    public static double knockbackExtraVertical;
+    public static double knockbackFriction = 2.0;
+    public static double knockbackHorizontal = 0.4;
+    public static double knockbackVertical = 0.4;
+    public static double knockbackVerticalLimit = 0.4;
+    public static double knockbackExtraHorizontal = 0.5;
+    public static double knockbackExtraVertical = 0.1;
 
     //Taco
     public static boolean optimizeArmorStandMovement = false; //world
