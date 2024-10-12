@@ -31,6 +31,10 @@ public class CubingPaperConfig {
     public static boolean allowMapDecorations = true;
     public static int bookMaxPages = 5;
 
+    //Taco
+    public static boolean optimizeArmorStandMovement = false; //world
+    public static boolean isRedstoneFireBPE = true; //world
+
     public static void init() {
         try {
             if (!new File("cubingpaper.json").exists()) {
@@ -40,6 +44,7 @@ public class CubingPaperConfig {
             config = JsonParser.parseReader(new FileReader("cubingpaper.json")).getAsJsonObject();
             JsonObject settings = config.getAsJsonObject("settings");
 
+            //CubingPaper - Configurations
             cleanLogs = settings.get("cleanLogs").getAsBoolean();
             commandOP = settings.get("commandOP").getAsBoolean();
             limitBlockPlaceDistance = settings.get("limitBlockPlaceDistance").getAsBoolean();
@@ -50,10 +55,13 @@ public class CubingPaperConfig {
             String r = settings.get("restartCommand").getAsString();
             restartArgument = r.isEmpty() ? null : r.split(" ");
 
+            //FlamePaper
             adaptativeChunkGC = settings.get("adaptativeChunkGC").getAsBoolean();
             allowMapDecorations = settings.get("allowMapDecorations").getAsBoolean();
             bookMaxPages = settings.get("bookMaxPages").getAsInt();
 
+            optimizeArmorStandMovement = settings.get("armor-stand.optimize-movement").getAsBoolean();
+            isRedstoneFireBPE = settings.get("redstone-fire-BlockPhysicsEvent").getAsBoolean();
         } catch (IOException e) {
             e.printStackTrace();
         }

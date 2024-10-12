@@ -781,7 +781,7 @@ public class Chunk {
             i = this.entitySlices.length - 1;
         }
 
-        //Taco 0020
+        //Taco - Fix-Bugs-with-Spigot-Mob-Spawn-Logic
         if (!this.entitySlices[i].remove(entity)) return;
         // PaperSpigot start - update counts
         if (entity instanceof EntityItem) {

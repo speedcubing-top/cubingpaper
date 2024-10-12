@@ -136,7 +136,7 @@ public class AntiXray
                     replaceWithTypeId = (byte) CraftMagicNumbers.getId(Blocks.STONE);
                     break;
             }
-            //Taco 0009
+            //Taco - Optimize-X-Ray
             BlockPosition.MutableBlockPosition pos = new BlockPosition.MutableBlockPosition();
             // Chunks can have up to 16 sections
             for ( int i = 0; i < 16; i++ )
@@ -166,7 +166,7 @@ public class AntiXray
                                 if ( obfuscateBlocks[blockId] )
                                 {
                                     // The world isn't loaded, bail out
-                                    //Taco 0009
+                                    //Taco - Optimize-X-Ray
                                     pos.setValues(startX + x, ( i << 4 ) + y, startZ + z);
                                     if (!isLoaded(world, pos, initialRadius))
                                     {
@@ -174,7 +174,7 @@ public class AntiXray
                                         continue;
                                     }
                                     // On the otherhand, if radius is 0, or the nearby blocks are all non air, we can obfuscate
-                                    //Taco 0009
+                                    //Taco - Optimize-X-Ray
                                     if (!hasTransparentBlockAdjacent(world,pos,initialRadius)) {
                                         int newId = blockId;
                                         switch ( world.spigotConfig.engineMode )
@@ -209,7 +209,7 @@ public class AntiXray
 
     private void updateNearbyBlocks(World world, BlockPosition position, int radius, boolean updateSelf)
     {
-        //Taco 0009
+        //Taco - Optimize-X-Ray
         int startX = position.getX() - radius;
         int endX = position.getX() + radius;
         int startY = Math.max(0, position.getY() - radius);
@@ -246,9 +246,9 @@ public class AntiXray
     }
     private void updateBlock(World world, BlockPosition position){
         // If the block in question is loaded
-    //Taco 0009
+    //Taco - Optimize-X-Ray
             // Get block id
-            //Taco 0009
+            //Taco - Optimize-X-Ray
 
             // See if it needs update
             if (obfuscateBlocks[Block.getId( getType(world, position) )] )
@@ -258,18 +258,18 @@ public class AntiXray
             }
 
             // Check other blocks for updates
-            //Taco 0009
+            //Taco - Optimize-X-Ray
     }
 
     private static boolean isLoaded(World world, BlockPosition position, int radius)
     {
-        //Taco 0009
+        //Taco - Optimize-X-Ray
         return net.techcable.tacospigot.utils.BlockHelper.isAllAdjacentBlocksLoaded(world, position, radius);
     }
 
     private static boolean hasTransparentBlockAdjacent(World world, BlockPosition position, int radius)
     {
-        //Taco 0009
+        //Taco - Optimize-X-Ray
         return !net.techcable.tacospigot.utils.BlockHelper.isAllAdjacentBlocksFillPredicate(world, position, radius, (w, p) -> {
             Block block = getType(w, p);
             return isSolidBlock(block);

@@ -705,4 +705,14 @@ public class EntityArmorStand extends EntityLiving {
     public boolean ad() {
         return super.ad() && !this.s();
     }
+
+    //Taco - Optimize-armor-stands
+    // TacoSpigot start - add an option to make armor stands not move
+    @Override
+    public void move(double motX, double motY, double motZ) {
+        if (top.speedcubing.paper.CubingPaperConfig.optimizeArmorStandMovement)
+            return;
+        super.move(motX, motY, motZ);
+   }
+   // TacoSpigot end
 }

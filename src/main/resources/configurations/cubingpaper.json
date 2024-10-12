@@ -6,8 +6,12 @@
     "opsJson": false,
     "playerDataSaving": false,
     "restartCommand": "",
+
     "adaptativeChunkGC": true,
     "allowMapDecorations": false,
-    "bookMaxPages": 5
+    "bookMaxPages": 5,
+
+    "armor-stand.optimize-movement": false,
+    "redstone-fire-BlockPhysicsEvent": true
   }
 }

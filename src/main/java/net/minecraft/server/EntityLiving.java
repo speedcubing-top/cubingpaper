@@ -1842,4 +1842,15 @@ public abstract class EntityLiving extends Entity {
     protected void bP() {
         this.updateEffects = true;
     }
+    //Taco - Add-methods-for-working-with-arrows-stuck-in-living
+    // TacoSpigot start - deobfuscation helper
+    public int getArrowsStuck() {
+         return this.bv();
+    }
+    // TacoSpigot end
+    // TacoSpigot start - deobfuscation helper
+    public void setArrowsStuck(int i) {
+        this.o(i);
+    }
+    // TacoSpigot end
 }

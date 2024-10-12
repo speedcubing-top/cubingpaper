@@ -33,6 +33,12 @@
     </properties>
 
     <dependencies>
+        <!--Taco - Use-Fastutil-Collections -->
+        <dependency>
+            <groupId>it.unimi.dsi</groupId>
+            <artifactId>fastutil</artifactId>
+            <version>8.5.14</version>
+        </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>

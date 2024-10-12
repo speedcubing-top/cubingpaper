@@ -502,4 +502,16 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     public void _INVALID_setMaxHealth(int health) {
         setMaxHealth(health);
     }
+    //Taco - Add-methods-for-working-with-arrows-stuck-in-living
+    // TacoSpigot start
+    @Override
+    public int getArrowsStuck() {
+        return getHandle().getArrowsStuck();
+    }
+
+    @Override
+    public void setArrowsStuck(int arrows) {
+        getHandle().setArrowsStuck(arrows);
+    }
+    // TacoSpigot end
 }

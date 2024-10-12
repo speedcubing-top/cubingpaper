@@ -27,7 +27,7 @@ public class PacketPlayOutChat implements Packet<PacketListenerPlayOut> {
     public void b(PacketDataSerializer packetdataserializer) throws IOException {
         // Spigot start
         if (components != null) {
-            //Taco 0012
+            //Taco - Don-t-nest-if-we-don-t-need-to-when-cerealising-text
             if (this.components.length == 1)
                 packetdataserializer.a(net.md_5.bungee.chat.ComponentSerializer.toString(this.components[0]));
             else

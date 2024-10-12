@@ -572,7 +572,10 @@ public abstract class World implements IBlockAccess {
             try {
                 // CraftBukkit start
                 CraftWorld world = ((WorldServer) this).getWorld();
-                if (world != null) {
+                //Taco - Add-option-to-stop-redstone-firing-BlockPhysicsEvent
+				// TacoSpigot start - Add config to disable redstone firing BlockPhysicsEvent
+				if (world != null && (top.speedcubing.paper.CubingPaperConfig.isRedstoneFireBPE || !(block instanceof BlockRedstoneWire || block instanceof BlockRedstoneTorch || block instanceof BlockRepeater))) {
+				// TacoSpigot end
                     BlockPhysicsEvent event = new BlockPhysicsEvent(world.getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()), CraftMagicNumbers.getId(block));
                     this.getServer().getPluginManager().callEvent(event);
 
@@ -1237,6 +1240,8 @@ public abstract class World implements IBlockAccess {
         // Spigot end
 
         if (entity instanceof EntityItem) return arraylist; // PaperSpigot - Optimize item movement
+        //Taco - Optimize-armor-stands
+        if (entity instanceof EntityArmorStand) return arraylist; // TacoSpigot - Optimize armor stand movement
 
         double d0 = 0.25D;
         List list = this.getEntities(entity, axisalignedbb.grow(d0, d0, d0));
