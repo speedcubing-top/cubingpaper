@@ -15,8 +15,6 @@
     "pearl-passthrough.fence_gate": true,
     "pearl-passthrough.tripwire": true,
     "pearl-passthrough.slab": true,
-    "tnt.optimize-movement": false,
-    "tnt.optimize-liquid-explosions": true,
     "knockback.friction": 2.0,
     "knockback.horizontal": 0.4,
     "knockback.vertical": 0.4,
@@ -29,6 +27,9 @@
     "allow-non-player-entities-on-scoreboards": false,
     "grass-ignores-light": false,
     "disable-falling-block-stacking-at-256": false,
-    "fix-east-west-cannoning": false
+    "fix-east-west-cannoning": false,
+    "tnt.optimize-movement": false,
+    "tnt.optimize-liquid-explosions": true,
+    "useArraysForBlockStates": false
   }
 }

@@ -54,6 +54,7 @@ public class CubingPaperConfig {
     public static boolean fixEastWest = false;
     public static boolean optimizeTntMovement = false; //world
     public static boolean optimizeLiquidExplosions = true; //world
+    public static boolean useArraysForBlockStates = false;
 
     public static void init() {
         try {
@@ -104,6 +105,7 @@ public class CubingPaperConfig {
             fixEastWest = settings.get("fix-east-west-cannoning").getAsBoolean();
             optimizeTntMovement = settings.get("tnt.optimize-movement").getAsBoolean();
             optimizeLiquidExplosions = settings.get("tnt.optimize-liquid-explosions").getAsBoolean();
+            useArraysForBlockStates = settings.get("useArraysForBlockStates").getAsBoolean();
         } catch (IOException e) {
             e.printStackTrace();
         }
