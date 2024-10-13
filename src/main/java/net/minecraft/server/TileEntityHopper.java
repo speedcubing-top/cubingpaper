@@ -200,7 +200,8 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
                 }
             }
             // PaperSpigot start
-            if (world.paperSpigotConfig.useHopperCheck && !this.n()) {
+            //FlamePaper - Push-based-hoppers
+            if (world.paperSpigotConfig.useHopperCheck && !top.speedcubing.paper.CubingPaperConfig.isHopperPushBased && !this.n()) { // FlamePaper - dont use hopper check in push mode
                 this.d(world.spigotConfig.hopperCheck);
             }
             // PaperSpigot end
@@ -241,7 +242,8 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
     }
 
     private boolean r() {
-        IInventory iinventory = this.H();
+        //FlamePaper - Push-based-hoppers
+        IInventory iinventory = org.github.paperspigot.HopperHelper.getInventory(getWorld(), getPosition().shift(BlockHopper.b(this.u()))); // FlamePaper
 
         if (iinventory == null) {
             return false;
@@ -346,8 +348,22 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
         return true;
     }
 
+    //FlamePaper - Push-based-hoppers
+    // PaperSpigot start - Split methods, one that pushes and one that pulls
+    @Deprecated
     public static boolean a(IHopper ihopper) {
-        IInventory iinventory = b(ihopper);
+        //FlamePaper - Push-based-hoppers
+        IInventory iinventory;
+        if (top.speedcubing.paper.CubingPaperConfig.isHopperPushBased && ihopper instanceof TileEntityHopper) {
+            BlockPosition pos = ((TileEntityHopper) ihopper).getPosition().up(); // Only pull from a above, because everything else comes to us
+            iinventory = org.github.paperspigot.HopperHelper.getInventory(ihopper.getWorld(), pos);
+        } else {
+            iinventory = b(ihopper); // Use old behavior for BB entity searching
+        }
+        return acceptItem(ihopper, iinventory);
+    }
+    public static boolean acceptItem(IHopper ihopper, IInventory iinventory) {
+        // FlamePaper end
 
         if (iinventory != null) {
             EnumDirection enumdirection = EnumDirection.DOWN;
@@ -374,7 +390,8 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
                     }
                 }
             }
-        } else {
+            //FlamePaper - Push-based-hoppers
+        } else if (!top.speedcubing.paper.CubingPaperConfig.isHopperPushBased || !(ihopper instanceof TileEntityHopper)) { // FlamePaper - only search for entities in 'pull mode'
             Iterator iterator = a(ihopper.getWorld(), ihopper.A(), ihopper.B() + 1.0D, ihopper.C()).iterator();
 
             while (iterator.hasNext()) {
@@ -633,4 +650,20 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
         }
 
     }
+    //FlamePaper - Push-based-hoppers
+    // FlamePaper start
+    public boolean canAcceptItems() {
+        return !this.n() && !this.q() && BlockHopper.f(this.u());
+    }
+    // FlamePaper end
+
+    //FlamePaper - Push-based-hoppers
+    // FlamePaper start
+    public AxisAlignedBB getHopperLookupBoundingBox() {
+        return getHopperLookupBoundingBox(this.A(), this.B() + 1.0D, this.C());
+    }
+    private static AxisAlignedBB getHopperLookupBoundingBox(double d0, double d1, double d2) {
+        return new AxisAlignedBB(d0 - 0.5D, d1 - 0.5D, d2 - 0.5D, d0 + 0.5D, d1 + 0.5D, d2 + 0.5D);
+    }
+    // FlamePaper end
 }

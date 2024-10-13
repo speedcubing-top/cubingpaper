@@ -15,6 +15,7 @@
     "pearl-passthrough.fence_gate": true,
     "pearl-passthrough.tripwire": true,
     "pearl-passthrough.slab": true,
+    "hopper.push-based": true,
     "knockback.friction": 2.0,
     "knockback.horizontal": 0.4,
     "knockback.vertical": 0.4,

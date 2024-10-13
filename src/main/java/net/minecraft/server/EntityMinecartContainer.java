@@ -8,8 +8,15 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.InventoryHolder;
 // CraftBukkit end
 
-public abstract class EntityMinecartContainer extends EntityMinecartAbstract implements ITileInventory {
+//FlamePaper - Push-based-hoppers
+// FlamePaper start - HopperPusher
+public abstract class EntityMinecartContainer extends EntityMinecartAbstract implements ITileInventory, org.github.paperspigot.HopperPusher {
 
+    @Override
+    public boolean acceptItem(TileEntityHopper hopper) {
+        return TileEntityHopper.acceptItem(hopper, this);
+    }
+    // FlamePaper end
     private ItemStack[] items = new ItemStack[27]; // CraftBukkit - 36 -> 27
     private boolean b = true;
 

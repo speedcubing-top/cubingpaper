@@ -38,6 +38,7 @@ public class CubingPaperConfig {
     public static boolean pearlPassthroughTripwire = true;
     public static boolean pearlPassthroughSlab = true;
     public static int disconnectSpamAddition = 5;
+    public static boolean isHopperPushBased = true;
     public static double knockbackFriction = 2.0;
     public static double knockbackHorizontal = 0.4;
     public static double knockbackVertical = 0.4;
@@ -85,6 +86,7 @@ public class CubingPaperConfig {
             pearlPassthroughFenceGate = settings.get("pearl-passthrough.fence_gate").getAsBoolean();
             pearlPassthroughTripwire = settings.get("pearl-passthrough.tripwire").getAsBoolean();
             pearlPassthroughSlab = settings.get("pearl-passthrough.slab").getAsBoolean();
+            isHopperPushBased = settings.get("hopper.push-based").getAsBoolean();
             knockbackFriction = settings.get( "knockback.friction").getAsDouble();
             knockbackHorizontal = settings.get( "knockback.horizontal").getAsDouble();
             knockbackVertical = settings.get( "knockback.vertical").getAsDouble();

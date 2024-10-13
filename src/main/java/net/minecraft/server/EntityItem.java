@@ -5,7 +5,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.event.player.PlayerPickupItemEvent; // CraftBukkit
 
-public class EntityItem extends Entity {
+//FlamePaper - Push-based-hoppers
+// FlamePaper start - implement HopperPusher
+public class EntityItem extends Entity implements org.github.paperspigot.HopperPusher {
+    @Override
+    public boolean acceptItem(TileEntityHopper hopper) {
+        return TileEntityHopper.a(hopper, this);
+    }
+    // FlamePaper end
 
     private static final Logger b = LogManager.getLogger();
     private int age;
@@ -59,6 +66,8 @@ public class EntityItem extends Entity {
             this.die();
         } else {
             super.t_();
+            //FlamePaper - Push-based-hoppers
+            if (tryPutInHopper()) return; // TacoSpigot
             // CraftBukkit start - Use wall time for pickup and despawn timers
             int elapsedTicks = MinecraftServer.currentTick - this.lastTick;
             if (this.pickupDelay != 32767) this.pickupDelay -= elapsedTicks;
@@ -124,6 +133,8 @@ public class EntityItem extends Entity {
     // Spigot start - copied from above
     @Override
     public void inactiveTick() {
+        //FlamePaper - Push-based-hoppers
+        if (tryPutInHopper()) return; // FlamePaper
         // CraftBukkit start - Use wall time for pickup and despawn timers
         int elapsedTicks = MinecraftServer.currentTick - this.lastTick;
         if (this.pickupDelay != 32767) this.pickupDelay -= elapsedTicks;
