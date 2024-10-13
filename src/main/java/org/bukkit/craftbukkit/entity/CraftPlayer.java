@@ -1606,4 +1606,36 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         return spigot;
     }
     // Spigot end
+    //Taco - Complete-resource-pack-API
+    // TacoSpigot start
+    private org.bukkit.event.player.PlayerResourcePackStatusEvent.Status resourcePackStatus;
+    private String resourcePackHash;
+
+    @Override
+    public void setResourcePack(String url, String hash) {
+        Validate.notNull(url, "Resource pack URL cannot be null");
+        Validate.notNull(hash, "Hash cannot be null");
+        this.getHandle().setResourcePack(url, hash);
+    }
+
+    @Override
+    public org.bukkit.event.player.PlayerResourcePackStatusEvent.Status getResourcePackStatus() {
+        return this.resourcePackStatus;
+    }
+
+    @Override
+    public String getResourcePackHash() {
+        return this.resourcePackHash;
+    }
+
+    @Override
+    public boolean hasResourcePack() {
+        return this.resourcePackStatus == org.bukkit.event.player.PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED;
+    }
+
+    public void setResourcePackStatus(org.bukkit.event.player.PlayerResourcePackStatusEvent.Status status, String hash) {
+        this.resourcePackStatus = status;
+        this.resourcePackHash = hash;
+    }
+    // TacoSpigot end
 }

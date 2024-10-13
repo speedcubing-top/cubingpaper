@@ -4,7 +4,8 @@ import java.io.IOException;
 
 public class PacketPlayInResourcePackStatus implements Packet<PacketListenerPlayIn> {
 
-    private String a;
+    //Taco - Complete-resource-pack-API
+    public String a; // TacoSpigot - make public
     public PacketPlayInResourcePackStatus.EnumResourcePackStatus b; // PAIL: private -> public, rename: status
 
     public PacketPlayInResourcePackStatus() {}

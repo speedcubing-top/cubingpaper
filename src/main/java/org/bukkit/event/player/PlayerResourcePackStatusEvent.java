@@ -12,8 +12,23 @@ public class PlayerResourcePackStatusEvent extends PlayerEvent {
     private static final HandlerList handlers = new HandlerList();
     private final Status status;
 
+    //TacoAPI - Complete-resource-pack-API
+    private final String hash; // TacoSpigot
+    // TacoSpigot start
+    public PlayerResourcePackStatusEvent(final Player who, Status resourcePackStatus, String hash) {
+        super(who);
+        this.hash = hash;
+        this.status = resourcePackStatus;
+    }
+    public String getHash() {
+        return this.hash;
+    }
+    // TacoSpigot end
+    @Deprecated // TacoSpigot
     public PlayerResourcePackStatusEvent(final Player who, Status resourcePackStatus) {
         super(who);
+        //TacoAPI - Complete-resource-pack-API
+        this.hash = null; // TacoSpigot
         this.status = resourcePackStatus;
     }
 
