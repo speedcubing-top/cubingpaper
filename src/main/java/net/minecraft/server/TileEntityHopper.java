@@ -260,11 +260,11 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
 
                         // CraftBukkit start - Call event when pushing items into other inventories
                         CraftItemStack oitemstack = CraftItemStack.asCraftMirror(this.splitStack(i, world.spigotConfig.hopperAmount)); // Spigot
-                        //FlamePaper - Disable-InventoryMoveItemEvent
-                        // FlamePaper start - add an option to turn of InventoryMoveItemEvent
+                        //Taco - Add-a-flag-to-disable-InventoryMoveItemEvent
+                        // TacoSpigot start - add an option to turn of InventoryMoveItemEvent
                         final org.bukkit.inventory.ItemStack stack;
                         if (org.github.paperspigot.HopperHelper.isFireInventoryMoveItemEvent(this)) {
-                        // FlamePaper end
+                        // TacoSpigot end
 
                         Inventory destinationInventory;
                         // Have to special case large chests as they work oddly
@@ -281,7 +281,7 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
                             this.d(world.spigotConfig.hopperTransfer); // Spigot
                             return false;
                         }
-                        //FlamePaper - Disable-InventoryMoveItemEvent
+                        //Taco - Add-a-flag-to-disable-InventoryMoveItemEvent
                         // TacoSpigot start
                         stack = event.getItem();
                         // handle cases where the event is not fired
@@ -293,7 +293,7 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
                         // TacoSpigot end
 
                         if (itemstack1 == null || itemstack1.count == 0) {
-                            //FlamePaper - Disable-InventoryMoveItemEvent
+                            //Taco - Add-a-flag-to-disable-InventoryMoveItemEvent
                             if (stack.equals(oitemstack)) { // TacoSpigot - event.getItem() -> stack
                                 iinventory.update();
                             } else {
@@ -428,7 +428,7 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
             // ItemStack itemstack2 = addItem(ihopper, iinventory.splitStack(i, 1), (EnumDirection) null);
             // CraftBukkit start - Call event on collection of items from inventories into the hopper
             CraftItemStack oitemstack = CraftItemStack.asCraftMirror(iinventory.splitStack(i, ihopper.getWorld().spigotConfig.hopperAmount)); // Spigot
-            //FlamePaper - Disable-InventoryMoveItemEvent
+            //Taco - Add-a-flag-to-disable-InventoryMoveItemEvent
             // TacoSpigot start - add an option to turn of InventoryMoveItemEvent
             final org.bukkit.inventory.ItemStack stack;
             if (org.github.paperspigot.HopperHelper.isFireInventoryMoveItemEvent(ihopper)) {
@@ -455,7 +455,7 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
                 }
                 return false;
             }
-            //FlamePaper - Disable-InventoryMoveItemEvent
+            //Taco - Add-a-flag-to-disable-InventoryMoveItemEvent
             // TacoSpigot start
             stack = event.getItem();
             // handle cases where the event is not fired
@@ -467,7 +467,7 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
             // TacoSpigot end
 
             if (itemstack2 == null || itemstack2.count == 0) {
-                //FlamePaper - Disable-InventoryMoveItemEvent
+                //Taco - Add-a-flag-to-disable-InventoryMoveItemEvent
                 if (stack.equals(oitemstack)) {
                     iinventory.update();
                 } else {

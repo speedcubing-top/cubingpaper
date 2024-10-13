@@ -11,7 +11,7 @@ import net.minecraft.server.TileEntityHopper;
 import net.minecraft.server.World;
 
 public class HopperHelper {
-    //FlamePaper - Disable-InventoryMoveItemEvent
+    //Taco - Add-a-flag-to-disable-InventoryMoveItemEvent
     public static boolean isFireInventoryMoveItemEvent(net.minecraft.server.IHopper hopper) {
         return top.speedcubing.paper.CubingPaperConfig.isHopperFireIMIE && org.bukkit.event.inventory.InventoryMoveItemEvent.getHandlerList().getRegisteredListeners().length > 0;
     }
