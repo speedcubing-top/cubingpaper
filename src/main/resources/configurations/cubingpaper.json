@@ -16,6 +16,7 @@
     "pearl-passthrough.tripwire": true,
     "pearl-passthrough.slab": true,
     "hopper.push-based": true,
+    "hopper.fire-inventory-move-item-event": true,
     "knockback.friction": 2.0,
     "knockback.horizontal": 0.4,
     "knockback.vertical": 0.4,
