@@ -5,8 +5,4 @@ public class CubingPaper {
         System.out.println("[CubingPaper] initializing...");
         CubingPaperConfig.init();
     }
-
-    public static void onFinishLoad(){
-
-    }
 }

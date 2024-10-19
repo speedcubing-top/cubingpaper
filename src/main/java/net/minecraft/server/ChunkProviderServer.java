@@ -208,23 +208,24 @@ public class ChunkProviderServer implements IChunkProvider {
         return chunk;
     }
 
+    //IonSpigot - Optimise-Chunk-Getting
+    private Chunk cachedChunk = null;
     public Chunk getOrCreateChunk(int i, int j) {
-        // CraftBukkit start
-        Chunk chunk = (Chunk) this.chunks.get(LongHash.toLong(i, j));
-
-        chunk = chunk == null ? (!this.world.ad() && !this.forceChunkLoad ? this.emptyChunk : this.getChunkAt(i, j)) : chunk;
-
-        if (chunk == emptyChunk) return chunk;
-        if (i != chunk.locX || j != chunk.locZ) {
-            // Paper start
-            String msg = "Chunk (" + chunk.locX + ", " + chunk.locZ + ") stored at  (" + i + ", " + j + ") in world '" + world.getWorld().getName() + "'";
-            b.error(msg);
-            b.error(chunk.getClass().getName());
-            ServerInternalException ex = new ServerInternalException(msg);
-            ex.printStackTrace();
-            Bukkit.getPluginManager().callEvent(new ServerExceptionEvent(ex));
-            // Paper end
+        //IonSpigot - Optimise-Chunk-Getting
+        Chunk chunk = cachedChunk; // We have to do this for thread safety
+        if (chunk != null && chunk.locX == i && chunk.locZ == j && chunk.o()) {
+            return chunk;
         }
+        chunk = this.chunks.get(LongHash.toLong(i, j));
+        if (chunk == null) {
+            if (!this.world.ad() && !this.forceChunkLoad) {
+                return this.emptyChunk;
+            }
+            chunk = this.getChunkAt(i, j);
+        }
+        cachedChunk = chunk;
+        // CraftBukkit start
+        //IonSpigot - Optimise-Chunk-Getting
 
         return chunk;
         // CraftBukkit end
