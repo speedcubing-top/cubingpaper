@@ -577,7 +577,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
             }
 
         }
-
+        //CubingPaper - gc on startup
+        System.gc();
     }
 
     private void a(ServerPing serverping) {
