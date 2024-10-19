@@ -1667,6 +1667,12 @@ public abstract class EntityLiving extends Entity {
     protected void doTick() {}
 
     protected void bL() {
+        //IonSpigot - Allow-completely-disabling-pushing
+        // IonSpigot start - Allow completely disabling pushing
+        if (world.spigotConfig.maxCollisionsPerEntity == -1) {
+            return;
+        }
+        // IonSpigot end
         //IonSpigot - Optimise-Entity-Collisions
         // IonSpigot start - Optimise Entity Collisions
         List list = this.world.getEntitiesByAmount(this, this.getBoundingBox().grow(0.20000000298023224D, 0.0D, 0.20000000298023224D),
