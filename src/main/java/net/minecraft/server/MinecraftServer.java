@@ -324,6 +324,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
 
         this.b("menu.generatingTerrain");
         //FlamePaper - Disable-startup-chunk-loading
+        //IonSpigot - Async-Spawn-Chunks
+        //cubing: cus the startup loading is disabled by flamepaper, no need to patch things here
 
         for (WorldServer world : this.worlds) {
             this.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldLoadEvent(world.getWorld()));
