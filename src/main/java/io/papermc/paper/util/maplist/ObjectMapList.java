@@ -132,7 +132,8 @@ public final class ObjectMapList<T> extends AbstractReferenceList<T> implements 
     }
 
     @Override
-    public Spliterator<T> spliterator() {
+    //CubingPaper - fix-compile-error
+    public it.unimi.dsi.fastutil.objects.ObjectSpliterator<T> spliterator() {
         return super.spliterator();
     }
 
