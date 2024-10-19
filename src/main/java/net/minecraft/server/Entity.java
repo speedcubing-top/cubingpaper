@@ -2313,4 +2313,8 @@ public abstract class Entity implements ICommandListener {
 
         EnchantmentManager.b(entityliving, entity);
     }
+
+    //IonSpigot - Lag-Compensated-Ticking
+    protected boolean compensated;
+    protected void tick() {}
 }
