@@ -30,7 +30,8 @@ public class ChunkProviderServer implements IChunkProvider {
 
     private static final Logger b = LogManager.getLogger();
     //Taco - Use-Fastutil-Collections
-    public it.unimi.dsi.fastutil.longs.LongSet unloadQueue = new it.unimi.dsi.fastutil.longs.LongArraySet(); // CraftBukkit - LongHashSet // TacoSpigot - LongHashSet -> HashArraySet
+    //IonSpigot - Reduce-Unload-Queue-Complexity
+    public it.unimi.dsi.fastutil.longs.LongSet unloadQueue = new it.unimi.dsi.fastutil.longs.LongOpenHashSet(); // CraftBukkit - LongHashSet // TacoSpigot - LongHashSet -> HashArraySet
     public Chunk emptyChunk;
     public IChunkProvider chunkProvider;
     private IChunkLoader chunkLoader;

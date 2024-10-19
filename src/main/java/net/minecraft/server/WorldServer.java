@@ -657,7 +657,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                             break;
                         }
 
-                        if (next.a().isPowerSource() || next.a() instanceof IContainer) {
+                        //IonSpigot - 0036-Make-Sand-Bypass-Tick-Cap
+                        if (next.a().isPowerSource() || next.a() instanceof IContainer || next.a() instanceof BlockFalling) { // IonSpigot - falling blocks should bypass tick cap
                             iterator.remove();
                             this.V.add(next);
                         }
