@@ -1,9 +1,8 @@
 name: Build jar
 
 on:
-  push:
-    tags:
-      - '*'
+  workflow_dispatch:
+
 
 jobs:
   build:
@@ -19,7 +18,7 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
       - name: Upload jar
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: cubingPaper
           path: target/cubingpaper-1.8.8-R0.1-SNAPSHOT.jar
