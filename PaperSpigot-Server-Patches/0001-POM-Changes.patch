@@ -1,0 +1,23 @@
+From 608e1cd0be0a0994a385da4855c4e07fcfc3de3a Mon Sep 17 00:00:00 2001
+From: speedcubing <git@speedcubing.top>
+Date: Wed, 8 Jan 2025 18:35:56 +0800
+Subject: [PATCH] POM Changes
+
+
+diff --git a/pom.xml b/pom.xml
+index 644305e6..d3a42627 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -229,7 +229,8 @@
+             <plugin>
+                 <groupId>net.md-5</groupId>
+                 <artifactId>specialsource-maven-plugin</artifactId>
+-		<version>1.2.3</version> <!-- paper - bump log4j -->
++                <!-- CubingPaper - bump version -->
++		<version>2.0.3</version> <!-- paper - bump log4j -->
+                 <executions>
+                     <execution>
+                         <phase>package</phase>
+-- 
+2.35.3.windows.1
+
