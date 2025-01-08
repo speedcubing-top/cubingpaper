@@ -1,7 +1,7 @@
-From 608e1cd0be0a0994a385da4855c4e07fcfc3de3a Mon Sep 17 00:00:00 2001
+From 20cfec1b987b685d8d0728a701e2ef7d14ac5a19 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Wed, 8 Jan 2025 18:35:56 +0800
-Subject: [PATCH] POM Changes
+Subject: [PATCH] POM changes
 
 
 diff --git a/pom.xml b/pom.xml
