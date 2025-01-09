@@ -84,7 +84,7 @@ if [ ! -d "Paper" ]; then
   
   # apply patch
   cd $basedir/Paper
-  sh newApplyPatches.sh
+  ./newApplyPatches.sh
   
   
   cd $basedir
