@@ -1,7 +1,7 @@
-From 20cfec1b987b685d8d0728a701e2ef7d14ac5a19 Mon Sep 17 00:00:00 2001
+From 37ee524dc12b12a3fc93bb1bbc7a0759e76107d8 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Wed, 8 Jan 2025 18:35:56 +0800
-Subject: [PATCH] POM changes
+Subject: [PATCH] POM Changes
 
 
 diff --git a/pom.xml b/pom.xml
@@ -19,5 +19,5 @@ index 644305e6..d3a42627 100644
                      <execution>
                          <phase>package</phase>
 -- 
-2.35.3.windows.1
+2.35.1.windows.2
 
