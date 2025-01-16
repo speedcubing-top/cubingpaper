@@ -1,0 +1,36 @@
+From 9e2e508ab746f21397df55999f76360af72e25e7 Mon Sep 17 00:00:00 2001
+From: speedcubing <git@speedcubing.top>
+Date: Thu, 16 Jan 2025 11:38:15 +0800
+Subject: [PATCH] Pom Changes
+
+
+diff --git a/pom.xml b/pom.xml
+index fe9d6d26..f416af79 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -4,17 +4,17 @@
+     <modelVersion>4.0.0</modelVersion>
+ 
+     <parent>
+-        <groupId>org.github.paperspigot</groupId>
+-        <artifactId>paperspigot-parent</artifactId>
++        <groupId>top.speedcubing.cubingpaper</groupId>
++        <artifactId>cubingpaper-parent</artifactId>
+         <version>dev-SNAPSHOT</version>
+     </parent>
+ 
+-    <groupId>org.github.paperspigot</groupId>
+-    <artifactId>paperspigot-api</artifactId>
++    <groupId>top.speedcubing.cubingpaper</groupId>
++    <artifactId>cubingpaper-api</artifactId>
+     <version>1.8.8-R0.1-SNAPSHOT</version>
+     <packaging>jar</packaging>
+ 
+-    <name>PaperSpigot-API</name>
++    <name>CubingPaper-API</name>
+     <url>https://hub.spigotmc.org/stash/projects/PAPER/</url>
+     <description>An enhanced plugin API for Minecraft servers.</description>
+ 
+-- 
+2.35.3.windows.1
+
