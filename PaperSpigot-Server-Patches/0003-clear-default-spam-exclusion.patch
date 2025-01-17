@@ -1,0 +1,21 @@
+From b278e91caa8206919689eec4b37b8098095a5141 Mon Sep 17 00:00:00 2001
+From: speedcubing <git@speedcubing.top>
+Date: Fri, 17 Jan 2025 08:27:12 +0800
+Subject: [PATCH] clear default spam exclusion
+
+
+diff --git a/src/main/java/org/spigotmc/SpigotConfig.java b/src/main/java/org/spigotmc/SpigotConfig.java
+index b9d185d9..f7c99452 100644
+--- a/src/main/java/org/spigotmc/SpigotConfig.java
++++ b/src/main/java/org/spigotmc/SpigotConfig.java
+@@ -331,7 +331,6 @@ public class SpigotConfig
+     {
+         spamExclusions = getList( "commands.spam-exclusions", Arrays.asList( new String[]
+         {
+-                "/skill"
+         } ) );
+     }
+ 
+-- 
+2.35.3.windows.1
+
