@@ -93,6 +93,9 @@ else
   echo "Paper folder exists, skipped."
 fi
 
-
-git clone Paper/PaperSpigot-API CubingPaper-API
-git clone Paper/PaperSpigot-Server CubingPaper-Server
+if [ ! -d "CubingPaper-API" ]; then
+  git clone Paper/PaperSpigot-API CubingPaper-API
+fi
+if [ ! -d "CubingPaper-Server" ]; then
+  git clone Paper/PaperSpigot-Server CubingPaper-Server
+fi
