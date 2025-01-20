@@ -9,7 +9,7 @@
         <version>7</version>
     </parent>
 
-    <groupId>top.speedcubing.cubingpaper</groupId>
+    <groupId>top.speedcubing</groupId>
     <artifactId>cubingpaper-parent</artifactId>
     <version>dev-SNAPSHOT</version>
     <packaging>pom</packaging>

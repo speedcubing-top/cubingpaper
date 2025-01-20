@@ -1,11 +1,11 @@
-From 319d7d00dd46530fa3030eb17070c25d1bf25607 Mon Sep 17 00:00:00 2001
+From ea39090006fa317498f018caa54bc86bf9f48bf5 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Wed, 8 Jan 2025 18:35:56 +0800
 Subject: [PATCH] POM Changes
 
 
 diff --git a/pom.xml b/pom.xml
-index 644305e6..13ac4479 100644
+index 644305e6..f2f82b59 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -1,11 +1,11 @@
@@ -14,7 +14,7 @@ index 644305e6..13ac4479 100644
      <modelVersion>4.0.0</modelVersion>
 -    <groupId>org.github.paperspigot</groupId>
 -    <artifactId>paperspigot</artifactId>
-+    <groupId>top.speedcubing.cubingpaper</groupId>
++    <groupId>top.speedcubing</groupId>
 +    <artifactId>cubingpaper</artifactId>
      <packaging>jar</packaging>
      <version>1.8.8-R0.1-SNAPSHOT</version>
@@ -29,7 +29,7 @@ index 644305e6..13ac4479 100644
      <parent>
 -        <groupId>org.github.paperspigot</groupId>
 -        <artifactId>paperspigot-parent</artifactId>
-+        <groupId>top.speedcubing.cubingpaper</groupId>
++        <groupId>top.speedcubing</groupId>
 +        <artifactId>cubingpaper-parent</artifactId>
          <version>dev-SNAPSHOT</version>
          <relativePath>../pom.xml</relativePath>
@@ -40,7 +40,7 @@ index 644305e6..13ac4479 100644
          <dependency>
 -            <groupId>org.github.paperspigot</groupId>
 -            <artifactId>paperspigot-api</artifactId>
-+            <groupId>top.speedcubing.cubingpaper</groupId>
++            <groupId>top.speedcubing</groupId>
 +            <artifactId>cubingpaper-api</artifactId>
              <version>${project.version}</version>
              <type>jar</type>
@@ -56,5 +56,5 @@ index 644305e6..13ac4479 100644
                      <execution>
                          <phase>package</phase>
 -- 
-2.35.3.windows.1
+2.39.5
 
