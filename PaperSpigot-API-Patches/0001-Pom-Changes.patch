@@ -1,11 +1,11 @@
-From 3aff2f5ff6357d5c296b1a36f3e0b1b667458145 Mon Sep 17 00:00:00 2001
+From a5096608fb77956190a2a2b88e378cf8a04e020e Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Thu, 16 Jan 2025 11:38:15 +0800
 Subject: [PATCH] Pom Changes
 
 
 diff --git a/pom.xml b/pom.xml
-index fe9d6d26..22ccfbbc 100644
+index fe9d6d26..bb82322f 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -4,17 +4,17 @@
@@ -31,6 +31,24 @@ index fe9d6d26..22ccfbbc 100644
      <url>https://hub.spigotmc.org/stash/projects/PAPER/</url>
      <description>An enhanced plugin API for Minecraft servers.</description>
  
+@@ -78,7 +78,7 @@
+         <dependency>
+             <groupId>com.google.code.gson</groupId>
+             <artifactId>gson</artifactId>
+-          <version>2.2.4</version>
++          <version>2.11.0</version>
+         </dependency>
+         <dependency>
+             <groupId>org.avaje</groupId>
+@@ -104,7 +104,7 @@
+         <dependency>
+             <groupId>junit</groupId>
+             <artifactId>junit</artifactId>
+-            <version>4.12</version>
++            <version>4.13.2</version>
+             <scope>test</scope>
+         </dependency>
+         <dependency>
 -- 
-2.39.5
+2.35.3.windows.1
 
