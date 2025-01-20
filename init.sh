@@ -6,7 +6,7 @@ basedir=`pwd`
 # clone NMS
 echo "[Build] Cloning NMS"
 if [ ! -d "NMSClasses" ]; then
-  git clone git@github.com:speedcubing-top/NMSClasses.git
+  git clone https://github.com/speedcubing-top/NMSClasses.git
 else
   echo "NMSClasses folder exists, skipped."
 fi
@@ -70,7 +70,7 @@ echo "[Build] Cloning Paper"
 
 if [ ! -d "Paper" ]; then
 
-  git clone -b ver/1.8.8 --single-branch git@github.com:PaperMC/Paper.git Paper
+  git clone -b ver/1.8.8 --single-branch https://github.com/PaperMC/Paper.git Paper
   cd $basedir/Paper
   git checkout -b master
 
