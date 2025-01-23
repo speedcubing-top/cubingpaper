@@ -1,0 +1,58 @@
+From 931732c4913f2ed2522e6d673b32a37244ae1374 Mon Sep 17 00:00:00 2001
+From: LinsaFTW <25271111+linsaftw@users.noreply.github.com>
+Date: Mon, 12 Dec 2022 00:11:20 +0100
+Subject: [PATCH] Use isActive instead of isOpen
+
+
+diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
+index e1e7bb6c..fa4c4f06 100644
+--- a/src/main/java/net/minecraft/server/NetworkManager.java
++++ b/src/main/java/net/minecraft/server/NetworkManager.java
+@@ -119,7 +119,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+     }
+ 
+     protected void a(ChannelHandlerContext channelhandlercontext, Packet packet) throws Exception {
+-        if (this.channel.isOpen()) {
++        if (this.channel.isActive()) {
+             try {
+                 packet.a(this.m);
+             } catch (CancelledPacketHandleException cancelledpackethandleexception) {
+@@ -209,7 +209,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+     }
+ 
+     private void m() {
+-        if (this.channel != null && this.channel.isOpen()) {
++        if (this.channel != null && this.channel.isActive()) {
+             this.j.readLock().lock();
+ 
+             try {
+@@ -243,7 +243,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+         // Spigot Start
+         this.preparing = false;
+         // Spigot End
+-        if (this.channel.isOpen()) {
++        if (this.channel.isActive()) {
+             this.channel.close(); // We can't wait as this may be called from an event loop.
+             this.n = ichatbasecomponent;
+         }
+@@ -261,7 +261,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+     }
+ 
+     public boolean g() {
+-        return this.channel != null && this.channel.isOpen();
++        return this.channel != null && this.channel.isActive();
+     }
+ 
+     public boolean h() {
+@@ -306,7 +306,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+     }
+ 
+     public void l() {
+-        if (this.channel != null && !this.channel.isOpen()) {
++        if (this.channel != null && !this.channel.isActive()) {
+             if (!this.p) {
+                 this.p = true;
+                 if (this.j() != null) {
+-- 
+2.35.3.windows.1
+

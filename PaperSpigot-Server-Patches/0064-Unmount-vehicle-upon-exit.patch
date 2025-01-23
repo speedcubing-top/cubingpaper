@@ -1,0 +1,21 @@
+From 235ae6fc9e430a38d774c022fdffa8d71acd3975 Mon Sep 17 00:00:00 2001
+From: LinsaFTW <25271111+linsaftw@users.noreply.github.com>
+Date: Sun, 26 Mar 2023 17:44:35 -0300
+Subject: [PATCH] Unmount vehicle upon exit
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 3c2d3197..9e97fda0 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -355,6 +355,7 @@ public abstract class PlayerList {
+     }
+ 
+     public String disconnect(EntityPlayer entityplayer) { // CraftBukkit - return string
++        entityplayer.mount(null); // FlamePaper - Unmount vehicle upon exit
+         entityplayer.b(StatisticList.f);
+ 
+         // CraftBukkit start - Quitting must be before we do final save of data, in case plugins need to modify it
+-- 
+2.35.3.windows.1
+
