@@ -1,23 +1,21 @@
-From 99ab33ccc1e4a8b03e6ca56cf642e536ad75d7e7 Mon Sep 17 00:00:00 2001
+From 55812b7633adaa64ef3706a502a8f1a3a098700b Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Fri, 17 Jan 2025 18:53:38 +0800
 Subject: [PATCH] Update-Version-Command
 
 
 diff --git a/src/main/java/org/bukkit/command/defaults/VersionCommand.java b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
-index e91e1d8c..1d3c3339 100644
+index e91e1d8c..1aaf04c1 100644
 --- a/src/main/java/org/bukkit/command/defaults/VersionCommand.java
 +++ b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
-@@ -43,7 +43,8 @@ public class VersionCommand extends BukkitCommand {
-         if (!testPermission(sender)) return true;
+@@ -44,7 +44,6 @@ public class VersionCommand extends BukkitCommand {
  
          if (args.length == 0) {
--            sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ")");
-+            sender.sendMessage("§cThis server is running §bCubingPaper§c."); // CubingPaper
-+            // sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ")");
-             sendVersion(sender);
+             sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ")");
+-            sendVersion(sender);
          } else {
              StringBuilder name = new StringBuilder();
+ 
 -- 
-2.35.1.windows.2
+2.35.3.windows.1
 
