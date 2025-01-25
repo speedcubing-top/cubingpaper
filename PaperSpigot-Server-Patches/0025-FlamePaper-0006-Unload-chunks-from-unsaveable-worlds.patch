@@ -1,0 +1,67 @@
+From 954583fc1233691b36981e0421bb6e818e1e62b6 Mon Sep 17 00:00:00 2001
+From: speedcubing <git@speedcubing.top>
+Date: Fri, 24 Jan 2025 01:12:37 +0800
+Subject: [PATCH] FlamePaper 0006 Unload chunks from unsaveable worlds
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 8bcd152f..a3a83189 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -268,7 +268,7 @@ public class ChunkProviderServer implements IChunkProvider {
+     }
+ 
+     public void saveChunkNOP(Chunk chunk) {
+-        if (this.chunkLoader != null) {
++        if (canSave() && this.chunkLoader != null) {
+             try {
+                 this.chunkLoader.b(this.world, chunk);
+             } catch (Exception exception) {
+@@ -279,7 +279,7 @@ public class ChunkProviderServer implements IChunkProvider {
+     }
+ 
+     public void saveChunk(Chunk chunk) {
+-        if (this.chunkLoader != null) {
++        if (canSave() && this.chunkLoader != null) {
+             try {
+                 chunk.setLastSaved(this.world.getTime());
+                 this.chunkLoader.a(this.world, chunk);
+@@ -373,8 +373,8 @@ public class ChunkProviderServer implements IChunkProvider {
+ 
+     }
+ 
+-    public boolean unloadChunks() {
+-        if (!this.world.savingDisabled) {
++    public boolean unloadChunks(boolean force) {
++        if (canSave() || force) {
+             // CraftBukkit start
+             Server server = this.world.getServer();
+             // TacoSpigot start - use iterator for unloadQueue
+@@ -425,6 +425,10 @@ public class ChunkProviderServer implements IChunkProvider {
+         return this.chunkProvider.unloadChunks();
+     }
+ 
++    public boolean unloadChunks() {
++        return unloadChunks(false);
++    }
++
+     public boolean canSave() {
+         return !this.world.savingDisabled;
+     }
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index a2fb0398..9607d5e8 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1004,6 +1004,9 @@ public final class CraftServer implements Server {
+                 getLogger().log(Level.SEVERE, null, ex);
+             }
+         }
++        
++        // FlamePaper - Fix chunk memory leak
++        handle.chunkProviderServer.unloadChunks(true);
+ 
+         worlds.remove(world.getName().toLowerCase());
+         console.worlds.remove(console.worlds.indexOf(handle));
+-- 
+2.35.3.windows.1
+

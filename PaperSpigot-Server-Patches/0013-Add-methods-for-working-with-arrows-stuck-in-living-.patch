@@ -1,0 +1,64 @@
+From 389281edfb1b6bad2d164672bf3624f9dc1236bb Mon Sep 17 00:00:00 2001
+From: mrapple <tony@oc.tc>
+Date: Thu, 10 Mar 2016 15:09:32 -0700
+Subject: [PATCH] Add methods for working with arrows stuck in living entities
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index ca8cc5df..12257ad2 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -1166,10 +1166,21 @@ public abstract class EntityLiving extends Entity {
+         return (float) this.getAttributeInstance(GenericAttributes.maxHealth).getValue();
+     }
+ 
++    // TacoSpigot start - deobfuscation helper
++    public int getArrowsStuck() {
++        return this.bv();
++    }
++    // TacoSpigot end
+     public final int bv() {
+         return this.datawatcher.getByte(9);
+     }
+ 
++
++    // TacoSpigot start - deobfuscation helper
++    public void setArrowsStuck(int i) {
++        this.o(i);
++    }
++    // TacoSpigot end
+     public final void o(int i) {
+         this.datawatcher.watch(9, Byte.valueOf((byte) i));
+     }
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
+index 3e3a0480..c2d3866a 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
+@@ -11,7 +11,6 @@ import net.minecraft.server.DamageSource;
+ import net.minecraft.server.EntityArmorStand;
+ import net.minecraft.server.EntityArrow;
+ import net.minecraft.server.EntityEgg;
+-import net.minecraft.server.EntityEnderDragon;
+ import net.minecraft.server.EntityEnderPearl;
+ import net.minecraft.server.EntityFishingHook;
+ import net.minecraft.server.EntityHuman;
+@@ -502,4 +501,16 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
+     public void _INVALID_setMaxHealth(int health) {
+         setMaxHealth(health);
+     }
++
++    // TacoSpigot start
++    @Override
++    public int getArrowsStuck() {
++        return getHandle().getArrowsStuck();
++    }
++
++    @Override
++    public void setArrowsStuck(int arrows) {
++        getHandle().setArrowsStuck(arrows);
++    }
++    // TacoSpigot end
+ }
+-- 
+2.35.3.windows.1
+

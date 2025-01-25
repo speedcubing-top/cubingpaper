@@ -1,0 +1,21 @@
+From 8de36ae50341a62f3e1b4c143e79f49da328fc8e Mon Sep 17 00:00:00 2001
+From: RoccoDev <hey@rocco.dev>
+Date: Mon, 10 May 2021 21:34:04 +0200
+Subject: [PATCH] Fix update packet not being sent on right click
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index dd69a0c8..46d3d7e5 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -784,6 +784,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+         if (itemstack != null && itemstack.count == 0) {
+             this.player.inventory.items[this.player.inventory.itemInHandIndex] = null;
+             itemstack = null;
++            always = true; // KigPaper - send update packet
+         }
+ 
+         if (itemstack == null || itemstack.l() == 0) {
+-- 
+2.35.3.windows.1
+

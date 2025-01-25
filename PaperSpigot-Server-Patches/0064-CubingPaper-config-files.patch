@@ -1,0 +1,278 @@
+From 41241c3eb7b426dcb4b776998fdfdb6943b0cbed Mon Sep 17 00:00:00 2001
+From: speedcubing <git@speedcubing.top>
+Date: Fri, 24 Jan 2025 00:38:32 +0800
+Subject: [PATCH] CubingPaper config files
+
+
+diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
+index 36d75d61..524e8095 100644
+--- a/src/main/java/net/minecraft/server/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/DedicatedServer.java
+@@ -169,6 +169,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+             org.github.paperspigot.PaperSpigotConfig.init((File) options.valueOf("paper-settings"));
+             org.github.paperspigot.PaperSpigotConfig.registerCommands();
+             // PaperSpigot end
++            top.speedcubing.cubingpaper.CubingPaperConfig.init((File)  options.valueOf("cubing-settings")); // CubingPaper
+ 
+             DedicatedServer.LOGGER.info("Generating keypair");
+             this.a(MinecraftEncryption.b());
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index d06f0d04..fdfde77e 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -163,6 +163,8 @@ public abstract class World implements IBlockAccess {
+ 
+     public final org.github.paperspigot.PaperSpigotWorldConfig paperSpigotConfig; // PaperSpigot
+ 
++    public final top.speedcubing.cubingpaper.CubingPaperWorldConfig cubingPaperConfig; // CubingPaper
++
+     public final co.aikar.timings.WorldTimingsHandler timings; // Spigot
+     public final net.techcable.tacospigot.TacoSpigotWorldConfig tacoSpigotConfig;
+ 
+@@ -182,6 +184,7 @@ public abstract class World implements IBlockAccess {
+         this.spigotConfig = new org.spigotmc.SpigotWorldConfig( worlddata.getName() ); // Spigot
+         this.paperSpigotConfig = new org.github.paperspigot.PaperSpigotWorldConfig( worlddata.getName() ); // PaperSpigot
+         this.tacoSpigotConfig = new net.techcable.tacospigot.TacoSpigotWorldConfig(worlddata.getName()); // TacoSpigot
++        this.cubingPaperConfig = new top.speedcubing.cubingpaper.CubingPaperWorldConfig(worlddata.getName()); // CubingPaper
+         this.generator = gen;
+         this.world = new CraftWorld((WorldServer) this, gen, env);
+         this.ticksPerAnimalSpawns = this.getServer().getTicksPerAnimalSpawns(); // CraftBukkit
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index b39900a2..4ae93a2e 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -715,6 +715,7 @@ public final class CraftServer implements Server {
+         org.spigotmc.SpigotConfig.init((File) console.options.valueOf("spigot-settings")); // Spigot
+         org.github.paperspigot.PaperSpigotConfig.init((File) console.options.valueOf("paper-settings")); // PaperSpigot
+         net.techcable.tacospigot.TacoSpigotConfig.init((File) console.options.valueOf("taco-settings")); // TacoSpigot
++        top.speedcubing.cubingpaper.CubingPaperConfig.init((File) console.options.valueOf("cubing-settings")); // CubingPaper
+         for (WorldServer world : console.worlds) {
+             world.worldData.setDifficulty(difficulty);
+             world.setSpawnFlags(monsters, animals);
+@@ -732,6 +733,7 @@ public final class CraftServer implements Server {
+             world.spigotConfig.init(); // Spigot
+             world.paperSpigotConfig.init(); // PaperSpigot
+             world.tacoSpigotConfig.init(); // TacoSpigot
++            world.cubingPaperConfig.init(); // CubingPaper
+         }
+ 
+         pluginManager.clearPlugins();
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index 984e31a1..780b2a5d 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -138,6 +138,14 @@ public class Main {
+                         .defaultsTo(new File("taco.yml"))
+                         .describedAs("Yml file");
+                 // TacoSpigot end
++
++                // CubingPaper start
++                acceptsAll(asList("cubing", "cubing-settings"), "File for cubingpaper settings")
++                        .withRequiredArg()
++                        .ofType(File.class)
++                        .defaultsTo(new File("cubing.yml"))
++                        .describedAs("Yml file");
++                // CubingPaper end
+             }
+         };
+ 
+diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+new file mode 100644
+index 00000000..28591b52
+--- /dev/null
++++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+@@ -0,0 +1,109 @@
++package top.speedcubing.cubingpaper;
++
++import com.google.common.base.Throwables;
++import java.io.File;
++import java.io.IOException;
++import java.lang.reflect.InvocationTargetException;
++import java.lang.reflect.Method;
++import java.lang.reflect.Modifier;
++import java.util.List;
++import java.util.logging.Level;
++import org.bukkit.Bukkit;
++import org.bukkit.configuration.InvalidConfigurationException;
++import org.bukkit.configuration.file.YamlConfiguration;
++
++public class CubingPaperConfig {
++
++    private static File CONFIG_FILE;
++    private static final String HEADER = "This is the main configuration file for CubingPaper.\n"
++            + "As you can see, there's tons to configure. Some options may impact gameplay, so use\n"
++            + "with caution, and make sure you know what each option does before configuring.\n"
++            + "\n"
++            + "If you need help with the configuration or have any questions related to CubingPaper,\n"
++            + "join us at the Discord.\n"
++            + "\n"
++            + "Discord: https://speedcubing.top/discord\n";
++    /*========================================================================*/
++    public static YamlConfiguration config;
++    static int version;
++    /*========================================================================*/
++
++    public static void init(File configFile) {
++        CONFIG_FILE = configFile;
++        config = new YamlConfiguration();
++        try {
++            config.load(CONFIG_FILE);
++        } catch (IOException ex) {
++        } catch (InvalidConfigurationException ex) {
++            Bukkit.getLogger().log(Level.SEVERE, "Could not load cubing.yml, please correct your syntax errors", ex);
++            throw Throwables.propagate(ex);
++        }
++        config.options().header(HEADER);
++        config.options().copyDefaults(true);
++
++        version = getInt("config-version", 9);
++        set("config-version", 9);
++        readConfig(CubingPaperConfig.class, null);
++    }
++
++    static void readConfig(Class<?> clazz, Object instance) {
++        java.util.TreeSet<Method> methods = new java.util.TreeSet<>(java.util.Comparator.comparing(Method::getName));
++        for (Method method : clazz.getDeclaredMethods()) {
++            if (Modifier.isPrivate(method.getModifiers())) {
++                if (method.getParameterTypes().length == 0 && method.getReturnType() == Void.TYPE) {
++                    methods.add(method);
++                }
++            }
++        }
++        for (Method method : methods) {
++            try {
++                method.setAccessible(true);
++                method.invoke(instance);
++            } catch (InvocationTargetException ex) {
++                throw Throwables.propagate(ex.getCause());
++            } catch (Exception ex) {
++                Bukkit.getLogger().log(Level.SEVERE, "Error invoking " + method, ex);
++            }
++        }
++
++        try {
++            config.save(CONFIG_FILE);
++        } catch (IOException ex) {
++            Bukkit.getLogger().log(Level.SEVERE, "Could not save " + CONFIG_FILE, ex);
++        }
++    }
++
++    private static void set(String path, Object val) {
++        config.set(path, val);
++    }
++
++    private static boolean getBoolean(String path, boolean def) {
++        config.addDefault(path, def);
++        return config.getBoolean(path, config.getBoolean(path));
++    }
++
++    private static double getDouble(String path, double def) {
++        config.addDefault(path, def);
++        return config.getDouble(path, config.getDouble(path));
++    }
++
++    private static float getFloat(String path, float def) {
++        config.addDefault(path, def);
++        return (float) getDouble(path, (double) def);
++    }
++
++    private static int getInt(String path, int def) {
++        config.addDefault(path, def);
++        return config.getInt(path, config.getInt(path));
++    }
++
++    private static <T> List getList(String path, T def) {
++        config.addDefault(path, def);
++        return (List<T>) config.getList(path, config.getList(path));
++    }
++
++    private static String getString(String path, String def) {
++        config.addDefault(path, def);
++        return config.getString(path, config.getString(path));
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperWorldConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperWorldConfig.java
+new file mode 100644
+index 00000000..867567fb
+--- /dev/null
++++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperWorldConfig.java
+@@ -0,0 +1,75 @@
++package top.speedcubing.cubingpaper;
++
++import java.util.List;
++import org.bukkit.Bukkit;
++import org.bukkit.configuration.file.YamlConfiguration;
++
++public class CubingPaperWorldConfig
++{
++
++    private final String worldName;
++    private final YamlConfiguration config;
++    private boolean verbose;
++
++    public CubingPaperWorldConfig(String worldName)
++    {
++        this.worldName = worldName;
++        this.config = CubingPaperConfig.config;
++        init();
++    }
++
++    public void init()
++    {
++        this.verbose = getBoolean( "verbose", true );
++
++        log( "-------- World Settings For [" + worldName + "] --------" );
++        CubingPaperConfig.readConfig( CubingPaperWorldConfig.class, this );
++    }
++
++    private void log(String s)
++    {
++        if ( verbose )
++        {
++            Bukkit.getLogger().info( s );
++        }
++    }
++
++    private void set(String path, Object val)
++    {
++        config.set( "world-settings.default." + path, val );
++    }
++
++    private boolean getBoolean(String path, boolean def)
++    {
++        config.addDefault( "world-settings.default." + path, def );
++        return config.getBoolean( "world-settings." + worldName + "." + path, config.getBoolean( "world-settings.default." + path ) );
++    }
++
++    private double getDouble(String path, double def)
++    {
++        config.addDefault( "world-settings.default." + path, def );
++        return config.getDouble( "world-settings." + worldName + "." + path, config.getDouble( "world-settings.default." + path ) );
++    }
++
++    private int getInt(String path, int def)
++    {
++        config.addDefault( "world-settings.default." + path, def );
++        return config.getInt( "world-settings." + worldName + "." + path, config.getInt( "world-settings.default." + path ) );
++    }
++
++    private float getFloat(String path, float def) {
++        config.addDefault("world-settings.default." + path, def);
++        return (float) getDouble( path, (double) def );
++    }
++
++    private <T> List getList(String path, T def) {
++        config.addDefault( "world-settings.default." + path, def );
++        return (List<T>) config.getList( "world-settings." + worldName + "." + path, config.getList( "world-settings.default." + path ) );
++    }
++
++    private String getString(String path, String def)
++    {
++        config.addDefault( "world-settings.default." + path, def );
++        return config.getString( "world-settings." + worldName + "." + path, config.getString( "world-settings.default." + path ) );
++    }
++}
+-- 
+2.35.3.windows.1
+

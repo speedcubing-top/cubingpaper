@@ -1,0 +1,63 @@
+From 8fbf256a2d47b736433e0418c34ba493c4deb2ab Mon Sep 17 00:00:00 2001
+From: LinsaFTW <25271111+linsaftw@users.noreply.github.com>
+Date: Fri, 22 Apr 2022 13:39:32 -0300
+Subject: [PATCH] Disconnect Spam Options
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 2aa3efcd..0c862db8 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -1049,7 +1049,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+             // Spigot end
+             // CraftBukkit start - replaced with thread safe throttle
+             // this.chatThrottle += 20;
+-            if (counted && chatSpamField.addAndGet(this, 20) > 200 && !this.minecraftServer.getPlayerList().isOp(this.player.getProfile())) { // Spigot
++            if (PaperSpigotConfig.disconnectSpam && counted && chatSpamField.addAndGet(this, PaperSpigotConfig.disconnectSpamAddition) > 200 && !this.minecraftServer.getPlayerList().isOp(this.player.getProfile())) { // Spigot
+                 if (!isSync) {
+                     Waitable waitable = new Waitable() {
+                         @Override
+@@ -1068,7 +1068,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+                     } catch (ExecutionException e) {
+                         throw new RuntimeException(e);
+                     }
+-                } else {
++                } else if (PaperSpigotConfig.disconnectSpam) {
+                     this.disconnect("disconnect.spam");
+                 }
+                 // CraftBukkit end
+@@ -1951,7 +1951,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+     public void a(PacketPlayInTabComplete packetplayintabcomplete) {
+         PlayerConnectionUtils.ensureMainThread(packetplayintabcomplete, this, this.player.u());
+         // CraftBukkit start
+-        if (chatSpamField.addAndGet(this, 10) > 500 && !this.minecraftServer.getPlayerList().isOp(this.player.getProfile())) {
++        if (PaperSpigotConfig.disconnectSpam && chatSpamField.addAndGet(this, PaperSpigotConfig.disconnectSpamAddition) > 500 && !this.minecraftServer.getPlayerList().isOp(this.player.getProfile())) {
+             this.disconnect("disconnect.spam");
+             return;
+         }
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
+index 0f5bb5f2..1e31600b 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
+@@ -180,6 +180,18 @@ public class PaperSpigotConfig
+         warnForExcessiveVelocity = getBoolean("warnWhenSettingExcessiveVelocity", true);
+     }
+ 
++    public static boolean disconnectSpam;
++    private static void disconnectSpam()
++    {
++        disconnectSpam = getBoolean("disconnect-spam.enabled", true);
++    }
++
++    public static int disconnectSpamAddition;
++    private static void disconnectSpamAddition()
++    {
++        disconnectSpamAddition = getInt("disconnect-spam.addition", 5);
++    }
++
+     public static int bookMaxPages;
+     private static void bookMaxPages()
+     {
+-- 
+2.35.3.windows.1
+

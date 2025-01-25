@@ -1,0 +1,22 @@
+From 75b4e8111f7a018cdf76bad60ae60ae8bf146c4f Mon Sep 17 00:00:00 2001
+From: LinsaFTW <25271111+linsaftw@users.noreply.github.com>
+Date: Thu, 24 Mar 2022 03:57:32 -0300
+Subject: [PATCH] Dont check occluding hoppers
+
+
+diff --git a/src/main/java/net/minecraft/server/TileEntityHopper.java b/src/main/java/net/minecraft/server/TileEntityHopper.java
+index 4d7f1608..007d8d94 100644
+--- a/src/main/java/net/minecraft/server/TileEntityHopper.java
++++ b/src/main/java/net/minecraft/server/TileEntityHopper.java
+@@ -612,7 +612,7 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
+             }
+         }
+ 
+-        if (object == null) {
++        if (object == null && !org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(block).isOccluding()) {
+             List list = world.a((Entity) null, new AxisAlignedBB(d0 - 0.5D, d1 - 0.5D, d2 - 0.5D, d0 + 0.5D, d1 + 0.5D, d2 + 0.5D), IEntitySelector.c);
+ 
+             if (list.size() > 0) {
+-- 
+2.35.3.windows.1
+

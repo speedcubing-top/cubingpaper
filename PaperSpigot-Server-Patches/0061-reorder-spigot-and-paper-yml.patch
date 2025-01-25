@@ -1,0 +1,60 @@
+From ac7364ed90db667417f37245fba6e5f38f103e60 Mon Sep 17 00:00:00 2001
+From: speedcubing <git@speedcubing.top>
+Date: Fri, 17 Jan 2025 18:40:09 +0800
+Subject: [PATCH] reorder spigot and paper yml
+
+
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
+index a86d99b8..c866a4d2 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
+@@ -72,12 +72,20 @@ public class PaperSpigotConfig
+ 
+     static void readConfig(Class<?> clazz, Object instance)
+     {
++        java.util.TreeSet<Method> methods = new java.util.TreeSet<>(java.util.Comparator.comparing(Method::getName));
+         for ( Method method : clazz.getDeclaredMethods() )
+         {
+             if ( Modifier.isPrivate( method.getModifiers() ) )
+             {
+                 if ( method.getParameterTypes().length == 0 && method.getReturnType() == Void.TYPE )
+                 {
++                    // CubingPaper start
++                    methods.add(method);
++                }
++            }
++        }
++        for(Method method : methods) {{{
++            // CubingPaper end
+                     try
+                     {
+                         method.setAccessible( true );
+diff --git a/src/main/java/org/spigotmc/SpigotConfig.java b/src/main/java/org/spigotmc/SpigotConfig.java
+index f7c99452..a46845c3 100644
+--- a/src/main/java/org/spigotmc/SpigotConfig.java
++++ b/src/main/java/org/spigotmc/SpigotConfig.java
+@@ -100,12 +100,21 @@ public class SpigotConfig
+ 
+     static void readConfig(Class<?> clazz, Object instance)
+     {
++        // CubingPaper
++        java.util.TreeSet<Method> methods = new java.util.TreeSet<>(java.util.Comparator.comparing(Method::getName));
+         for ( Method method : clazz.getDeclaredMethods() )
+         {
+             if ( Modifier.isPrivate( method.getModifiers() ) )
+             {
+                 if ( method.getParameterTypes().length == 0 && method.getReturnType() == Void.TYPE )
+                 {
++                    // CubingPaper start
++                    methods.add(method);
++                }
++            }
++        }
++        for(Method method : methods) {{{
++            // CubingPaper end
+                     try
+                     {
+                         method.setAccessible( true );
+-- 
+2.35.3.windows.1
+

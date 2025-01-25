@@ -1,0 +1,57 @@
+From 7e57a037a0d4f4c733eb0c6c98a232c04ee02b85 Mon Sep 17 00:00:00 2001
+From: speedcubing <git@speedcubing.top>
+Date: Fri, 24 Jan 2025 01:50:20 +0800
+Subject: [PATCH] FlamePaper 0027 Option for map decorators
+
+
+diff --git a/src/main/java/net/minecraft/server/WorldMap.java b/src/main/java/net/minecraft/server/WorldMap.java
+index 9bf89d50..aa5c772a 100644
+--- a/src/main/java/net/minecraft/server/WorldMap.java
++++ b/src/main/java/net/minecraft/server/WorldMap.java
+@@ -148,6 +148,10 @@ public class WorldMap extends PersistentBase {
+             this.decorations.remove(entityhuman.getUniqueID()); // Spigot
+         }
+ 
++        // FlamePaper - Option for map decorations
++        boolean allowDecorations = org.github.paperspigot.PaperSpigotConfig.allowMapDecorations;
++
++        if (allowDecorations) // FlamePaper - Option for map decorations
+         for (int i = 0; i < this.g.size(); ++i) {
+             WorldMap.WorldMapHumanTracker worldmap_worldmaphumantracker1 = (WorldMap.WorldMapHumanTracker) this.g.get(i);
+ 
+@@ -161,6 +165,7 @@ public class WorldMap extends PersistentBase {
+             }
+         }
+ 
++        if (allowDecorations) // FlamePaper - Option for map decorations
+         if (itemstack.y()) {
+             EntityItemFrame entityitemframe = itemstack.z();
+             BlockPosition blockposition = entityitemframe.getBlockPosition();
+@@ -168,6 +173,7 @@ public class WorldMap extends PersistentBase {
+             this.a(1, entityhuman.world, UUID.nameUUIDFromBytes(("frame-" + entityitemframe.getId()).getBytes(Charsets.US_ASCII)), (double) blockposition.getX(), (double) blockposition.getZ(), (double) (entityitemframe.direction.b() * 90)); // Spigot
+         }
+ 
++        if (allowDecorations) // FlamePaper - Option for map decorations
+         if (itemstack.hasTag() && itemstack.getTag().hasKeyOfType("Decorations", 9)) {
+             NBTTagList nbttaglist = itemstack.getTag().getList("Decorations", 10);
+ 
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
+index 48876924..2153682f 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
+@@ -186,6 +186,12 @@ public class PaperSpigotConfig
+         bookMaxPages = getInt("book.max_pages", 5);
+     }
+     
++    public static boolean allowMapDecorations;
++    private static void allowMapDecorations()
++    {
++        allowMapDecorations = getBoolean("allow-map-decorations", false);
++    }
++
+     public static double knockbackFriction;
+     public static double knockbackHorizontal;
+     public static double knockbackVertical;
+-- 
+2.35.3.windows.1
+

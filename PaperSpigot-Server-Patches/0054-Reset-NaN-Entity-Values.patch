@@ -1,0 +1,39 @@
+From a8a7d1629b1e6534c17e047c03a9e79f287492ed Mon Sep 17 00:00:00 2001
+From: LinsaFTW <25271111+linsaftw@users.noreply.github.com>
+Date: Fri, 13 Jan 2023 17:02:17 -0300
+Subject: [PATCH] Reset NaN Entity Values
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 5d37fb8d..d987e016 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -1237,6 +1237,12 @@ public abstract class Entity implements ICommandListener {
+ 
+     public void e(NBTTagCompound nbttagcompound) {
+         try {
++            // FlamePaper start - Reset NaN Entity Values
++            if (Double.isNaN(locX)) this.locX = 0;
++            if (Double.isNaN(locY)) this.locY = 0;
++            if (Double.isNaN(locZ)) this.locZ = 0;
++            // FlamePaper start - Reset NaN Entity Values
++
+             nbttagcompound.set("Pos", this.a(new double[] { this.locX, this.locY, this.locZ}));
+             nbttagcompound.set("Motion", this.a(new double[] { this.motX, this.motY, this.motZ}));
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index 5acaf93f..0f124d75 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -1374,7 +1374,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+ 
+     @Override
+     public double getHealth() {
+-        return health;
++        return Double.isNaN(health) ? 0.0D : health; // FlamePaper - Reset NaN Entity Values
+     }
+ 
+     public void setRealHealth(double health) {
+-- 
+2.35.3.windows.1
+

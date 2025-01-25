@@ -1,0 +1,73 @@
+From 6582ae9c210e8f326c2f0cc290c6e761c8932b8c Mon Sep 17 00:00:00 2001
+From: LinsaFTW <25271111+linsaftw@users.noreply.github.com>
+Date: Sat, 26 Jun 2021 11:31:33 -0300
+Subject: [PATCH] Pearl through blocks
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityEnderPearl.java b/src/main/java/net/minecraft/server/EntityEnderPearl.java
+index 319c0bc6..2c94ae15 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderPearl.java
++++ b/src/main/java/net/minecraft/server/EntityEnderPearl.java
+@@ -6,6 +6,10 @@ import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.event.player.PlayerTeleportEvent;
+ // CraftBukkit end
+ 
++import org.github.paperspigot.PaperSpigotConfig;
++
++import net.minecraft.server.BlockPosition;
++
+ public class EntityEnderPearl extends EntityProjectile {
+ 
+     private EntityLiving c;
+@@ -38,6 +42,21 @@ public class EntityEnderPearl extends EntityProjectile {
+         }
+         // PaperSpigot end
+ 
++        BlockPosition blockPosition = movingobjectposition.a();
++
++        if (blockPosition != null) {
++            IBlockData blockData = world.getType(blockPosition);
++            Block block = blockData.getBlock();
++            boolean collides = 
++                PaperSpigotConfig.pearlPassthroughTripwire && block == Blocks.TRIPWIRE
++                || PaperSpigotConfig.pearlPassthroughFenceGate && block == Blocks.FENCE_GATE && ((Boolean) blockData.get(BlockFenceGate.OPEN)).booleanValue()
++                || PaperSpigotConfig.pearlPassthroughSlab && (block == Blocks.STONE_SLAB || block == Blocks.WOODEN_SLAB || block == Blocks.STONE_SLAB2);
++
++            if (collides) {
++                return;
++            }
++        }
++
+         for (int i = 0; i < 32; ++i) {
+             this.world.addParticle(EnumParticle.PORTAL, this.locX, this.locY + this.random.nextDouble() * 2.0D, this.locZ, this.random.nextGaussian(), 0.0D, this.random.nextGaussian(), new int[0]);
+         }
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
+index f88deb3f..de13fb1d 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
+@@ -185,4 +185,22 @@ public class PaperSpigotConfig
+     {
+         bookMaxPages = getInt("book.max_pages", 5);
+     }
++    
++    public static boolean pearlPassthroughFenceGate;
++    private static void pearlPassthroughFenceGate()
++    {
++        pearlPassthroughFenceGate = getBoolean( "pearl-passthrough.fence_gate", true );
++    }
++
++    public static boolean pearlPassthroughTripwire;
++    private static void pearlPassthroughTripwire()
++    {
++        pearlPassthroughTripwire = getBoolean( "pearl-passthrough.tripwire", true );
++    }
++
++    public static boolean pearlPassthroughSlab;
++    private static void pearlPassthroughSlab()
++    {
++        pearlPassthroughSlab = getBoolean( "pearl-passthrough.slab", true );
++    }
+ }
+-- 
+2.35.3.windows.1
+

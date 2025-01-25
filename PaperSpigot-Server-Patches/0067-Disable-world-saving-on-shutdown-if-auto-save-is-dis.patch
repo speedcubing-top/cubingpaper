@@ -1,0 +1,23 @@
+From c95593d0e86b8eaf8851f03a630d882ff95d741d Mon Sep 17 00:00:00 2001
+From: RoccoDev <roccodev.business@gmail.com>
+Date: Mon, 10 Aug 2020 11:43:26 +0200
+Subject: [PATCH] Disable world saving on shutdown if auto save is disabled
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index b3fc67b2..67de9e84 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -391,6 +391,9 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+                 // CraftBukkit end
+ 
+                 if (worldserver != null) {
++                    // KigPaper start - disable saving if !autoSave
++                    if(worldserver.savingDisabled) continue;
++                    // KigPaper end
+                     if (!flag) {
+                         MinecraftServer.LOGGER.info("Saving chunks for level \'" + worldserver.getWorldData().getName() + "\'/" + worldserver.worldProvider.getName());
+                     }
+-- 
+2.35.3.windows.1
+
