@@ -1,4 +1,4 @@
-From 8de36ae50341a62f3e1b4c143e79f49da328fc8e Mon Sep 17 00:00:00 2001
+From cdd3137c1928992cba74dde22e4bed2a2ce4b89a Mon Sep 17 00:00:00 2001
 From: RoccoDev <hey@rocco.dev>
 Date: Mon, 10 May 2021 21:34:04 +0200
 Subject: [PATCH] Fix update packet not being sent on right click
@@ -17,5 +17,5 @@ index dd69a0c8..46d3d7e5 100644
  
          if (itemstack == null || itemstack.l() == 0) {
 -- 
-2.35.3.windows.1
+2.35.1.windows.2
 

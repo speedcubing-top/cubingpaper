@@ -1,0 +1,62 @@
+From 869806fabc896b0108169bd2f66781fa33a2cedd Mon Sep 17 00:00:00 2001
+From: speedcubing <git@speedcubing.top>
+Date: Mon, 27 Jan 2025 10:38:45 +0800
+Subject: [PATCH] Paper 1.9.4 Optimize Chunk Access
+
+
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index 79322bd5..2712a2de 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -32,6 +32,7 @@ public class Chunk {
+     private boolean h;
+     public final World world;
+     public final int[] heightMap;
++	public final long chunkKey; // Paper
+     public final int locX;
+     public final int locZ;
+     private boolean k;
+@@ -141,6 +142,7 @@ public class Chunk {
+         this.world = world;
+         this.locX = i;
+         this.locZ = j;
++		this.chunkKey = org.bukkit.craftbukkit.util.LongHash.toLong(this.locX, this.locZ); // Paper
+         this.heightMap = new int[256];
+ 
+         for (int k = 0; k < this.entitySlices.length; ++k) {
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 9f434418..4fa2ffdd 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -41,7 +41,27 @@ public class ChunkProviderServer implements IChunkProvider {
+     public IChunkProvider chunkProvider;
+     private IChunkLoader chunkLoader;
+     public boolean forceChunkLoad = false; // CraftBukkit - true -> false
+-    public Long2ObjectMap<Chunk> chunks = new Long2ObjectOpenHashMap<Chunk>(4096, 0.5f); // TacoSpigot - use trove Long2ObjectOpenHashMap instead of craftbukkit implementation (using inital capacity and load factor chosen by Amaranth in an old impl)
++    // Paper start
++    protected Chunk lastChunkByPos = null;
++    public Long2ObjectOpenHashMap<Chunk> chunks = new Long2ObjectOpenHashMap<Chunk>(8192) {
++
++        @Override
++        public Chunk get(long key) {
++            if (lastChunkByPos != null && key == lastChunkByPos.chunkKey) {
++                return lastChunkByPos;
++            }
++            return lastChunkByPos = super.get(key);
++        }
++
++        @Override
++        public Chunk remove(long key) {
++            if (lastChunkByPos != null && key == lastChunkByPos.chunkKey) {
++                lastChunkByPos = null;
++            }
++            return super.remove(key);
++        }
++    }; // CraftBukkit
++    // Paper end
+     public WorldServer world;
+ 
+     public ChunkProviderServer(WorldServer worldserver, IChunkLoader ichunkloader, IChunkProvider ichunkprovider) {
+-- 
+2.35.1.windows.2
+
