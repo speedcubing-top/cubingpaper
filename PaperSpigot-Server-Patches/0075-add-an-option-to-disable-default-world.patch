@@ -1,0 +1,64 @@
+From 0104cc8d92db603958daf3c46252f391edfc80a7 Mon Sep 17 00:00:00 2001
+From: speedcubing <git@speedcubing.top>
+Date: Tue, 28 Jan 2025 19:01:27 +0800
+Subject: [PATCH] add an option to disable default world
+
+
+diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
+index 524e8095..b00299c2 100644
+--- a/src/main/java/net/minecraft/server/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/DedicatedServer.java
+@@ -252,6 +252,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+                 this.c((this.getMaxBuildHeight() + 8) / 16 * 16);
+                 this.c(MathHelper.clamp(this.getMaxBuildHeight(), 64, 256));
+                 this.propertyManager.setProperty("max-build-height", Integer.valueOf(this.getMaxBuildHeight()));
++                if(!top.speedcubing.cubingpaper.CubingPaperConfig.disableDefaultWorld) // CubingPaper
+                 DedicatedServer.LOGGER.info("Preparing level \"" + this.U() + "\"");
+                 this.a(this.U(), this.U(), k, worldtype, s2);
+                 long i1 = System.nanoTime() - j;
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 67de9e84..fa550d0b 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -231,6 +231,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+         */
+         int worldCount = 3;
+ 
++        if(!top.speedcubing.cubingpaper.CubingPaperConfig.disableDefaultWorld) // CubingPaper
+         for (int j = 0; j < worldCount; ++j) {
+             WorldServer world;
+             byte dimension = 0;
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 4ae93a2e..96016513 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -923,6 +923,11 @@ public final class CraftServer implements Server {
+             return null;
+         }
+ 
++        // CubingPaper - let the first loaded world save scoreboard and player files
++        if(top.speedcubing.cubingpaper.CubingPaperConfig.disableDefaultWorld && getScoreboardManager() == null) {
++            getServer().server.scoreboardManager = new org.bukkit.craftbukkit.scoreboard.CraftScoreboardManager(getServer(), internal.getScoreboard());
++            getServer().getPlayerList().setPlayerFileData(new WorldServer[]{internal});
++        }
+         internal.scoreboard = getScoreboardManager().getMainScoreboard().getHandle();
+ 
+         internal.tracker = new EntityTracker(internal);
+diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+index 28591b52..e94ec48b 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
++++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+@@ -106,4 +106,9 @@ public class CubingPaperConfig {
+         config.addDefault(path, def);
+         return config.getString(path, config.getString(path));
+     }
++
++    public static boolean disableDefaultWorld;
++    private static void disablePlayerDataSaving() {
++        disableDefaultWorld = getBoolean("disableDefaultWorld", false);
++    }
+ }
+\ No newline at end of file
+-- 
+2.35.1.windows.2
+

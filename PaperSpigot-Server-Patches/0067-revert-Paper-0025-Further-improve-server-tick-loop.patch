@@ -1,11 +1,11 @@
-From 4c944958e5545479a8665e3315ace8a8d0b2b53e Mon Sep 17 00:00:00 2001
+From ccfefd426b1f3028a10b56ae5d4d3b37d5568a07 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Fri, 17 Jan 2025 08:26:23 +0800
 Subject: [PATCH] revert-Paper-0025-Further-improve-server-tick-loop
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index e0742c04..f2b968c6 100644
+index 8d3da09f..5f93d6e5 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -111,11 +111,18 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
@@ -28,7 +28,7 @@ index e0742c04..f2b968c6 100644
  
      public MinecraftServer(OptionSet options, Proxy proxy, File file1) {
          io.netty.util.ResourceLeakDetector.setEnabled( false ); // Spigot - disable
-@@ -474,52 +481,10 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -477,52 +484,10 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
          this.isRunning = false;
      }
  
@@ -85,7 +85,7 @@ index e0742c04..f2b968c6 100644
      }
      // PaperSpigot End
   
-@@ -537,42 +502,29 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -540,42 +505,29 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
                  // PaperSpigot start - Further improve tick loop
                  Arrays.fill( recentTps, 20 );
                  //long lastTick = System.nanoTime(), catchupTime = 0, curTime, wait, tickSection = lastTick;
@@ -160,5 +160,5 @@ index 9607d5e8..e47d4063 100644
          // PaperSpigot end
  
 -- 
-2.35.3.windows.1
+2.35.1.windows.2
 

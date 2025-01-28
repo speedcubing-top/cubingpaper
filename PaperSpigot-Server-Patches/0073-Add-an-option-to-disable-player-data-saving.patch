@@ -1,4 +1,4 @@
-From 09bc87e60b2634b35214ad3caf8d661b9b1aad16 Mon Sep 17 00:00:00 2001
+From 9ca3479719e29e953798719b4e6c1d2d5318d7de Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Sat, 25 Jan 2025 03:13:33 +0800
 Subject: [PATCH] Add an option to disable player data saving

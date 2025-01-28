@@ -1,4 +1,4 @@
-From b51bdfb2dbf3276c5073547faa851562c96da736 Mon Sep 17 00:00:00 2001
+From 26d3923d470f03a4190a277988fc44c13d138bfa Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Sat, 25 Jan 2025 03:16:37 +0800
 Subject: [PATCH] Fix ghost block
@@ -12,7 +12,7 @@ we have code to patch ghost blocks
 (this is from https://github.com/refrainsclub)
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 942225b7..dd69a0c8 100644
+index 94fa2fbc..46d3d7e5 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -757,6 +757,10 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
@@ -27,5 +27,5 @@ index 942225b7..dd69a0c8 100644
              }
  
 -- 
-2.35.3.windows.1
+2.35.1.windows.2
 

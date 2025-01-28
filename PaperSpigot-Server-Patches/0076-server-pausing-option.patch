@@ -1,0 +1,102 @@
+From 4663b6920736cd06f4baa12364edb4da459745e3 Mon Sep 17 00:00:00 2001
+From: speedcubing <git@speedcubing.top>
+Date: Tue, 28 Jan 2025 22:12:51 +0800
+Subject: [PATCH] server pausing option
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index fa550d0b..7ed836a7 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -619,7 +619,41 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+ 
+     protected void z() {}
+ 
++    private int emptyTicks = 0;
+     protected void A() throws ExceptionWorldConflict { // CraftBukkit - added throws
++        // CubingPaper start - implement server sleep
++        org.spigotmc.WatchdogThread.tick(); // Spigot
++        int pauseWhenEmptySecondsTicks = top.speedcubing.cubingpaper.CubingPaperConfig.pauseWhenEmptySeconds * 20;
++        if (pauseWhenEmptySecondsTicks > 0) {
++            if (getPlayerList().getPlayerCount() == 0) {
++                ++this.emptyTicks;
++            } else {
++                this.emptyTicks = 0;
++            }
++            if (this.emptyTicks >= pauseWhenEmptySecondsTicks) {
++                if (this.emptyTicks == pauseWhenEmptySecondsTicks) {
++                    LOGGER.info("Server empty for {} seconds, pausing", top.speedcubing.cubingpaper.CubingPaperConfig.pauseWhenEmptySeconds);
++                    SpigotTimings.worldSaveTimer.startTiming(); // Spigot
++                    this.methodProfiler.a("save");
++                    this.v.savePlayers();
++                    server.playerCommandState = true;
++                    for (World world : worlds) {
++                        world.getWorld().save(false);
++                    }
++                    server.playerCommandState = false;
++                    this.methodProfiler.b();
++                    SpigotTimings.worldSaveTimer.stopTiming();
++                }
++
++                this.server.getScheduler().mainThreadHeartbeat();
++
++                // tick connections
++                this.aq().c();
++                ((DedicatedServer) this).aO();
++                return;
++            }
++        }
++        // CubingPaper end
+         co.aikar.timings.TimingsManager.FULL_SERVER_TICK.startTiming(); // Spigot
+         long i = System.nanoTime();
+ 
+@@ -679,7 +713,6 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+ 
+         this.methodProfiler.b();
+         this.methodProfiler.b();
+-        org.spigotmc.WatchdogThread.tick(); // Spigot
+         co.aikar.timings.TimingsManager.FULL_SERVER_TICK.stopTiming(); // Spigot
+     }
+ 
+@@ -701,7 +734,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+ 
+         SpigotTimings.bukkitSchedulerTimer.startTiming(); // Spigot
+         // CraftBukkit start
+-        this.server.getScheduler().mainThreadHeartbeat(this.ticks);
++        this.server.getScheduler().mainThreadHeartbeat();
+         SpigotTimings.bukkitSchedulerTimer.stopTiming(); // Spigot
+ 
+         // Run tasks that are waiting on processing
+diff --git a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
+index f036709c..aa3bb24b 100644
+--- a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
++++ b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
+@@ -334,8 +334,8 @@ public class CraftScheduler implements BukkitScheduler {
+     /**
+      * This method is designed to never block or wait for locks; an immediate execution of all current tasks.
+      */
+-    public void mainThreadHeartbeat(final int currentTick) {
+-        this.currentTick = currentTick;
++    public void mainThreadHeartbeat() {
++        this.currentTick++;
+         final List<CraftTask> temp = this.temp;
+         parsePending();
+         while (isReady(currentTick)) {
+diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+index e94ec48b..3381547d 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
++++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+@@ -111,4 +111,9 @@ public class CubingPaperConfig {
+     private static void disablePlayerDataSaving() {
+         disableDefaultWorld = getBoolean("disableDefaultWorld", false);
+     }
++
++    public static int pauseWhenEmptySeconds;
++    private static void pauseWhenEmptySeconds() {
++        pauseWhenEmptySeconds = getInt("pauseWhenEmptySeconds", 60);
++    }
+ }
+\ No newline at end of file
+-- 
+2.35.1.windows.2
+

@@ -1,4 +1,4 @@
-From 1c088cf0a1afde349e5c49705298f45e36f30bf4 Mon Sep 17 00:00:00 2001
+From 743ea7d195c741e711a8bc99cce9a0e2c9bfaae0 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Mon, 27 Jan 2025 10:08:13 +0800
 Subject: [PATCH] KigPaper 0138 Fix some more memory leaks

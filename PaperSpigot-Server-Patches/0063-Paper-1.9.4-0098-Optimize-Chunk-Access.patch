@@ -1,7 +1,7 @@
-From 869806fabc896b0108169bd2f66781fa33a2cedd Mon Sep 17 00:00:00 2001
+From f1493c05a49693776d2b5ee634879246001ee11f Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Mon, 27 Jan 2025 10:38:45 +0800
-Subject: [PATCH] Paper 1.9.4 Optimize Chunk Access
+Subject: [PATCH] Paper 1.9.4 0098 Optimize Chunk Access
 
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java

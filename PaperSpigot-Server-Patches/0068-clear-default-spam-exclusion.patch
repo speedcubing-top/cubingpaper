@@ -1,4 +1,4 @@
-From 60a496649f95adae7ae7ecba03201e8bd0cb9d8f Mon Sep 17 00:00:00 2001
+From c55889b3875a072c582be2eedfb5875ee42d3138 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Fri, 17 Jan 2025 08:27:12 +0800
 Subject: [PATCH] clear default spam exclusion
@@ -17,5 +17,5 @@ index b9d185d9..f7c99452 100644
      }
  
 -- 
-2.35.3.windows.1
+2.35.1.windows.2
 

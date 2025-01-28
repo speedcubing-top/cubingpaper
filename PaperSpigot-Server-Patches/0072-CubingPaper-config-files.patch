@@ -1,4 +1,4 @@
-From 41241c3eb7b426dcb4b776998fdfdb6943b0cbed Mon Sep 17 00:00:00 2001
+From ae4fa01175120b1dc2fa29e53f409561809ce840 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Fri, 24 Jan 2025 00:38:32 +0800
 Subject: [PATCH] CubingPaper config files
@@ -274,5 +274,5 @@ index 00000000..867567fb
 +    }
 +}
 -- 
-2.35.3.windows.1
+2.35.1.windows.2
 
