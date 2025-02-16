@@ -1,0 +1,22 @@
+From 56e37f60afbfb3845b1886fcbf7cff317055f6de Mon Sep 17 00:00:00 2001
+From: speedcubing <git@speedcubing.top>
+Date: Wed, 12 Feb 2025 23:23:45 +0800
+Subject: [PATCH] fix EntityInsentient goalTarget not being initialized
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
+index b351add9..871d748d 100644
+--- a/src/main/java/net/minecraft/server/EntityInsentient.java
++++ b/src/main/java/net/minecraft/server/EntityInsentient.java
+@@ -25,7 +25,7 @@ public abstract class EntityInsentient extends EntityLiving {
+     protected NavigationAbstract navigation;
+     public PathfinderGoalSelector goalSelector;
+     public PathfinderGoalSelector targetSelector;
+-    private WeakReference<EntityLiving> goalTarget; // KigPaper - wrap in WeakReference
++    private WeakReference<EntityLiving> goalTarget = new WeakReference<>(null); // KigPaper - wrap in WeakReference
+     private EntitySenses bk;
+     private ItemStack[] equipment = new ItemStack[5];
+     public float[] dropChances = new float[5];
+-- 
+2.35.3.windows.1
+
