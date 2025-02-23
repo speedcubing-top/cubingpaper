@@ -1,14 +1,14 @@
-From ab60a77f19279a3d552c273985ee10b3220c2ebe Mon Sep 17 00:00:00 2001
+From 6de8b6161db640af65cbd069dba34c0d49294cb0 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Fri, 17 Jan 2025 18:46:17 +0800
 Subject: [PATCH] gc on startup
 
 
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
-index ce06694b..36d75d61 100644
+index e35eb773..37af8980 100644
 --- a/src/main/java/net/minecraft/server/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/DedicatedServer.java
-@@ -257,6 +257,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -259,6 +259,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
                  String s3 = String.format("%.3fs", new Object[] { Double.valueOf((double) i1 / 1.0E9D)});
  
                  DedicatedServer.LOGGER.info("Done (" + s3 + ")! For help, type \"help\" or \"?\"");
@@ -17,5 +17,5 @@ index ce06694b..36d75d61 100644
                      DedicatedServer.LOGGER.info("Starting GS4 status listener");
                      this.m = new RemoteStatusListener(this);
 -- 
-2.35.1.windows.2
+2.35.3.windows.1
 

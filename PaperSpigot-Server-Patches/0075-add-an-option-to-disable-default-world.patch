@@ -1,14 +1,14 @@
-From 0104cc8d92db603958daf3c46252f391edfc80a7 Mon Sep 17 00:00:00 2001
+From 39c79124c6163e52acf33732c336438e3ab1555e Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Tue, 28 Jan 2025 19:01:27 +0800
 Subject: [PATCH] add an option to disable default world
 
 
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
-index 524e8095..b00299c2 100644
+index 451428d8..d62cabc8 100644
 --- a/src/main/java/net/minecraft/server/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/DedicatedServer.java
-@@ -252,6 +252,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+@@ -254,6 +254,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
                  this.c((this.getMaxBuildHeight() + 8) / 16 * 16);
                  this.c(MathHelper.clamp(this.getMaxBuildHeight(), 64, 256));
                  this.propertyManager.setProperty("max-build-height", Integer.valueOf(this.getMaxBuildHeight()));
@@ -17,10 +17,10 @@ index 524e8095..b00299c2 100644
                  this.a(this.U(), this.U(), k, worldtype, s2);
                  long i1 = System.nanoTime() - j;
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 67de9e84..fa550d0b 100644
+index 72588b0b..5841e9ff 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -231,6 +231,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -253,6 +253,7 @@ public abstract class MinecraftServer extends dev._2lstudios.flamepaper.tickloop
          */
          int worldCount = 3;
  
@@ -29,7 +29,7 @@ index 67de9e84..fa550d0b 100644
              WorldServer world;
              byte dimension = 0;
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 4ae93a2e..96016513 100644
+index 6a6ad13e..3394b1dd 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -923,6 +923,11 @@ public final class CraftServer implements Server {
@@ -45,7 +45,7 @@ index 4ae93a2e..96016513 100644
  
          internal.tracker = new EntityTracker(internal);
 diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
-index 28591b52..e94ec48b 100644
+index 28591b52..cc7d1b5a 100644
 --- a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
 +++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
 @@ -106,4 +106,9 @@ public class CubingPaperConfig {
@@ -54,11 +54,11 @@ index 28591b52..e94ec48b 100644
      }
 +
 +    public static boolean disableDefaultWorld;
-+    private static void disablePlayerDataSaving() {
++    private static void disableDefaultWorld() {
 +        disableDefaultWorld = getBoolean("disableDefaultWorld", false);
 +    }
  }
 \ No newline at end of file
 -- 
-2.35.1.windows.2
+2.35.3.windows.1
 

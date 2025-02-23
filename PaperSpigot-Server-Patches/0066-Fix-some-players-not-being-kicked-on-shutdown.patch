@@ -1,4 +1,4 @@
-From 9b5e84f54a88ca3ee5ab6b945969e6ec7bd1e786 Mon Sep 17 00:00:00 2001
+From f3f4a3f88c43760349983a9295f83fbc46ed9638 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Tue, 29 Mar 2016 20:19:20 -0400
 Subject: [PATCH] Fix some players not being kicked on shutdown
@@ -23,5 +23,5 @@ index 9e97fda0..876e9048 100644
      }
  
 -- 
-2.35.1.windows.2
+2.35.3.windows.1
 

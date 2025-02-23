@@ -1,4 +1,4 @@
-From f1493c05a49693776d2b5ee634879246001ee11f Mon Sep 17 00:00:00 2001
+From f4a0e3421261fba3dcc817792c0429d360ee9c44 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Mon, 27 Jan 2025 10:38:45 +0800
 Subject: [PATCH] Paper 1.9.4 0098 Optimize Chunk Access
@@ -58,5 +58,5 @@ index 9f434418..4fa2ffdd 100644
  
      public ChunkProviderServer(WorldServer worldserver, IChunkLoader ichunkloader, IChunkProvider ichunkprovider) {
 -- 
-2.35.1.windows.2
+2.35.3.windows.1
 

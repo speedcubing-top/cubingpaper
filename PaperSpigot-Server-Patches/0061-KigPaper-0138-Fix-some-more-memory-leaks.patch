@@ -1,4 +1,4 @@
-From 743ea7d195c741e711a8bc99cce9a0e2c9bfaae0 Mon Sep 17 00:00:00 2001
+From 5f2e8a049535d7cbd36c9d0d52d0aa6495a31963 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Mon, 27 Jan 2025 10:08:13 +0800
 Subject: [PATCH] KigPaper 0138 Fix some more memory leaks
@@ -83,5 +83,5 @@ index c8eebf8c..0bcd1fc0 100644
          } else {
              this.a.a(1);
 -- 
-2.35.1.windows.2
+2.35.3.windows.1
 

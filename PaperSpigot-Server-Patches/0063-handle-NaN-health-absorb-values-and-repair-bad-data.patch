@@ -1,4 +1,4 @@
-From 8163d10cc0c40e8f0e2ad269b51705ff1340437e Mon Sep 17 00:00:00 2001
+From b499788103af027658627dee400aec458dccc5fd Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Sun, 27 Sep 2015 01:18:02 -0400
 Subject: [PATCH] handle NaN health/absorb values and repair bad data
@@ -56,5 +56,5 @@ index 0f124d75..74547106 100644
      }
  
 -- 
-2.35.1.windows.2
+2.35.3.windows.1
 

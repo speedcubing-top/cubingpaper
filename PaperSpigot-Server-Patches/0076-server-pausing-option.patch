@@ -1,19 +1,20 @@
-From 4663b6920736cd06f4baa12364edb4da459745e3 Mon Sep 17 00:00:00 2001
+From bfc9047448840572c5288c511de3372cd51285b7 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
-Date: Tue, 28 Jan 2025 22:12:51 +0800
+Date: Mon, 24 Feb 2025 04:01:21 +0800
 Subject: [PATCH] server pausing option
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index fa550d0b..7ed836a7 100644
+index 5841e9ff..c753a2b3 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -619,7 +619,41 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -759,8 +759,42 @@ public abstract class MinecraftServer extends dev._2lstudios.flamepaper.tickloop
  
      protected void z() {}
  
 +    private int emptyTicks = 0;
-     protected void A() throws ExceptionWorldConflict { // CraftBukkit - added throws
+     // FlamePaper start - Modern tick loop
+     protected void A(java.util.function.BooleanSupplier shouldKeepTicking) throws ExceptionWorldConflict { // CraftBukkit - added throws
 +        // CubingPaper start - implement server sleep
 +        org.spigotmc.WatchdogThread.tick(); // Spigot
 +        int pauseWhenEmptySecondsTicks = top.speedcubing.cubingpaper.CubingPaperConfig.pauseWhenEmptySeconds * 20;
@@ -49,8 +50,8 @@ index fa550d0b..7ed836a7 100644
 +        // CubingPaper end
          co.aikar.timings.TimingsManager.FULL_SERVER_TICK.startTiming(); // Spigot
          long i = System.nanoTime();
- 
-@@ -679,7 +713,6 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+         isOversleep = true;
+@@ -828,7 +862,6 @@ public abstract class MinecraftServer extends dev._2lstudios.flamepaper.tickloop
  
          this.methodProfiler.b();
          this.methodProfiler.b();
@@ -58,7 +59,7 @@ index fa550d0b..7ed836a7 100644
          co.aikar.timings.TimingsManager.FULL_SERVER_TICK.stopTiming(); // Spigot
      }
  
-@@ -701,7 +734,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -850,7 +883,7 @@ public abstract class MinecraftServer extends dev._2lstudios.flamepaper.tickloop
  
          SpigotTimings.bukkitSchedulerTimer.startTiming(); // Spigot
          // CraftBukkit start
@@ -68,7 +69,7 @@ index fa550d0b..7ed836a7 100644
  
          // Run tasks that are waiting on processing
 diff --git a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
-index f036709c..aa3bb24b 100644
+index f036709c..8ae0e48c 100644
 --- a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
 +++ b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
 @@ -334,8 +334,8 @@ public class CraftScheduler implements BukkitScheduler {
@@ -78,16 +79,16 @@ index f036709c..aa3bb24b 100644
 -    public void mainThreadHeartbeat(final int currentTick) {
 -        this.currentTick = currentTick;
 +    public void mainThreadHeartbeat() {
-+        this.currentTick++;
++        ++this.currentTick;
          final List<CraftTask> temp = this.temp;
          parsePending();
          while (isReady(currentTick)) {
 diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
-index e94ec48b..3381547d 100644
+index cc7d1b5a..40fb78a8 100644
 --- a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
 +++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
 @@ -111,4 +111,9 @@ public class CubingPaperConfig {
-     private static void disablePlayerDataSaving() {
+     private static void disableDefaultWorld() {
          disableDefaultWorld = getBoolean("disableDefaultWorld", false);
      }
 +
@@ -98,5 +99,5 @@ index e94ec48b..3381547d 100644
  }
 \ No newline at end of file
 -- 
-2.35.1.windows.2
+2.35.3.windows.1
 
