@@ -70,7 +70,7 @@ echo "[Build] Cloning Paper"
 
 if [ ! -d "Paper" ]; then
 
-  git clone -b ver/1.8.8 --single-branch https://github.com/PaperMC/Paper.git Paper
+  git clone -b ver/1.8.8 --single-branch https://github.com/PaperMC/Paper-archive.git Paper
   cd $basedir/Paper
   git checkout -b master
 
