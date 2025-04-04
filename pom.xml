@@ -33,19 +33,19 @@
             <url>https://repo.md-5.net/content/repositories/releases/</url>
         </repository>
         <repository>
-            <id>speedcubing-top</id>
+            <id>speedcubing-public</id>
             <url>https://repo.speedcubing.top/repository/maven-public/</url>
         </repository>
     </repositories>
 
     <distributionManagement>
         <repository>
-            <id>destroystokyo-releases</id>
-            <url>https://repo.destroystokyo.com/content/repositories/releases/</url>
+            <id>speedcubing-public-projects-release</id>
+            <url>https://repo.speedcubing.top/repository/maven-public-projects-release/</url>
         </repository>
         <snapshotRepository>
-            <id>destroystokyo-snapshots</id>
-            <url>https://repo.destroystokyo.com/content/repositories/snapshots/</url>
+            <id>speedcubing-public-projects-snapshot</id>
+            <url>https://repo.speedcubing.top/repository/maven-public-projects-snapshot/</url>
         </snapshotRepository>
     </distributionManagement>
 </project>
