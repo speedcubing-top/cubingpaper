@@ -13,7 +13,7 @@ Fork of https://github.com/PaperMC/Paper-archive/ -b ver/1.8.8
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/your-username/CubingPaper.git
+   git clone https://github.com/speedcubing-top/CubingPaper.git
    cd CubingPaper
    ```
 2. Run the build script:
