@@ -1,0 +1,27 @@
+From 16fbdf5e0f1f9ab657dbbd8f0be5c70132b5bcf2 Mon Sep 17 00:00:00 2001
+From: TheSpeedCubing <speedcubing@speedcubing.top>
+Date: Wed, 11 Jun 2025 14:58:20 +0800
+Subject: [PATCH] Let loadbefore * load before every single plugin
+
+
+diff --git a/src/main/java/org/bukkit/plugin/SimplePluginManager.java b/src/main/java/org/bukkit/plugin/SimplePluginManager.java
+index ce9839ec..8f3d49aa 100644
+--- a/src/main/java/org/bukkit/plugin/SimplePluginManager.java
++++ b/src/main/java/org/bukkit/plugin/SimplePluginManager.java
+@@ -298,6 +298,13 @@ public final class SimplePluginManager implements PluginManager {
+             }
+         }
+ 
++        // CubingPaper - let loadbefore * load before every single plugin
++        result.sort((a, b) -> {
++            boolean aLoadAll = a.getDescription().getLoadBefore().contains("*");
++            boolean bLoadAll = b.getDescription().getLoadBefore().contains("*");
++            return Boolean.compare(!aLoadAll, !bLoadAll);
++        });
++
+         return result.toArray(new Plugin[result.size()]);
+     }
+ 
+-- 
+2.35.3.windows.1
+
