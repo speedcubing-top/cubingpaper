@@ -2,15 +2,6 @@
 
 basedir=`pwd`
 
-
-# clone NMS
-echo "[Build] Cloning NMS"
-if [ ! -d "NMSClasses" ]; then
-  git clone https://github.com/speedcubing-top/NMSClasses.git
-else
-  echo "NMSClasses folder exists, skipped."
-fi
-
 # clone bukkit
 echo "[Build] Cloning Bukkit"
 if [ ! -d "Bukkit" ]; then
@@ -42,7 +33,7 @@ if [ ! -d "CraftBukkit" ]; then
   for patch in nms-patches/*.patch; do
     base_name=$(basename "$patch" .patch)
 
-    cp ../NMSClasses/net/minecraft/server/$base_name.java src/main/java/net/minecraft/server/$base_name.java
+    cp $basedir/work/decompile/net/minecraft/server/$base_name.java src/main/java/net/minecraft/server/$base_name.java
 
     echo "[CraftBukkit->NMS] Applying $base_name.patch"
     
