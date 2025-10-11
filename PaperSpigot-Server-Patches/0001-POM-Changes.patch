@@ -1,11 +1,11 @@
-From a79a641b748e76f86571be4ed7cb42524aa2a456 Mon Sep 17 00:00:00 2001
+From 2b7a752ca9cbc4c77f9ff61f644b9df246c3e71b Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Wed, 8 Jan 2025 18:35:56 +0800
 Subject: [PATCH] POM Changes
 
 
 diff --git a/pom.xml b/pom.xml
-index 644305e6..9695822a 100644
+index 644305e6..5799d9cd 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -1,17 +1,17 @@
@@ -61,7 +61,7 @@ index 644305e6..9695822a 100644
              <scope>compile</scope>
          </dependency>
          <dependency>
-@@ -57,28 +57,28 @@
+@@ -57,7 +57,7 @@
          <dependency>
              <groupId>net.sf.jopt-simple</groupId>
              <artifactId>jopt-simple</artifactId>
@@ -70,14 +70,7 @@ index 644305e6..9695822a 100644
              <type>jar</type>
              <scope>compile</scope>
          </dependency>
-         <dependency>
-             <groupId>jline</groupId>
-             <artifactId>jline</artifactId>
--            <version>2.12.1</version> <!-- Paper - Update Log4j - use this specific version as it works on both aarch64 and windows -->
-+            <version>2.14.6</version> <!-- Paper - Update Log4j - use this specific version as it works on both aarch64 and windows -->
-             <type>jar</type>
-             <scope>compile</scope>
-         </dependency>
+@@ -71,14 +71,14 @@
          <dependency>
              <groupId>org.xerial</groupId>
              <artifactId>sqlite-jdbc</artifactId>
@@ -107,5 +100,5 @@ index 644305e6..9695822a 100644
                      <execution>
                          <phase>package</phase>
 -- 
-2.35.3.windows.1
+2.39.5
 
