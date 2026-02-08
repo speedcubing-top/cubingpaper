@@ -10,6 +10,7 @@ Fork of https://github.com/PaperMC/Paper-archive/ -b ver/1.8.8
 - Maven 
 - curl 
 - jq
+- unzip
 
 ### Steps
 
