@@ -15,6 +15,11 @@ else
   echo "BuildData folder exists, skipped."
 fi
 
+if [ -d "work" ]; then
+    echo "work folder exists, skipped."
+    exit 0
+fi
+
 set -- $(jq -r '.minecraftVersion, .classMappings, .memberMappings, .accessTransforms, .packageMappings' BuildData/info.json)
 minecraftVersion=$1
 classMappings=$2
