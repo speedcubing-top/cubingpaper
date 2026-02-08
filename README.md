@@ -7,7 +7,9 @@ Fork of https://github.com/PaperMC/Paper-archive/ -b ver/1.8.8
 ### Requirements
 
 - JDK 8  
-- Maven
+- Maven 
+- curl 
+- jq
 
 ### Steps
 
