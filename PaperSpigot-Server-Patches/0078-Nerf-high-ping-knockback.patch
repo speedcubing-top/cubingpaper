@@ -1,0 +1,55 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Fri, 27 Mar 2026 12:00:00 +0800
+Subject: [PATCH] Nerf high-ping knockback
+
+Players with high ping can exploit knockback mechanics to gain unfair
+advantages. This patch adds a configurable option in cubing.yml to
+increase the knockback friction divisor for players whose ping exceeds a
+configurable threshold, reducing the effective knockback they receive.
+---
+ src/main/java/net/minecraft/server/EntityLiving.java     | 8 ++++++++
+ .../top/speedcubing/cubingpaper/CubingPaperConfig.java   | 9 +++++++++
+ 2 files changed, 17 insertions(+)
+
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index 58c47182..767556f0 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -912,6 +912,14 @@ public abstract class EntityLiving extends Entity {
+             // FlamePaper start - Customizable knockback
+             double magnitude = MathHelper.sqrt(d0 * d0 + d1 * d1);
+             double friction = PaperSpigotConfig.knockbackFriction;
++            // CubingPaper start - Nerf high-ping knockback
++            if (top.speedcubing.cubingpaper.CubingPaperConfig.nerfHighPingKnockback && this instanceof EntityPlayer) {
++                EntityPlayer player = (EntityPlayer) this;
++                if (player.ping >= top.speedcubing.cubingpaper.CubingPaperConfig.nerfHighPingKnockbackMinPing) {
++                    friction = top.speedcubing.cubingpaper.CubingPaperConfig.nerfHighPingKnockbackFriction;
++                }
++            }
++            // CubingPaper end - Nerf high-ping knockback
+             double horizontalKnockback = PaperSpigotConfig.knockbackHorizontal;
+             double verticalKnockback = PaperSpigotConfig.knockbackVertical;
+ 
+diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+index 40fb78a8..2a1fbce1 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
++++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+@@ -116,4 +116,13 @@ public class CubingPaperConfig {
+     private static void pauseWhenEmptySeconds() {
+         pauseWhenEmptySeconds = getInt("pauseWhenEmptySeconds", 60);
+     }
++
++    public static boolean nerfHighPingKnockback;
++    public static int nerfHighPingKnockbackMinPing;
++    public static double nerfHighPingKnockbackFriction;
++    private static void nerfHighPingKnockback() {
++        nerfHighPingKnockback = getBoolean("nerfHighPingKnockback.enabled", false);
++        nerfHighPingKnockbackMinPing = getInt("nerfHighPingKnockback.min-ping", 100);
++        nerfHighPingKnockbackFriction = getDouble("nerfHighPingKnockback.friction", 4.0);
++    }
+ }
+\ No newline at end of file
+-- 
+2.43.0
+
