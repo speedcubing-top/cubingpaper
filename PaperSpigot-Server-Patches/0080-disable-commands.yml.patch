@@ -1,0 +1,22 @@
+From c1baffdb731c8fe5066fe87a8fc590fc0e5ccd8e Mon Sep 17 00:00:00 2001
+From: speedcubing <speedcubing@speedcubing.top>
+Date: Fri, 8 May 2026 00:57:33 +0800
+Subject: [PATCH] disable commands.yml
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 3394b1dd..6d55ce74 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -277,6 +277,8 @@ public final class CraftServer implements Server {
+     }
+ 
+     private void saveCommandsConfig() {
++        // CubingPaper - disable commands.yml
++        if(false)
+         try {
+             commandsConfiguration.save(getCommandsConfigFile());
+         } catch (IOException ex) {
+-- 
+2.47.3
+
