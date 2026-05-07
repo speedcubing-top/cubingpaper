@@ -1,4 +1,4 @@
-From 01ff976dac2279be2aa202f7881df37dbfe064af Mon Sep 17 00:00:00 2001
+From 12b64e2225dfb8f9b54098cfb4a03596b1b31e80 Mon Sep 17 00:00:00 2001
 From: HaeImAlan <me@haeimalan.com>
 Date: Fri, 27 Mar 2026 12:00:00 +0800
 Subject: [PATCH] Nerf high-ping knockback
@@ -27,6 +27,19 @@ index 58c47182..767556f0 100644
              double horizontalKnockback = PaperSpigotConfig.knockbackHorizontal;
              double verticalKnockback = PaperSpigotConfig.knockbackVertical;
  
+diff --git a/src/main/java/org/bukkit/craftbukkit/help/HelpYamlReader.java b/src/main/java/org/bukkit/craftbukkit/help/HelpYamlReader.java
+index 60a6221b..69d213c2 100644
+--- a/src/main/java/org/bukkit/craftbukkit/help/HelpYamlReader.java
++++ b/src/main/java/org/bukkit/craftbukkit/help/HelpYamlReader.java
+@@ -35,6 +35,8 @@ public class HelpYamlReader {
+             helpYaml.options().copyDefaults(true);
+             helpYaml.setDefaults(defaultConfig);
+ 
++            // CubingPaper - disable help.yaml
++            if (false)
+             try {
+                 if (!helpYamlFile.exists()) {
+                     helpYaml.save(helpYamlFile);
 diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
 index f80e36cd..e4c659ea 100644
 --- a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java

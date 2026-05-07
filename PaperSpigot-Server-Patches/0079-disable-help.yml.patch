@@ -1,0 +1,29 @@
+From 1e44c85ece946d33f8611c740511c91bad7f4acc Mon Sep 17 00:00:00 2001
+From: speedcubing <speedcubing@speedcubing.top>
+Date: Fri, 8 May 2026 00:36:54 +0800
+Subject: [PATCH] disable help.yml
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/help/HelpYamlReader.java b/src/main/java/org/bukkit/craftbukkit/help/HelpYamlReader.java
+index 69d213c2..8660220f 100644
+--- a/src/main/java/org/bukkit/craftbukkit/help/HelpYamlReader.java
++++ b/src/main/java/org/bukkit/craftbukkit/help/HelpYamlReader.java
+@@ -35,10 +35,12 @@ public class HelpYamlReader {
+             helpYaml.options().copyDefaults(true);
+             helpYaml.setDefaults(defaultConfig);
+ 
+-            // CubingPaper - disable help.yaml
+-            if (false)
+             try {
+-                if (!helpYamlFile.exists()) {
++                // CubingPaper - disable help.yaml
++                if (helpYamlFile.exists()) {
++                    helpYamlFile.delete();
++                }
++                if (false && !helpYamlFile.exists()) {
+                     helpYaml.save(helpYamlFile);
+                 }
+             } catch (IOException ex) {
+-- 
+2.47.3
+
