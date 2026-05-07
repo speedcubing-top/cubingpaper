@@ -1,4 +1,4 @@
-From bfc9047448840572c5288c511de3372cd51285b7 Mon Sep 17 00:00:00 2001
+From c2baf71b8e7786713ba00e55af81f2add7ec8db7 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Mon, 24 Feb 2025 04:01:21 +0800
 Subject: [PATCH] server pausing option
@@ -84,7 +84,7 @@ index f036709c..8ae0e48c 100644
          parsePending();
          while (isReady(currentTick)) {
 diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
-index cc7d1b5a..40fb78a8 100644
+index cc7d1b5a..f80e36cd 100644
 --- a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
 +++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
 @@ -111,4 +111,9 @@ public class CubingPaperConfig {
@@ -94,10 +94,10 @@ index cc7d1b5a..40fb78a8 100644
 +
 +    public static int pauseWhenEmptySeconds;
 +    private static void pauseWhenEmptySeconds() {
-+        pauseWhenEmptySeconds = getInt("pauseWhenEmptySeconds", 60);
++        pauseWhenEmptySeconds = getInt("pauseWhenEmptySeconds", -1);
 +    }
  }
 \ No newline at end of file
 -- 
-2.35.3.windows.1
+2.47.3
 
