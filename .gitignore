@@ -1,2 +1,9 @@
 *.iml
 .idea/
+BuildData/
+Bukkit/
+CraftBukkit/
+CubingPaper-API/
+CubingPaper-Server/
+Paper/
+work/
