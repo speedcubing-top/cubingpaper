@@ -1,22 +1,49 @@
-From c1baffdb731c8fe5066fe87a8fc590fc0e5ccd8e Mon Sep 17 00:00:00 2001
+From 3033dd1e9ba0b0dc35cd61f286f9d943b3ed160d Mon Sep 17 00:00:00 2001
 From: speedcubing <speedcubing@speedcubing.top>
 Date: Fri, 8 May 2026 00:57:33 +0800
 Subject: [PATCH] disable commands.yml
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 3394b1dd..6d55ce74 100644
+index 3394b1dd..84761c51 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -277,6 +277,8 @@ public final class CraftServer implements Server {
+@@ -217,7 +217,10 @@ public final class CraftServer implements Server {
+         commandsConfiguration = YamlConfiguration.loadConfiguration(getCommandsConfigFile());
+         commandsConfiguration.options().copyDefaults(true);
+         commandsConfiguration.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("configurations/commands.yml"), Charsets.UTF_8)));
+-        saveCommandsConfig();
++        // CubingPaper - disable commands.yaml
++        if (getCommandsConfigFile().exists()) {
++            getCommandsConfigFile().delete();
++        }
+ 
+         // Migrate aliases from old file and add previously implicit $1- to pass all arguments
+         if (legacyAlias != null) {
+@@ -237,7 +240,7 @@ public final class CraftServer implements Server {
+             }
+         }
+ 
+-        saveCommandsConfig();
++        // CubingPaper - disable commands.yaml
+         overrideAllCommandBlockCommands = commandsConfiguration.getStringList("command-block-overrides").contains("*");
+         ((SimplePluginManager) pluginManager).useTimings(configuration.getBoolean("settings.plugin-profiling"));
+         monsterSpawn = configuration.getInt("spawn-limits.monsters");
+@@ -276,13 +279,7 @@ public final class CraftServer implements Server {
+         }
      }
  
-     private void saveCommandsConfig() {
-+        // CubingPaper - disable commands.yml
-+        if(false)
-         try {
-             commandsConfiguration.save(getCommandsConfigFile());
-         } catch (IOException ex) {
+-    private void saveCommandsConfig() {
+-        try {
+-            commandsConfiguration.save(getCommandsConfigFile());
+-        } catch (IOException ex) {
+-            Logger.getLogger(CraftServer.class.getName()).log(Level.SEVERE, "Could not save " + getCommandsConfigFile(), ex);
+-        }
+-    }
++    // CubingPaper - disable commands.yaml
+ 
+     public void loadPlugins() {
+         pluginManager.registerInterface(JavaPluginLoader.class);
 -- 
 2.47.3
 

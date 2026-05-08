@@ -1,0 +1,27 @@
+From a32b13d3931f3efd5397f2ac69afe40f05dd2d46 Mon Sep 17 00:00:00 2001
+From: speedcubing <speedcubing@speedcubing.top>
+Date: Fri, 8 May 2026 20:04:52 +0800
+Subject: [PATCH] disable permissions.yml
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 84761c51..0aa8297f 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -787,6 +787,13 @@ public final class CraftServer implements Server {
+         File file = new File(configuration.getString("settings.permissions-file"));
+         FileInputStream stream;
+ 
++        // CubingPaper - disable permissions.yml
++        if (file.exists()) {
++            file.delete();
++        }
++        if (true) {
++            return;
++        }
+         try {
+             stream = new FileInputStream(file);
+         } catch (FileNotFoundException ex) {
+-- 
+2.47.3
+
