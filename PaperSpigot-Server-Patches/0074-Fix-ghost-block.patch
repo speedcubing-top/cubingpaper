@@ -1,4 +1,4 @@
-From 26d3923d470f03a4190a277988fc44c13d138bfa Mon Sep 17 00:00:00 2001
+From fa5b7287f0a992917672be96df3e42ba692d0c2e Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Sat, 25 Jan 2025 03:16:37 +0800
 Subject: [PATCH] Fix ghost block
@@ -9,23 +9,25 @@ Content-Transfer-Encoding: 8bit
 quadflame — 2025/1/23 afternoon 12:46
 we have code to patch ghost blocks
 
-(this is from https://github.com/refrainsclub)
+(this is from https://github.com/jameblai/refrains-paper)
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 94fa2fbc..46d3d7e5 100644
+index 94fa2fbc..0bea7154 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -757,6 +757,10 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+@@ -757,6 +757,12 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
              Location eyeLoc = this.getPlayer().getEyeLocation();
              double reachDistance = NumberConversions.square(eyeLoc.getX() - blockposition.getX()) + NumberConversions.square(eyeLoc.getY() - blockposition.getY()) + NumberConversions.square(eyeLoc.getZ() - blockposition.getZ());
              if (reachDistance > (this.getPlayer().getGameMode() == org.bukkit.GameMode.CREATIVE ? CREATIVE_PLACE_DISTANCE_SQUARED : SURVIVAL_PLACE_DISTANCE_SQUARED)) {
++                // refrainsPaper start
 +                this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(worldserver, blockposition));
 +                this.player.playerConnection.sendPacket(new PacketPlayOutBlockChange(worldserver,  blockposition.shift(enumdirection)));
 +                Slot slot = this.player.activeContainer.getSlot(this.player.inventory, this.player.inventory.itemInHandIndex);
 +                this.player.playerConnection.sendPacket(new PacketPlayOutSetSlot(this.player.activeContainer.windowId, slot.rawSlotIndex, this.player.inventory.getItemInHand()));
++                // refrainsPaper end
                  return;
              }
  
 -- 
-2.35.1.windows.2
+2.47.3
 
