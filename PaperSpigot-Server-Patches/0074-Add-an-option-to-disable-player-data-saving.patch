@@ -1,4 +1,4 @@
-From 9ca3479719e29e953798719b4e6c1d2d5318d7de Mon Sep 17 00:00:00 2001
+From 365f3eb7169fec4927cdd96c5971af31b53e485f Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Sat, 25 Jan 2025 03:13:33 +0800
 Subject: [PATCH] Add an option to disable player data saving
@@ -53,5 +53,5 @@ index 867567fb..b1ec5bae 100644
 +    }
  }
 -- 
-2.35.1.windows.2
+2.47.3
 

@@ -1,4 +1,4 @@
-From 483c9cae0b7f795cfac5b0ae444b39c4c4809218 Mon Sep 17 00:00:00 2001
+From 55346f301d6913ba74d088a8eabc1512d25da5db Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Fri, 17 Jan 2025 18:40:09 +0800
 Subject: [PATCH] reorder spigot and paper yml
@@ -56,5 +56,5 @@ index f7c99452..a46845c3 100644
                      {
                          method.setAccessible( true );
 -- 
-2.35.1.windows.2
+2.47.3
 

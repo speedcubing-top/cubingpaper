@@ -1,4 +1,4 @@
-From 12b64e2225dfb8f9b54098cfb4a03596b1b31e80 Mon Sep 17 00:00:00 2001
+From 603487c1171cb9e9546c8501076847ec29bbb384 Mon Sep 17 00:00:00 2001
 From: HaeImAlan <me@haeimalan.com>
 Date: Fri, 27 Mar 2026 12:00:00 +0800
 Subject: [PATCH] Nerf high-ping knockback
@@ -9,7 +9,7 @@ increase the knockback friction divisor for players whose ping exceeds a
 configurable threshold, reducing the effective knockback they receive.
 
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 58c47182..767556f0 100644
+index a6c78c16..c6f6ee1a 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -912,6 +912,14 @@ public abstract class EntityLiving extends Entity {

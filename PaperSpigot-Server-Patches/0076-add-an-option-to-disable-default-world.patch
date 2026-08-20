@@ -1,4 +1,4 @@
-From 39c79124c6163e52acf33732c336438e3ab1555e Mon Sep 17 00:00:00 2001
+From 2ff0f270b12d96052e9b0749918ec876c4639f28 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Tue, 28 Jan 2025 19:01:27 +0800
 Subject: [PATCH] add an option to disable default world
@@ -60,5 +60,5 @@ index 28591b52..cc7d1b5a 100644
  }
 \ No newline at end of file
 -- 
-2.35.3.windows.1
+2.47.3
 

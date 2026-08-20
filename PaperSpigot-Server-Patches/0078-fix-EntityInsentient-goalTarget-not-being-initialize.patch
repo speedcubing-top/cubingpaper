@@ -1,4 +1,4 @@
-From 56e37f60afbfb3845b1886fcbf7cff317055f6de Mon Sep 17 00:00:00 2001
+From 214d83221fecdd7247e7e2e1503ed160d7698ffa Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Wed, 12 Feb 2025 23:23:45 +0800
 Subject: [PATCH] fix EntityInsentient goalTarget not being initialized
@@ -18,5 +18,5 @@ index b351add9..871d748d 100644
      private ItemStack[] equipment = new ItemStack[5];
      public float[] dropChances = new float[5];
 -- 
-2.35.3.windows.1
+2.47.3
 

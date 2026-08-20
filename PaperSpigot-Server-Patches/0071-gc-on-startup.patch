@@ -1,4 +1,4 @@
-From 6de8b6161db640af65cbd069dba34c0d49294cb0 Mon Sep 17 00:00:00 2001
+From 96dadfd5691ad3714015a6c49589137340da49b0 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Fri, 17 Jan 2025 18:46:17 +0800
 Subject: [PATCH] gc on startup
@@ -17,5 +17,5 @@ index e35eb773..37af8980 100644
                      DedicatedServer.LOGGER.info("Starting GS4 status listener");
                      this.m = new RemoteStatusListener(this);
 -- 
-2.35.3.windows.1
+2.47.3
 

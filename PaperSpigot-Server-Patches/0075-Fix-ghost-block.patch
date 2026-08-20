@@ -1,4 +1,4 @@
-From fa5b7287f0a992917672be96df3e42ba692d0c2e Mon Sep 17 00:00:00 2001
+From 249a40a499634b0d17195537e7a7be89eda04534 Mon Sep 17 00:00:00 2001
 From: speedcubing <git@speedcubing.top>
 Date: Sat, 25 Jan 2025 03:16:37 +0800
 Subject: [PATCH] Fix ghost block

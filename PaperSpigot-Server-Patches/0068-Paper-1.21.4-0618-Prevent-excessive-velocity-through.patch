@@ -1,0 +1,41 @@
+From d342367fab5edee027830b686d4655fcd3ca10a4 Mon Sep 17 00:00:00 2001
+From: speedcubing <speedcubing@speedcubing.top>
+Date: Thu, 20 Aug 2026 23:54:38 +0800
+Subject: [PATCH] Paper 1.21.4 0618 Prevent excessive velocity through repeated
+ crits
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index 58c47182..a6c78c16 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -1322,13 +1322,25 @@ public abstract class EntityLiving extends Entity {
+         return 0.42F;
+     }
+ 
++    protected long lastJumpTime = 0L; // Paper - Prevent excessive velocity through repeated crits
+     protected void bF() {
++        // Paper start - Prevent excessive velocity through repeated crits
++        long time = System.nanoTime();
++        boolean canCrit = true;
++        if (this instanceof EntityPlayer) {
++            canCrit = false;
++            if (time - this.lastJumpTime > (long)(0.250e9)) {
++                this.lastJumpTime = time;
++                canCrit = true;
++            }
++        }
++        // Paper end - Prevent excessive velocity through repeated crits
+         this.motY = (double) this.bE();
+         if (this.hasEffect(MobEffectList.JUMP)) {
+             this.motY += (double) ((float) (this.getEffect(MobEffectList.JUMP).getAmplifier() + 1) * 0.1F);
+         }
+ 
+-        if (this.isSprinting()) {
++        if (this.isSprinting() && canCrit) { // Paper - Prevent excessive velocity through repeated crits
+             float f = this.yaw * 0.017453292F;
+ 
+             this.motX -= (double) (MathHelper.sin(f) * 0.2F);
+-- 
+2.47.3
+
