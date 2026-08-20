@@ -1,0 +1,28 @@
+From 270820d3eb0b7b939a76d3886c7b4ea3b3a258eb Mon Sep 17 00:00:00 2001
+From: speedcubing <speedcubing@speedcubing.top>
+Date: Fri, 21 Aug 2026 01:47:48 +0800
+Subject: [PATCH] SPIGOT-2642: Proper shutdown when restart script non existent
+
+
+diff --git a/src/main/java/org/spigotmc/RestartCommand.java b/src/main/java/org/spigotmc/RestartCommand.java
+index 429c2580..a221239b 100644
+--- a/src/main/java/org/spigotmc/RestartCommand.java
++++ b/src/main/java/org/spigotmc/RestartCommand.java
+@@ -114,6 +114,14 @@ public class RestartCommand extends Command
+             } else
+             {
+                 System.out.println( "Startup script '" + SpigotConfig.restartScript + "' does not exist! Stopping server." );
++
++                // Actually shutdown
++                try
++                {
++                    MinecraftServer.getServer().stop();
++                } catch ( Throwable t )
++                {
++                }
+             }
+             System.exit( 0 );
+         } catch ( Exception ex )
+-- 
+2.47.3
+
