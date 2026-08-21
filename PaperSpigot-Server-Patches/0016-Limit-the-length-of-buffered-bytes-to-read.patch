@@ -1,4 +1,4 @@
-From a3541c5df9ec6f951717218e840ff33a5a434c53 Mon Sep 17 00:00:00 2001
+From 413b33fbfd7f36cc4ba1d6bfeea64bd94c818ecd Mon Sep 17 00:00:00 2001
 From: Thinkofdeath <thinkofdeath@spigotmc.org>
 Date: Mon, 28 Mar 2016 15:41:31 -0700
 Subject: [PATCH] Limit the length of buffered bytes to read
@@ -78,5 +78,5 @@ index 00000000..8558735c
 +    }
 +}
 -- 
-2.35.3.windows.1
+2.47.3
 
