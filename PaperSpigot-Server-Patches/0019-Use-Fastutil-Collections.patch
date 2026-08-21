@@ -1,8 +1,20 @@
 From 22cd6e1538461ada790c8bee597a3b05f849f029 Mon Sep 17 00:00:00 2001
-From: speedcubing <git@speedcubing.top>
-Date: Thu, 23 Jan 2025 01:46:49 +0800
-Subject: [PATCH] TacoSpigot 0021 Use Fastutil Collections
+From: Aikar <aikar@aikar.co>
+Date: Wed, 30 Mar 2016 02:13:24 -0400
+Subject: [PATCH] Use Fastutil Collections
 
+Swap out CraftBukkit LongObjectHashMap with Long2ObjectOpenHashMap
+Swap out Integer key HashMap for a Int2ObjectOpenHashMap For ChunkProviderServer
+
+Also swap out datawatcher collections for their fastutil equivelents.
+
+Amaranth, the creator of LongObjectHashMap, tested it vs fastutil and determined fastutil to be 3x faster
+and could not create anything faster than fastutil.
+
+These collections are super fast as seen
+http://java-performance.info/hashmap-overview-jdk-fastutil-goldman-sachs-hppc-koloboke-trove-january-2015/
+
+Signed-off-by: speedcubing <speedcubing@speedcubing.top>
 
 diff --git a/pom.xml b/pom.xml
 index 9695822a..f304ffbf 100644
