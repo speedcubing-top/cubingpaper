@@ -1,8 +1,17 @@
 From a3541c5df9ec6f951717218e840ff33a5a434c53 Mon Sep 17 00:00:00 2001
-From: speedcubing <git@speedcubing.top>
-Date: Thu, 23 Jan 2025 01:19:04 +0800
-Subject: [PATCH] TacoSpigot 0018 Limit the length of buffered bytes to read
+From: Thinkofdeath <thinkofdeath@spigotmc.org>
+Date: Mon, 28 Mar 2016 15:41:31 -0700
+Subject: [PATCH] Limit the length of buffered bytes to read
 
+This is a particularly severe/exploitable issue -- clients can send packets forcing the server to allocate any valid array size, without actually sending any data for it to fill. This is fixed by limiting the size of read byte arrays to at most Short.MAX_VALUE (31 KB).
+
+However, we have to make an exception for 1.7 ProtocolSupport clients,
+or they will crash. For them we limit the packets to 31 MB, which should
+still be plenty although it leaves the server slightly more vulnearable.
+
+The arrays in encryption packets are limited to 256 bytes.
+
+Signed-off-by: speedcubing <speedcubing@speedcubing.top>
 
 diff --git a/src/main/java/net/minecraft/server/PacketDataSerializer.java b/src/main/java/net/minecraft/server/PacketDataSerializer.java
 index e2eb3054..6104fd50 100644
