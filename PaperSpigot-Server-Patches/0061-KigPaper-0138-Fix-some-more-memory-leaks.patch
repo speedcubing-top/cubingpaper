@@ -1,8 +1,9 @@
 From 5f2e8a049535d7cbd36c9d0d52d0aa6495a31963 Mon Sep 17 00:00:00 2001
-From: speedcubing <git@speedcubing.top>
-Date: Mon, 27 Jan 2025 10:08:13 +0800
-Subject: [PATCH] KigPaper 0138 Fix some more memory leaks
+From: RoccoDev <hey@rocco.dev>
+Date: Thu, 11 Feb 2021 17:07:11 +0100
+Subject: [PATCH] Fix some more memory leaks
 
+Signed-off-by:  speedcubing <git@speedcubing.top>
 
 diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
 index b82b9847..b351add9 100644
@@ -84,4 +85,3 @@ index c8eebf8c..0bcd1fc0 100644
              this.a.a(1);
 -- 
 2.35.3.windows.1
-
