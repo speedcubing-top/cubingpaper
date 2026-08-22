@@ -1,8 +1,14 @@
 From f4a0e3421261fba3dcc817792c0429d360ee9c44 Mon Sep 17 00:00:00 2001
-From: speedcubing <git@speedcubing.top>
-Date: Mon, 27 Jan 2025 10:38:45 +0800
-Subject: [PATCH] Paper 1.9.4 0098 Optimize Chunk Access
+From: Aikar <aikar@aikar.co>
+Date: Thu, 27 Aug 2015 01:15:02 -0400
+Subject: [PATCH] Optimize Chunk Access
 
+getting a loaded chunk is one of the most hottest pieces of code in the game.
+getChunkAt is called for the same chunk multiple times in a row, often from getType();
+
+Optimize this look up by using a Last Access cache.
+
+Signed-off-by: speedcubing <speedcubing@speedcubing.top>
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
 index 79322bd5..2712a2de 100644
@@ -12,7 +18,7 @@ index 79322bd5..2712a2de 100644
      private boolean h;
      public final World world;
      public final int[] heightMap;
-+	public final long chunkKey; // Paper
++    public final long chunkKey; // Paper
      public final int locX;
      public final int locZ;
      private boolean k;
@@ -20,7 +26,7 @@ index 79322bd5..2712a2de 100644
          this.world = world;
          this.locX = i;
          this.locZ = j;
-+		this.chunkKey = org.bukkit.craftbukkit.util.LongHash.toLong(this.locX, this.locZ); // Paper
++        this.chunkKey = org.bukkit.craftbukkit.util.LongHash.toLong(this.locX, this.locZ); // Paper
          this.heightMap = new int[256];
  
          for (int k = 0; k < this.entitySlices.length; ++k) {
