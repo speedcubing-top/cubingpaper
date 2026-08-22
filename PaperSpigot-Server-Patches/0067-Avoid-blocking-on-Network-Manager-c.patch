@@ -1,8 +1,9 @@
 From 1b01ba43674729f6637f9b7e0f9f8ed2d5ec468e Mon Sep 17 00:00:00 2001
-From: speedcubing <git@speedcubing.top>
-Date: Tue, 28 Jan 2025 22:55:11 +0800
-Subject: [PATCH] Paper 1.9.4 0157 Avoid blocking on Network Manager creation
+From: Aikar <aikar@aikar.co>
+Date: Mon, 16 May 2016 23:19:16 -0400
+Subject: [PATCH] Avoid blocking on Network Manager creation
 
+Signed-off-by: speedcubing <speedcubing@speedcubing.top>
 
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
 index f13182c1..7940dadd 100644
