@@ -1,8 +1,9 @@
 From a5b19bc3bfc58c3c6921643928423fa13a725b31 Mon Sep 17 00:00:00 2001
-From: speedcubing <speedcubing@speedcubing.top>
-Date: Fri, 21 Aug 2026 00:15:54 +0800
-Subject: [PATCH] Paper 1.9.4 Fix SkullCache case bug
+From: Aikar <aikar@aikar.co>
+Date: Tue, 5 Jan 2016 21:48:24 -0500
+Subject: [PATCH] Fix SkullCache case bug
 
+Signed-off-by: speedcubing <speedcubing@speedcubing.top>
 
 diff --git a/src/main/java/net/minecraft/server/TileEntitySkull.java b/src/main/java/net/minecraft/server/TileEntitySkull.java
 index 58014c5f..42cd0580 100644
