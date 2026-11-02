@@ -1,6 +1,6 @@
 # CubingPaper
 
-Fork of https://github.com/PaperMC/Paper-archive/ -b ver/1.8.8
+Fork of https://github.com/PaperMC/Paper-archive/tree/ver/1.8.8
 
 ## How to (Build from Source)
 
