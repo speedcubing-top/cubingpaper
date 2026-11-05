@@ -37,12 +37,6 @@ jobs:
         chmod +x ./build.sh
         ./build.sh
 
-    - name: upload-artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-output
-        path: ./CubingPaper-Server/target/cubingpaper-1.8.8-R0.1-SNAPSHOT.jar
-
     - name: setup ~/.m2/settings.xml
       if: ${{ !inputs.build_only }}
       run: |
