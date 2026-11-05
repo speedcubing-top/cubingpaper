@@ -13,7 +13,7 @@ index ea38ae94..72588b0b 100644
  
      public String getServerModName() {
 -        return "PaperSpigot"; // PaperSpigot - PaperSpigot > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
-+        return "CubingPaper"; // PaperSpigot - PaperSpigot > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
++        return MinecraftServer.class.getPackage().getImplementationVersion() == null ? "CubingPaper" : "CubingPaper " + MinecraftServer.class.getPackage().getImplementationVersion(); // CubingPaper - brand with build version (F3) // PaperSpigot - PaperSpigot > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
      }
  
      public CrashReport b(CrashReport crashreport) {
