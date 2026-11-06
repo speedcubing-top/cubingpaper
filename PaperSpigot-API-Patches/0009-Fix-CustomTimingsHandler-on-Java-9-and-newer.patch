@@ -1,0 +1,38 @@
+From a6539cadd788f93b5c79c6a135afdc1a97b0972e Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Sat, 7 Nov 2026 02:40:50 +0800
+Subject: [PATCH] Fix CustomTimingsHandler on Java 9 and newer
+
+CustomTimingsHandler looked up the calling plugin with
+sun.reflect.Reflection.getCallerClass, which no longer exists since Java
+9. On the Java 21 the servers run, a plugin still using this deprecated
+timings API would hit a NoSuchMethodError that the surrounding
+catch (Exception) does not catch. Drop the lookup (from PandaSpigot).
+
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: HaeImAlan <me@haeimalan.com>
+
+diff --git a/src/main/java/org/spigotmc/CustomTimingsHandler.java b/src/main/java/org/spigotmc/CustomTimingsHandler.java
+index 7e89b97b..a20dc081 100644
+--- a/src/main/java/org/spigotmc/CustomTimingsHandler.java
++++ b/src/main/java/org/spigotmc/CustomTimingsHandler.java
+@@ -30,7 +30,6 @@ import co.aikar.timings.NullTimingHandler;
+ import co.aikar.timings.Timing;
+ import co.aikar.timings.Timings;
+ import co.aikar.timings.TimingsManager;
+-import sun.reflect.Reflection;
+ 
+ import java.lang.reflect.Method;
+ import java.util.logging.Level;
+@@ -52,7 +51,7 @@ public final class CustomTimingsHandler {
+ 
+         Plugin plugin = null;
+         try {
+-             plugin = TimingsManager.getPluginByClassloader(Reflection.getCallerClass(2));
++             //plugin = TimingsManager.getPluginByClassloader(Reflection.getCallerClass(2)); // CubingPaper - sun.reflect.Reflection is gone on Java 9+, and the NoSuchMethodError escaped the catch
+         } catch (Exception ignored) {}
+ 
+         new AuthorNagException("Deprecated use of CustomTimingsHandler. Please Switch to Timings.of ASAP").printStackTrace();
+-- 
+2.55.0.windows.5
+
