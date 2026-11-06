@@ -1,0 +1,266 @@
+From c2de55e4ccb0ae7f26371910bd0452246e619c03 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Sat, 7 Nov 2026 02:40:43 +0800
+Subject: [PATCH] Add packet limiter
+
+Clients could flood the server with packets without any limit.
+
+Kick a connection that averages more than packetLimiter.all.maxPacketRate
+packets per second over packetLimiter.all.interval seconds (500 over 7
+by default, far above heavy clicking), with optional per-packet limits
+that kick or drop. Counting uses Paper's IntervalledCounter (via
+PandaSpigot) on the netty thread.
+
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: HaeImAlan <me@haeimalan.com>
+
+diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
+index fa4c4f06..d8b33609 100644
+--- a/src/main/java/net/minecraft/server/NetworkManager.java
++++ b/src/main/java/net/minecraft/server/NetworkManager.java
+@@ -118,8 +118,81 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+         if (MinecraftServer.getServer().isDebugging()) throwable.printStackTrace(); // Spigot
+     }
+ 
++    // CubingPaper start - Packet limiter (from Paper, via PandaSpigot)
++    private final Object packetLimitLock = new Object();
++    private IntervalledCounterHolder packetCounters;
++    private boolean stopReadingPackets;
++
++    private static final class IntervalledCounterHolder {
++        final top.speedcubing.cubingpaper.IntervalledCounter all;
++        final java.util.Map<Class<?>, top.speedcubing.cubingpaper.IntervalledCounter> perPacket = new java.util.HashMap<Class<?>, top.speedcubing.cubingpaper.IntervalledCounter>();
++
++        IntervalledCounterHolder(top.speedcubing.cubingpaper.CubingPaperConfig.PacketLimit all) {
++            this.all = all == null ? null : new top.speedcubing.cubingpaper.IntervalledCounter(all.intervalNS);
++        }
++    }
++
++    /** @return false if the packet must not be handled */
++    private boolean checkPacketLimit(Packet packet) {
++        if (this.stopReadingPackets) {
++            return false;
++        }
++        top.speedcubing.cubingpaper.CubingPaperConfig.PacketLimit allLimit = top.speedcubing.cubingpaper.CubingPaperConfig.packetLimiterAll;
++        java.util.Map<Class<?>, top.speedcubing.cubingpaper.CubingPaperConfig.PacketLimit> limits = top.speedcubing.cubingpaper.CubingPaperConfig.packetLimiterLimits;
++        top.speedcubing.cubingpaper.CubingPaperConfig.PacketLimit packetLimit = limits.get(packet.getClass());
++        if (allLimit == null && packetLimit == null) {
++            return true;
++        }
++        long time = System.nanoTime();
++        synchronized (this.packetLimitLock) {
++            if (this.packetCounters == null) {
++                this.packetCounters = new IntervalledCounterHolder(allLimit);
++            }
++            if (allLimit != null && this.packetCounters.all != null) {
++                this.packetCounters.all.updateAndAdd(1, time);
++                if (this.packetCounters.all.getRate() >= allLimit.maxPacketRate) {
++                    this.killForPacketSpam();
++                    return false;
++                }
++            }
++            if (packetLimit != null) {
++                final top.speedcubing.cubingpaper.CubingPaperConfig.PacketLimit limit = packetLimit;
++                top.speedcubing.cubingpaper.IntervalledCounter counter = this.packetCounters.perPacket.get(packet.getClass());
++                if (counter == null) {
++                    counter = new top.speedcubing.cubingpaper.IntervalledCounter(limit.intervalNS);
++                    this.packetCounters.perPacket.put(packet.getClass(), counter);
++                }
++                counter.updateAndAdd(1, time);
++                if (counter.getRate() >= limit.maxPacketRate) {
++                    if (limit.kick) {
++                        this.killForPacketSpam();
++                    }
++                    return false;
++                }
++            }
++        }
++        return true;
++    }
++
++    private void killForPacketSpam() {
++        if (this.stopReadingPackets) {
++            return;
++        }
++        this.stopReadingPackets = true;
++        final ChatComponentText reason = new ChatComponentText(top.speedcubing.cubingpaper.CubingPaperConfig.packetLimiterKickMessage);
++        g.warn("{} was kicked for sending too many packets", this.getSocketAddress()); // CubingPaper - log who tripped it
++        this.a(new PacketPlayOutKickDisconnect(reason), new GenericFutureListener<Future<? super Void>>() {
++            public void operationComplete(Future<? super Void> future) {
++                NetworkManager.this.close(reason);
++            }
++        });
++        this.k();
++    }
++    // CubingPaper end
++
+     protected void a(ChannelHandlerContext channelhandlercontext, Packet packet) throws Exception {
+         if (this.channel.isActive()) {
++            if (!this.checkPacketLimit(packet)) return; // CubingPaper - Packet limiter
+             try {
+                 packet.a(this.m);
+             } catch (CancelledPacketHandleException cancelledpackethandleexception) {
+diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+index 58e4b7f4..38c087e9 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
++++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+@@ -137,4 +137,55 @@ public class CubingPaperConfig {
+     private static void lagCompensatedPotions() {
+         lagCompensatedPotions = getBoolean("lagCompensatedPotions", false);
+     }
++
++    // CubingPaper start - Packet limiter (from Paper, via PandaSpigot)
++    public static final class PacketLimit {
++        public final long intervalNS;
++        public final double maxPacketRate;
++        public final boolean kick; // otherwise drop the packet
++
++        PacketLimit(double intervalSeconds, double maxPacketRate, boolean kick) {
++            this.intervalNS = (long) (intervalSeconds * 1.0e9);
++            this.maxPacketRate = maxPacketRate;
++            this.kick = kick;
++        }
++    }
++
++    public static String packetLimiterKickMessage;
++    public static PacketLimit packetLimiterAll; // null = no overall limit
++    public static java.util.Map<Class<?>, PacketLimit> packetLimiterLimits;
++    private static void packetLimiter() {
++        packetLimiterKickMessage = org.bukkit.ChatColor.translateAlternateColorCodes('&', getString("packetLimiter.kickMessage", "&cSent too many packets."));
++        double interval = getDouble("packetLimiter.all.interval", 7.0);
++        double rate = getDouble("packetLimiter.all.maxPacketRate", 500.0);
++        packetLimiterAll = interval > 0 && rate > 0 ? new PacketLimit(interval, rate, true) : null;
++
++        // per packet, keyed by the 1.8 class name, e.g.
++        // PacketPlayInTabComplete: {interval: 1.0, maxPacketRate: 10.0, action: DROP}
++        java.util.Map<Class<?>, PacketLimit> limits = new java.util.HashMap<Class<?>, PacketLimit>();
++        org.bukkit.configuration.ConfigurationSection section = config.getConfigurationSection("packetLimiter.limits");
++        if (section == null) {
++            section = config.createSection("packetLimiter.limits");
++        }
++        for (String key : section.getKeys(false)) {
++            Class<?> clazz;
++            try {
++                clazz = Class.forName("net.minecraft.server." + key);
++            } catch (ClassNotFoundException e) {
++                Bukkit.getLogger().warning("Packet '" + key + "' does not exist, cannot limit it! Please update cubing.yml");
++                continue;
++            }
++            if (!net.minecraft.server.Packet.class.isAssignableFrom(clazz)) {
++                Bukkit.getLogger().warning("Class '" + key + "' is not a packet, cannot limit it! Please update cubing.yml");
++                continue;
++            }
++            double limitInterval = section.getDouble(key + ".interval");
++            double limitRate = section.getDouble(key + ".maxPacketRate");
++            if (limitInterval > 0 && limitRate > 0) {
++                limits.put(clazz, new PacketLimit(limitInterval, limitRate, !"DROP".equalsIgnoreCase(section.getString(key + ".action", "KICK"))));
++            }
++        }
++        packetLimiterLimits = limits;
++    }
++    // CubingPaper end
+ }
+\ No newline at end of file
+diff --git a/src/main/java/top/speedcubing/cubingpaper/IntervalledCounter.java b/src/main/java/top/speedcubing/cubingpaper/IntervalledCounter.java
+new file mode 100644
+index 00000000..6bc451fa
+--- /dev/null
++++ b/src/main/java/top/speedcubing/cubingpaper/IntervalledCounter.java
+@@ -0,0 +1,94 @@
++package top.speedcubing.cubingpaper;
++
++// CubingPaper - Packet limiter: counts events over a sliding time window (from Paper, via PandaSpigot)
++public final class IntervalledCounter {
++
++    private long[] times;
++    private long[] counts;
++    private final long interval;
++    private long minTime;
++    private long sum;
++    private int head; // inclusive
++    private int tail; // exclusive
++
++    public IntervalledCounter(final long interval) {
++        this.times = new long[8];
++        this.counts = new long[8];
++        this.interval = interval;
++    }
++
++    public void updateCurrentTime(final long currentTime) {
++        long sum = this.sum;
++        int head = this.head;
++        final int tail = this.tail;
++        final long minTime = currentTime - this.interval;
++
++        final int arrayLen = this.times.length;
++
++        // guard against overflow by using subtraction
++        while (head != tail && this.times[head] - minTime < 0) {
++            sum -= this.counts[head];
++            this.counts[head] = 0;
++            if (++head >= arrayLen) {
++                head = 0;
++            }
++        }
++
++        this.sum = sum;
++        this.head = head;
++        this.minTime = minTime;
++    }
++
++    public void addTime(final long currTime, final long count) {
++        // guard against overflow by using subtraction
++        if (currTime - this.minTime < 0) {
++            return;
++        }
++        int nextTail = (this.tail + 1) % this.times.length;
++        if (nextTail == this.head) {
++            this.resize();
++            nextTail = (this.tail + 1) % this.times.length;
++        }
++
++        this.times[this.tail] = currTime;
++        this.counts[this.tail] += count;
++        this.sum += count;
++        this.tail = nextTail;
++    }
++
++    public void updateAndAdd(final int count, final long currTime) {
++        this.updateCurrentTime(currTime);
++        this.addTime(currTime, count);
++    }
++
++    private void resize() {
++        final long[] oldElements = this.times;
++        final long[] oldCounts = this.counts;
++        final long[] newElements = new long[this.times.length * 2];
++        final long[] newCounts = new long[this.times.length * 2];
++        this.times = newElements;
++        this.counts = newCounts;
++
++        final int head = this.head;
++        final int tail = this.tail;
++        final int size = tail >= head ? (tail - head) : (tail + (oldElements.length - head));
++        this.head = 0;
++        this.tail = size;
++
++        if (tail >= head) {
++            System.arraycopy(oldElements, head, newElements, 0, size);
++            System.arraycopy(oldCounts, head, newCounts, 0, size);
++        } else {
++            System.arraycopy(oldElements, head, newElements, 0, oldElements.length - head);
++            System.arraycopy(oldElements, 0, newElements, oldElements.length - head, tail);
++
++            System.arraycopy(oldCounts, head, newCounts, 0, oldCounts.length - head);
++            System.arraycopy(oldCounts, 0, newCounts, oldCounts.length - head, tail);
++        }
++    }
++
++    // returns in units per second
++    public double getRate() {
++        return this.sum / (this.interval * 1.0e-9);
++    }
++}
+-- 
+2.55.0.windows.5
+
