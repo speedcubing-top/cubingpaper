@@ -1,0 +1,30 @@
+From b465fa0591b2664808c3293f153a2c0944fd125f Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Sat, 7 Nov 2026 02:40:43 +0800
+Subject: [PATCH] Fix hit registration without line of sight
+
+A hit on an entity whose eyes are not in line of sight of the attacker's
+eyes was only accepted within 3 blocks (feet to feet) instead of 6. A
+slab, fence or ledge between the two heads therefore dropped ordinary
+3-block hits, because feet-to-feet distance of a legit hit often exceeds
+3 blocks. Keep the 6 block check in all cases (PandaSpigot GH-244).
+
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: HaeImAlan <me@haeimalan.com>
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index d47e4667..a54bed5b 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -1337,7 +1337,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+             boolean flag = this.player.hasLineOfSight(entity);
+             double d0 = 36.0D;
+ 
+-            if (!flag) {
++            if (false && !flag) { // CubingPaper - Fix hit registration (PandaSpigot GH-244): no 3-block reach limit without line of sight
+                 d0 = 9.0D;
+             }
+ 
+-- 
+2.55.0.windows.5
+
