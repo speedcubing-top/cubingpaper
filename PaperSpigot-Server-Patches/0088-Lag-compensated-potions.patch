@@ -1,0 +1,124 @@
+From 068408c253a8b9f193f3d03f5b696ab0f64f287c Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Sat, 7 Nov 2026 02:40:43 +0800
+Subject: [PATCH] Lag compensated potions
+
+A splash potion thrown by a player is advanced by the world tick, so for
+a laggy thrower it lands somewhere else than they saw (from IonSpigot).
+
+With lagCompensatedPotions enabled in cubing.yml, a player's splash
+potion is advanced from that player's movement packets instead. The
+world tick takes it back if the thrower dies, changes world, disconnects
+or sends no movement for 20 ticks, at most 10 potions per player are
+compensated, and potions whose launch was cancelled are skipped.
+
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: HaeImAlan <me@haeimalan.com>
+
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index 0c49a256..aeffe63e 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -50,6 +50,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+     public boolean g;
+     public int ping;
+     public boolean viewingCredits;
++    public final List<EntityPotion> compensatedPotions = new java.util.ArrayList<EntityPotion>(); // CubingPaper - Lag compensated potions
+ 
+     // CraftBukkit start
+     public String displayName;
+@@ -291,6 +292,19 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+     public void l() {
+         try {
+             super.t_();
++            // CubingPaper start - Lag compensated potions
++            // Index loop: an impact may run plugin code that throws another potion.
++            // valid is false if the launch was cancelled or the entity was removed.
++            for (int i = 0; i < this.compensatedPotions.size(); ++i) {
++                EntityPotion potion = this.compensatedPotions.get(i);
++                if (potion.compensatedBy == this && potion.valid && !potion.dead) {
++                    potion.tickCompensated();
++                }
++                if (potion.compensatedBy != this || !potion.valid || potion.dead) {
++                    this.compensatedPotions.remove(i--);
++                }
++            }
++            // CubingPaper end
+ 
+             for (int i = 0; i < this.inventory.getSize(); ++i) {
+                 ItemStack itemstack = this.inventory.getItem(i);
+diff --git a/src/main/java/net/minecraft/server/EntityPotion.java b/src/main/java/net/minecraft/server/EntityPotion.java
+index fd174c34..c49720d9 100644
+--- a/src/main/java/net/minecraft/server/EntityPotion.java
++++ b/src/main/java/net/minecraft/server/EntityPotion.java
+@@ -25,6 +25,16 @@ public class EntityPotion extends EntityProjectile {
+     public EntityPotion(World world, EntityLiving entityliving, ItemStack itemstack) {
+         super(world, entityliving);
+         this.item = itemstack;
++        // CubingPaper start - Lag compensated potions
++        if (top.speedcubing.cubingpaper.CubingPaperConfig.lagCompensatedPotions && entityliving instanceof EntityPlayer) {
++            EntityPlayer thrower = (EntityPlayer) entityliving;
++            if (thrower.compensatedPotions.size() < MAX_COMPENSATED_PER_PLAYER) {
++                this.compensatedBy = thrower;
++                this.lastCompensatedTick = MinecraftServer.currentTick;
++                thrower.compensatedPotions.add(this);
++            }
++        }
++        // CubingPaper end
+     }
+ 
+     public EntityPotion(World world, double d0, double d1, double d2, ItemStack itemstack) {
+@@ -32,6 +42,35 @@ public class EntityPotion extends EntityProjectile {
+         this.item = itemstack;
+     }
+ 
++    // CubingPaper start - Lag compensated potions
++    // A splash potion thrown by a player is advanced from that player's
++    // movement packets instead of the world tick, so it flies in step with
++    // the thrower's client and lands where a laggy thrower saw it land.
++    private static final int MAX_COMPENSATED_PER_PLAYER = 10;
++    // Hand back to the world tick if the thrower stops moving it for this long.
++    private static final int MAX_COMPENSATION_GAP_TICKS = 20;
++    EntityPlayer compensatedBy;
++    private int lastCompensatedTick;
++
++    @Override
++    public void t_() {
++        EntityPlayer thrower = this.compensatedBy;
++        if (thrower != null) {
++            if (!thrower.dead && thrower.world == this.world && !thrower.playerConnection.isDisconnected()
++                    && MinecraftServer.currentTick - this.lastCompensatedTick <= MAX_COMPENSATION_GAP_TICKS) {
++                return;
++            }
++            this.compensatedBy = null;
++        }
++        super.t_();
++    }
++
++    void tickCompensated() {
++        this.lastCompensatedTick = MinecraftServer.currentTick;
++        super.t_();
++    }
++    // CubingPaper end
++
+     protected float m() {
+         return 0.05F;
+     }
+diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+index 3e8ec580..58e4b7f4 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
++++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+@@ -132,4 +132,9 @@ public class CubingPaperConfig {
+         survivalPlaceDistance = getDouble("placeDistance.survival", 6);
+         creativePlaceDistance = getDouble("placeDistance.creative", 7);
+     }
++
++    public static boolean lagCompensatedPotions;
++    private static void lagCompensatedPotions() {
++        lagCompensatedPotions = getBoolean("lagCompensatedPotions", false);
++    }
+ }
+\ No newline at end of file
+-- 
+2.55.0.windows.5
+
