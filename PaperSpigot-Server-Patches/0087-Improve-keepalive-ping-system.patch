@@ -1,0 +1,113 @@
+From 472b749bbf322f8bdb4497e89f1cdf76e18fadaf Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Sat, 7 Nov 2026 02:40:43 +0800
+Subject: [PATCH] Improve keepalive ping system
+
+The server sent a keepalive every 2 seconds, accepted only a reply to
+the newest one and smoothed ping with a 3/4 weighted average. Replies
+slower than 2 seconds were all discarded, and ping spikes took about 8
+seconds to show, which the high-ping knockback nerf depends on.
+
+Send a keepalive every second, track every pending one, and report the
+true average of the replies over the last 5 seconds (from Paper). The
+reply arrives on the netty thread, so the shared state is synchronized.
+
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: HaeImAlan <me@haeimalan.com>
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index a54bed5b..8092ef93 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -75,9 +75,20 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+     private int f;
+     private int g;
+     private boolean h;
+-    private int i;
+-    private long j;
++    // CubingPaper start - Improve keepalive ping system (from Paper)
++    // Send a keepalive every second and keep every unanswered one, so replies are
++    // still matched when the round trip is longer than the send interval; ping is
++    // the true average of the replies to keepalives sent in the last 5 seconds.
++    // The send runs on the main thread and the reply on the netty thread.
++    private static final long KEEPALIVE_INTERVAL_TICKS = 20L;
++    private static final long PING_WINDOW_NS = java.util.concurrent.TimeUnit.SECONDS.toNanos(5L);
++    private static final int MAX_PENDING_KEEPALIVES = 60; // the netty read timeout kicks after 30s anyway
++    private final java.util.ArrayDeque<long[]> pendingKeepAlives = new java.util.ArrayDeque<long[]>(); // {id, sent ns}
++    private final java.util.ArrayDeque<long[]> keepAliveResponses = new java.util.ArrayDeque<long[]>(); // {sent ns, latency ns}
++    private long keepAliveLatencySumNS;
++    private int nextKeepAliveId;
+     private long k;
++    // CubingPaper end
+     // CraftBukkit start - multithreaded fields
+     private volatile int chatThrottle;
+     private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(PlayerConnection.class, "chatThrottle");
+@@ -126,11 +137,18 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+         this.h = false;
+         ++this.e;
+         this.minecraftServer.methodProfiler.a("keepAlive");
+-        if ((long) this.e - this.k > 40L) {
++        if ((long) this.e - this.k >= KEEPALIVE_INTERVAL_TICKS) { // CubingPaper - Improve keepalive ping system
+             this.k = (long) this.e;
+-            this.j = this.d();
+-            this.i = (int) this.j;
+-            this.sendPacket(new PacketPlayOutKeepAlive(this.i));
++            // CubingPaper start - Improve keepalive ping system
++            int id = ++this.nextKeepAliveId;
++            synchronized (this.pendingKeepAlives) {
++                if (this.pendingKeepAlives.size() >= MAX_PENDING_KEEPALIVES) {
++                    this.pendingKeepAlives.pollFirst();
++                }
++                this.pendingKeepAlives.addLast(new long[] { id, System.nanoTime() });
++            }
++            this.sendPacket(new PacketPlayOutKeepAlive(id));
++            // CubingPaper end
+         }
+ 
+         this.minecraftServer.methodProfiler.b();
+@@ -1933,17 +1951,34 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+     }
+ 
+     public void a(PacketPlayInKeepAlive packetplayinkeepalive) {
+-        if (packetplayinkeepalive.a() == this.i) {
+-            int i = (int) (this.d() - this.j);
+-
+-            this.player.ping = (this.player.ping * 3 + i) / 4;
++        // CubingPaper start - Improve keepalive ping system
++        long now = System.nanoTime();
++        int id = packetplayinkeepalive.a();
++        synchronized (this.pendingKeepAlives) {
++            long sent = -1L;
++            for (java.util.Iterator<long[]> it = this.pendingKeepAlives.iterator(); it.hasNext();) {
++                long[] pending = it.next();
++                it.remove(); // anything sent before the answered one won't be answered either
++                if (pending[0] == id) {
++                    sent = pending[1];
++                    break;
++                }
++            }
++            if (sent == -1L) {
++                return; // not ours, or already dropped from the queue
++            }
++            long latency = now - sent;
++            this.keepAliveResponses.addLast(new long[] { sent, latency });
++            this.keepAliveLatencySumNS += latency;
++            while (sent - this.keepAliveResponses.peekFirst()[0] > PING_WINDOW_NS) {
++                this.keepAliveLatencySumNS -= this.keepAliveResponses.pollFirst()[1];
++            }
++            this.player.ping = (int) (this.keepAliveLatencySumNS / this.keepAliveResponses.size() / 1000000L);
+         }
+-
++        // CubingPaper end
+     }
+ 
+-    private long d() {
+-        return System.nanoTime() / 1000000L;
+-    }
++    // CubingPaper - Improve keepalive ping system: d() no longer used
+ 
+     public void a(PacketPlayInAbilities packetplayinabilities) {
+         PlayerConnectionUtils.ensureMainThread(packetplayinabilities, this, this.player.u());
+-- 
+2.55.0.windows.5
+
