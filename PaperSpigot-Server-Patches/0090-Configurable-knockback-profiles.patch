@@ -1,0 +1,1484 @@
+From f124480e4a1e88432bc4e102879e717724f1a680 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Sat, 7 Nov 2026 23:45:46 +0800
+Subject: [PATCH] Configurable knockback profiles
+
+
+diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
+index d62cabc8..817b5be4 100644
+--- a/src/main/java/net/minecraft/server/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/DedicatedServer.java
+@@ -172,6 +172,10 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+             org.github.paperspigot.PaperSpigotConfig.registerCommands();
+             // PaperSpigot end
+             top.speedcubing.cubingpaper.CubingPaperConfig.init((File)  options.valueOf("cubing-settings")); // CubingPaper
++            // CubingPaper start - Configurable knockback profiles
++            top.speedcubing.cubingpaper.knockback.KnockbackConfig.init((File) options.valueOf("knockback-settings"));
++            top.speedcubing.cubingpaper.knockback.KnockbackConfig.registerCommands();
++            // CubingPaper end
+ 
+             DedicatedServer.LOGGER.info("Generating keypair");
+             this.a(MinecraftEncryption.b());
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index d987e016..5b1ca767 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -2297,4 +2297,23 @@ public abstract class Entity implements ICommandListener {
+ 
+         EnchantmentManager.b(entityliving, entity);
+     }
++
++    // CubingPaper start - Configurable knockback profiles
++    private dev.cobblesword.nachospigot.knockback.KnockbackProfile knockbackProfile;
++
++    public dev.cobblesword.nachospigot.knockback.KnockbackProfile getKnockbackProfile() {
++        return knockbackProfile;
++    }
++
++    public void setKnockbackProfile(dev.cobblesword.nachospigot.knockback.KnockbackProfile profile) {
++        this.knockbackProfile = profile;
++    }
++
++    /**
++     * @return this entity's own profile, or the server default profile when it has none
++     */
++    public dev.cobblesword.nachospigot.knockback.KnockbackProfile getEffectiveKnockbackProfile() {
++        return knockbackProfile != null ? knockbackProfile : top.speedcubing.cubingpaper.knockback.KnockbackConfig.getCurrentKb();
++    }
++    // CubingPaper end
+ }
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index ed3081d1..c2f93d15 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -8,8 +8,6 @@ import java.util.Iterator;
+ import java.util.List;
+ import java.util.UUID;
+ 
+-import org.github.paperspigot.PaperSpigotConfig; // FlamePaper - Customizable knockback
+-
+ // CraftBukkit start
+ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+ import org.bukkit.craftbukkit.entity.CraftItem;
+@@ -971,7 +969,8 @@ public abstract class EntityHuman extends EntityLiving {
+ 
+                 int i = b0 + EnchantmentManager.a((EntityLiving) this);
+ 
+-                if (this.isSprinting()) {
++                boolean sprintHit = this.isSprinting(); // CubingPaper - Configurable knockback profiles
++                if (sprintHit) {
+                     ++i;
+                 }
+ 
+@@ -1005,16 +1004,20 @@ public abstract class EntityHuman extends EntityLiving {
+ 
+                     if (flag2) {
+                         if (i > 0) {
+-                            // FlamePaper start - Customizable knockback
++                            // CubingPaper start - Configurable knockback profiles (ported from WindSpigot)
++                            dev.cobblesword.nachospigot.knockback.KnockbackProfile kb = entity.getEffectiveKnockbackProfile();
++                            double extraHorizontal = sprintHit ? kb.getWTapExtraHorizontal() : kb.getExtraHorizontal();
++                            double extraVertical = sprintHit ? kb.getWTapExtraVertical() : kb.getExtraVertical();
+                             entity.g(
+-                                (double) (-MathHelper.sin(this.yaw * 3.1415927F / 180.0F) * (float) i *
+-                                    PaperSpigotConfig.knockbackExtraHorizontal), PaperSpigotConfig.knockbackExtraVertical,
+-                                (double) (MathHelper.cos(this.yaw * 3.1415927F / 180.0F) * (float) i *
+-                                    PaperSpigotConfig.knockbackExtraHorizontal));
+-                            // FlamePaper end
++                                (double) (-MathHelper.sin(this.yaw * 3.1415927F / 180.0F) * (float) i) * extraHorizontal,
++                                extraVertical,
++                                (double) (MathHelper.cos(this.yaw * 3.1415927F / 180.0F) * (float) i) * extraHorizontal);
+                             this.motX *= 0.6D;
+                             this.motZ *= 0.6D;
+-                            this.setSprinting(false);
++                            if (kb.isStopSprint()) {
++                                this.setSprinting(false);
++                            }
++                            // CubingPaper end
+                         }
+ 
+                         if (entity instanceof EntityPlayer && entity.velocityChanged) {
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index c6f6ee1a..3a988d38 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -10,7 +10,7 @@ import java.util.Map;
+ import java.util.Random;
+ import java.util.UUID;
+ 
+-import org.github.paperspigot.PaperSpigotConfig; // FlamePaper - Customizable knockback
++import dev.cobblesword.nachospigot.knockback.KnockbackProfile; // CubingPaper - Configurable knockback profiles
+ 
+ // CraftBukkit start
+ import java.util.ArrayList;
+@@ -815,7 +815,7 @@ public abstract class EntityLiving extends Entity {
+                         }
+ 
+                         this.aw = (float) (MathHelper.b(d1, d0) * 180.0D / 3.1415927410125732D - (double) this.yaw);
+-                        this.a(entity, f, d0, d1);
++                        this.a(entity, f, d0, d1, damagesource); // CubingPaper - Configurable knockback profiles
+                     } else {
+                         this.aw = (float) ((int) (Math.random() * 2.0D) * 180);
+                     }
+@@ -906,36 +906,83 @@ public abstract class EntityLiving extends Entity {
+ 
+     protected void dropEquipment(boolean flag, int i) {}
+ 
+-    public void a(Entity entity, float f, double d0, double d1) {
++    // CubingPaper start - Configurable knockback profiles (ported from WindSpigot)
++    public void a(Entity entity, float f, double d0, double d1, DamageSource damagesource) {
+         if (this.random.nextDouble() >= this.getAttributeInstance(GenericAttributes.c).getValue()) {
+             this.ai = true;
+-            // FlamePaper start - Customizable knockback
++            KnockbackProfile kb = this.getEffectiveKnockbackProfile();
+             double magnitude = MathHelper.sqrt(d0 * d0 + d1 * d1);
+-            double friction = PaperSpigotConfig.knockbackFriction;
++
++            double horizontal = kb.getHorizontal();
++            double vertical = kb.getVertical();
++            if (damagesource instanceof EntityDamageSourceIndirect) {
++                Entity projectile = ((EntityDamageSourceIndirect) damagesource).getProximateDamageSource();
++                if (projectile instanceof EntityFishingHook) {
++                    horizontal = kb.getRodHorizontal();
++                    vertical = kb.getRodVertical();
++                } else if (projectile instanceof EntityArrow) {
++                    horizontal = kb.getArrowHorizontal();
++                    vertical = kb.getArrowVertical();
++                } else if (projectile instanceof EntitySnowball) {
++                    horizontal = kb.getSnowballHorizontal();
++                    vertical = kb.getSnowballVertical();
++                } else if (projectile instanceof EntityEgg) {
++                    horizontal = kb.getEggHorizontal();
++                    vertical = kb.getEggVertical();
++                } else if (projectile instanceof EntityEnderPearl) {
++                    horizontal = kb.getPearlHorizontal();
++                    vertical = kb.getPearlVertical();
++                }
++            }
++
++            double frictionHorizontal = kb.getFrictionHorizontal();
++            double frictionVertical = kb.getFrictionVertical();
+             // CubingPaper start - Nerf high-ping knockback
+             if (top.speedcubing.cubingpaper.CubingPaperConfig.nerfHighPingKnockback && this instanceof EntityPlayer) {
+                 EntityPlayer player = (EntityPlayer) this;
+                 if (player.ping >= top.speedcubing.cubingpaper.CubingPaperConfig.nerfHighPingKnockbackMinPing) {
+-                    friction = top.speedcubing.cubingpaper.CubingPaperConfig.nerfHighPingKnockbackFriction;
++                    frictionHorizontal = top.speedcubing.cubingpaper.CubingPaperConfig.nerfHighPingKnockbackFriction;
++                    frictionVertical = frictionHorizontal;
+                 }
+             }
+             // CubingPaper end - Nerf high-ping knockback
+-            double horizontalKnockback = PaperSpigotConfig.knockbackHorizontal;
+-            double verticalKnockback = PaperSpigotConfig.knockbackVertical;
+-
+-            this.motX /= friction;
+-            this.motY /= friction;
+-            this.motZ /= friction;
+-            this.motX -= d0 / magnitude * horizontalKnockback;
+-            this.motY += verticalKnockback;
+-            this.motZ -= d1 / magnitude * horizontalKnockback;
+-
+-            if (this.motY > PaperSpigotConfig.knockbackVerticalLimit) {
+-                this.motY = PaperSpigotConfig.knockbackVerticalLimit;
++
++            this.motX /= frictionHorizontal;
++            this.motY /= frictionVertical;
++            this.motZ /= frictionHorizontal;
++            this.motX -= d0 / magnitude * horizontal;
++            this.motY += vertical;
++            this.motZ -= d1 / magnitude * horizontal;
++
++            // WindSpigot - knockback addition
++            double addHorizontal = kb.getAddHorizontal();
++            if (addHorizontal != 0.0D) {
++                double addHorizontalX = this.motX < 0.0D ? -addHorizontal : addHorizontal;
++                double addHorizontalZ = this.motZ < 0.0D ? -addHorizontal : addHorizontal;
++                double absX = Math.abs(d0);
++                double absZ = Math.abs(d1);
++                if (this.motX > this.motZ) {
++                    this.motX += addHorizontalX;
++                    this.motZ += absX == 0.0D ? addHorizontalZ : addHorizontalZ * (absZ / absX);
++                } else if (this.motZ > this.motX) {
++                    this.motX += absZ == 0.0D ? addHorizontalX : addHorizontalX * (absX / absZ);
++                    this.motZ += addHorizontalZ;
++                } else {
++                    this.motX += addHorizontalX;
++                    this.motZ += addHorizontalZ;
++                }
++            }
++            this.motY += kb.getAddVertical();
++
++            if (this.motY > kb.getVerticalMax()) {
++                this.motY = kb.getVerticalMax();
++            }
++            if (this.motY < kb.getVerticalMin()) {
++                this.motY = kb.getVerticalMin();
+             }
+-            // FlamePaper end - Customizable knockback
+         }
+     }
++    // CubingPaper end
+ 
+     protected String bo() {
+         return "game.neutral.hurt";
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 0aa8297f..3c906056 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -713,6 +713,7 @@ public final class CraftServer implements Server {
+         org.github.paperspigot.PaperSpigotConfig.init((File) console.options.valueOf("paper-settings")); // PaperSpigot
+         net.techcable.tacospigot.TacoSpigotConfig.init((File) console.options.valueOf("taco-settings")); // TacoSpigot
+         top.speedcubing.cubingpaper.CubingPaperConfig.init((File) console.options.valueOf("cubing-settings")); // CubingPaper
++        top.speedcubing.cubingpaper.knockback.KnockbackConfig.init((File) console.options.valueOf("knockback-settings")); // CubingPaper
+         for (WorldServer world : console.worlds) {
+             world.worldData.setDifficulty(difficulty);
+             world.setSpawnFlags(monsters, animals);
+@@ -738,6 +739,7 @@ public final class CraftServer implements Server {
+         resetRecipes();
+         org.spigotmc.SpigotConfig.registerCommands(); // Spigot
+         org.github.paperspigot.PaperSpigotConfig.registerCommands(); // PaperSpigot
++        top.speedcubing.cubingpaper.knockback.KnockbackConfig.registerCommands(); // CubingPaper
+ 
+         overrideAllCommandBlockCommands = commandsConfiguration.getStringList("command-block-overrides").contains("*");
+ 
+@@ -1783,6 +1785,18 @@ public final class CraftServer implements Server {
+         return CraftMagicNumbers.INSTANCE;
+     }
+ 
++    // CubingPaper start - Configurable knockback profiles
++    @Override
++    public dev.cobblesword.nachospigot.knockback.KnockbackProfile getKnockbackProfile(String name) {
++        return top.speedcubing.cubingpaper.knockback.KnockbackConfig.getKbProfileByName(name);
++    }
++
++    @Override
++    public dev.cobblesword.nachospigot.knockback.KnockbackProfile getDefaultKnockbackProfile() {
++        return top.speedcubing.cubingpaper.knockback.KnockbackConfig.getCurrentKb();
++    }
++    // CubingPaper end
++
+     private final Spigot spigot = new Spigot()
+     {
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index 2509699f..b4e45cea 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -145,6 +145,12 @@ public class Main {
+                         .ofType(File.class)
+                         .defaultsTo(new File("cubing.yml"))
+                         .describedAs("Yml file");
++
++                acceptsAll(asList("knockback", "knockback-settings"), "File for knockback profiles")
++                        .withRequiredArg()
++                        .ofType(File.class)
++                        .defaultsTo(new File("knockback.yml"))
++                        .describedAs("Yml file");
+                 // CubingPaper end
+             }
+         };
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
+index c2d3866a..91dca079 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
+@@ -513,4 +513,16 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
+         getHandle().setArrowsStuck(arrows);
+     }
+     // TacoSpigot end
++
++    // CubingPaper start - Configurable knockback profiles
++    @Override
++    public dev.cobblesword.nachospigot.knockback.KnockbackProfile getKnockbackProfile() {
++        return getHandle().getKnockbackProfile();
++    }
++
++    @Override
++    public void setKnockbackProfile(dev.cobblesword.nachospigot.knockback.KnockbackProfile profile) {
++        getHandle().setKnockbackProfile(profile);
++    }
++    // CubingPaper end
+ }
+diff --git a/src/main/java/org/github/paperspigot/KnockbackCommand.java b/src/main/java/org/github/paperspigot/KnockbackCommand.java
+deleted file mode 100644
+index fe8f1747..00000000
+--- a/src/main/java/org/github/paperspigot/KnockbackCommand.java
++++ /dev/null
+@@ -1,146 +0,0 @@
+-package org.github.paperspigot;
+-
+-import com.google.common.collect.ImmutableList;
+-import org.bukkit.ChatColor;
+-import org.bukkit.command.Command;
+-import org.bukkit.command.CommandSender;
+-import org.bukkit.util.StringUtil;
+-
+-import java.util.ArrayList;
+-import java.util.List;
+-
+-public class KnockbackCommand extends Command {
+-    private static final List<String> ARGUMENTS = ImmutableList.of("friction", "horizontal", "vertical", "vertical-limit", "extra-horizontal", "extra-vertical", "reset", "show");
+-
+-    // Default values
+-    private final double knockbackFriction, knockbackHorizontal, knockbackVertical, knockbackVerticalLimit,
+-            knockbackExtraHorizontal, knockbackExtraVertical;
+-
+-    public KnockbackCommand(String name, double knockbackFriction, double knockbackHorizontal,
+-                                        double knockbackVertical, double knockbackVerticalLimit,
+-                                        double knockbackExtraHorizontal, double knockbackExtraVertical) {
+-        super(name);
+-        this.description = "Modify the knockback configuration";
+-        this.usageMessage = "/knockback " +
+-                "<friction|horizontal|vertical|vertical-limit|extra-horizontal|extra-vertical|reset|show> <value>";
+-        this.setPermission("bukkit.command.knockback");
+-        this.knockbackFriction = knockbackFriction;
+-        this.knockbackHorizontal = knockbackHorizontal;
+-        this.knockbackVertical = knockbackVertical;
+-        this.knockbackVerticalLimit = knockbackVerticalLimit;
+-        this.knockbackExtraHorizontal = knockbackExtraHorizontal;
+-        this.knockbackExtraVertical = knockbackExtraVertical;
+-    }
+-
+-    @Override
+-    public boolean execute(CommandSender sender, String currentAlias, String[] args) {
+-        if (!testPermission(sender)) {
+-            return true;
+-        }
+-        if (args.length < 1) {
+-            sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
+-            return true;
+-        }
+-
+-
+-        try {
+-            switch (args[0].toLowerCase()) {
+-                case "friction": {
+-                    double oldVal = PaperSpigotConfig.knockbackFriction;
+-                    double newVal = parseValue(args);
+-                    PaperSpigotConfig.knockbackFriction = newVal;
+-                    updated(sender, "friction", oldVal, newVal);
+-                    break;
+-                }
+-                case "horizontal": {
+-                    double oldVal = PaperSpigotConfig.knockbackHorizontal;
+-                    double newVal = parseValue(args);
+-                    PaperSpigotConfig.knockbackHorizontal = newVal;
+-                    updated(sender, "horizontal knockback", oldVal, newVal);
+-                    break;
+-                }
+-                case "vertical": {
+-                    double oldVal = PaperSpigotConfig.knockbackVertical;
+-                    double newVal = parseValue(args);
+-                    PaperSpigotConfig.knockbackVertical = newVal;
+-                    updated(sender, "vertical knockback", oldVal, newVal);
+-                    break;
+-                }
+-                case "vertical-limit": {
+-                    double oldVal = PaperSpigotConfig.knockbackVerticalLimit;
+-                    double newVal = parseValue(args);
+-                    PaperSpigotConfig.knockbackVerticalLimit = newVal;
+-                    updated(sender, "vertical limit", oldVal, newVal);
+-                    break;
+-                }
+-                case "extra-horizontal": {
+-                    double oldVal = PaperSpigotConfig.knockbackExtraHorizontal;
+-                    double newVal = parseValue(args);
+-                    PaperSpigotConfig.knockbackExtraHorizontal = newVal;
+-                    updated(sender, "horizontal (extra)", oldVal, newVal);
+-                    break;
+-                }
+-                case "extra-vertical": {
+-                    double oldVal = PaperSpigotConfig.knockbackExtraVertical;
+-                    double newVal = parseValue(args);
+-                    PaperSpigotConfig.knockbackExtraVertical = newVal;
+-                    updated(sender, "vertical (extra)", oldVal, newVal);
+-                    break;
+-                }
+-                case "reset":
+-                    PaperSpigotConfig.knockbackFriction = knockbackFriction;
+-                    PaperSpigotConfig.knockbackHorizontal = knockbackHorizontal;
+-                    PaperSpigotConfig.knockbackVertical = knockbackVertical;
+-                    PaperSpigotConfig.knockbackVerticalLimit = knockbackVerticalLimit;
+-                    PaperSpigotConfig.knockbackExtraHorizontal = knockbackExtraHorizontal;
+-                    PaperSpigotConfig.knockbackExtraVertical = knockbackExtraVertical;
+-                    sender.sendMessage(ChatColor.GREEN + "Knockback config reset to values from file.");
+-                    break;
+-                case "show":
+-                    sender.sendMessage(ChatColor.GOLD + "Knockback Configuration");
+-                    sendValue(sender, "Friction", PaperSpigotConfig.knockbackFriction);
+-                    sendValue(sender, "Horizontal Knockback", PaperSpigotConfig.knockbackHorizontal);
+-                    sendValue(sender, "Vertical Knockback", PaperSpigotConfig.knockbackVertical);
+-                    sendValue(sender, "Vertical Limit", PaperSpigotConfig.knockbackVerticalLimit);
+-                    sendValue(sender, "Horizontal (Extra)", PaperSpigotConfig.knockbackExtraHorizontal);
+-                    sendValue(sender, "Vertical (Extra)", PaperSpigotConfig.knockbackExtraVertical);
+-                    break;
+-                default:
+-                    sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
+-            }
+-        } catch (RuntimeException ex) {
+-            sender.sendMessage(ChatColor.RED + ex.getMessage());
+-        }
+-
+-        return true;
+-    }
+-
+-    @Override
+-    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
+-        if (args.length == 1) {
+-            return StringUtil.copyPartialMatches(args[0], ARGUMENTS, new ArrayList<>(ARGUMENTS.size()));
+-        }
+-        return ImmutableList.of();
+-    }
+-
+-    private double parseValue(String[] args) {
+-        if (args.length != 2)
+-            throw new RuntimeException("Please specify a single value to set the option to.");
+-
+-        try {
+-            return Double.parseDouble(args[1]);
+-        } catch (NumberFormatException ex) {
+-            throw new RuntimeException("Invalid value specified!");
+-        }
+-    }
+-
+-    private void updated(CommandSender viewer, String name, double oldVal, double newVal) {
+-        viewer.sendMessage(ChatColor.GREEN + "Updated " + ChatColor.GOLD + name + ChatColor.GREEN + " from " +
+-                ChatColor.BLUE + oldVal + ChatColor.GREEN + " to " + ChatColor.BLUE + newVal);
+-    }
+-
+-    private void sendValue(CommandSender viewer, String name, double value) {
+-        viewer.sendMessage(ChatColor.AQUA + ChatColor.BOLD.toString() + name + ChatColor.RESET +
+-                ": " + ChatColor.BLUE + value);
+-    }
+-}
+\ No newline at end of file
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
+index c866a4d2..8aecfaaa 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
+@@ -218,23 +218,16 @@ public class PaperSpigotConfig
+         allowMapDecorations = getBoolean("allow-map-decorations", false);
+     }
+ 
+-    public static double knockbackFriction;
+-    public static double knockbackHorizontal;
+-    public static double knockbackVertical;
+-    public static double knockbackVerticalLimit;
+-    public static double knockbackExtraHorizontal;
+-    public static double knockbackExtraVertical;
+-    private static void knockback() {
+-        knockbackFriction = getDouble( "knockback.friction", 2.0D );
+-        knockbackHorizontal = getDouble( "knockback.horizontal", 0.4D );
+-        knockbackVertical = getDouble( "knockback.vertical", 0.4D );
+-        knockbackVerticalLimit = getDouble( "knockback.vertical-limit", 0.4D );
+-        knockbackExtraHorizontal = getDouble( "knockback.extra-horizontal", 0.5D );
+-        knockbackExtraVertical = getDouble( "knockback.extra-vertical", 0.1D );
+-        commands.put("knockback", new KnockbackCommand( "knockback", knockbackFriction,
+-                knockbackHorizontal, knockbackVertical, knockbackVerticalLimit, knockbackExtraHorizontal,
+-                knockbackExtraVertical));
++    // CubingPaper start - Knockback moved to knockback.yml profiles
++    public static org.bukkit.configuration.ConfigurationSection legacyKnockback;
++    private static void legacyKnockback() {
++        legacyKnockback = config.getConfigurationSection("knockback");
++        if (legacyKnockback != null) {
++            // Picked up by KnockbackConfig for its 'default' profile
++            config.set("knockback", null);
++        }
+     }
++    // CubingPaper end
+ 
+     public static boolean pearlPassthroughFenceGate;
+     private static void pearlPassthroughFenceGate()
+diff --git a/src/main/java/top/speedcubing/cubingpaper/knockback/CraftKnockbackProfile.java b/src/main/java/top/speedcubing/cubingpaper/knockback/CraftKnockbackProfile.java
+new file mode 100644
+index 00000000..44c4a92e
+--- /dev/null
++++ b/src/main/java/top/speedcubing/cubingpaper/knockback/CraftKnockbackProfile.java
+@@ -0,0 +1,362 @@
++package top.speedcubing.cubingpaper.knockback;
++
++import dev.cobblesword.nachospigot.knockback.KnockbackProfile;
++
++/**
++ * Knockback profile ported from WindSpigot. The field defaults reproduce the
++ * stock knockback of this server, so a fresh profile changes nothing.
++ */
++public class CraftKnockbackProfile implements KnockbackProfile {
++
++    private String name;
++
++    private double horizontal = 0.4D;
++    private double vertical = 0.4D;
++    // No lower clamp in vanilla
++    private double verticalMin = Double.NEGATIVE_INFINITY;
++    private double verticalMax = 0.4D;
++    private double extraHorizontal = 0.5D;
++    private double extraVertical = 0.1D;
++    private double frictionHorizontal = 2.0D;
++    private double frictionVertical = 2.0D;
++
++    private boolean stopSprint = true;
++
++    private double rodHorizontal = 0.4D;
++    private double rodVertical = 0.4D;
++    private double arrowHorizontal = 0.4D;
++    private double arrowVertical = 0.4D;
++    private double pearlHorizontal = 0.4D;
++    private double pearlVertical = 0.4D;
++    private double snowballHorizontal = 0.4D;
++    private double snowballVertical = 0.4D;
++    private double eggHorizontal = 0.4D;
++    private double eggVertical = 0.4D;
++
++    private double wTapHorizontal = 0.5D;
++    private double wTapVertical = 0.1D;
++
++    private double addHorizontal = 0.0D;
++    private double addVertical = 0.0D;
++
++    public CraftKnockbackProfile(String name) {
++        this.name = name;
++    }
++
++    @Override
++    public void save() {
++        save(true);
++    }
++
++    @Override
++    public void save(boolean projectiles) {
++        write(projectiles);
++        KnockbackConfig.save();
++    }
++
++    /**
++     * Writes this profile into the loaded knockback.yml without saving the file.
++     */
++    void write(boolean projectiles) {
++        String path = "knockback.profiles." + this.name;
++        KnockbackConfig.set(path + ".stop-sprint", this.stopSprint);
++        KnockbackConfig.set(path + ".friction-horizontal", this.frictionHorizontal);
++        KnockbackConfig.set(path + ".friction-vertical", this.frictionVertical);
++        KnockbackConfig.set(path + ".horizontal", this.horizontal);
++        KnockbackConfig.set(path + ".vertical", this.vertical);
++        KnockbackConfig.set(path + ".vertical-max", this.verticalMax);
++        KnockbackConfig.set(path + ".vertical-min", this.verticalMin);
++        KnockbackConfig.set(path + ".extra-horizontal", this.extraHorizontal);
++        KnockbackConfig.set(path + ".extra-vertical", this.extraVertical);
++        KnockbackConfig.set(path + ".wtap-extra-horizontal", this.wTapHorizontal);
++        KnockbackConfig.set(path + ".wtap-extra-vertical", this.wTapVertical);
++        KnockbackConfig.set(path + ".add-horizontal", this.addHorizontal);
++        KnockbackConfig.set(path + ".add-vertical", this.addVertical);
++
++        if (projectiles) {
++            KnockbackConfig.set(path + ".projectiles.rod.horizontal", this.rodHorizontal);
++            KnockbackConfig.set(path + ".projectiles.rod.vertical", this.rodVertical);
++            KnockbackConfig.set(path + ".projectiles.arrow.horizontal", this.arrowHorizontal);
++            KnockbackConfig.set(path + ".projectiles.arrow.vertical", this.arrowVertical);
++            KnockbackConfig.set(path + ".projectiles.pearl.horizontal", this.pearlHorizontal);
++            KnockbackConfig.set(path + ".projectiles.pearl.vertical", this.pearlVertical);
++            KnockbackConfig.set(path + ".projectiles.snowball.horizontal", this.snowballHorizontal);
++            KnockbackConfig.set(path + ".projectiles.snowball.vertical", this.snowballVertical);
++            KnockbackConfig.set(path + ".projectiles.egg.horizontal", this.eggHorizontal);
++            KnockbackConfig.set(path + ".projectiles.egg.vertical", this.eggVertical);
++        }
++    }
++
++    @Override
++    public String getName() {
++        return name;
++    }
++
++    @Override
++    public void setName(String name) {
++        this.name = name;
++    }
++
++    @Override
++    public double getHorizontal() {
++        return horizontal;
++    }
++
++    @Override
++    public void setHorizontal(double horizontal) {
++        this.horizontal = horizontal;
++    }
++
++    @Override
++    public double getVertical() {
++        return vertical;
++    }
++
++    @Override
++    public void setVertical(double vertical) {
++        this.vertical = vertical;
++    }
++
++    @Override
++    public double getVerticalMin() {
++        return verticalMin;
++    }
++
++    @Override
++    public void setVerticalMin(double verticalMin) {
++        this.verticalMin = verticalMin;
++    }
++
++    @Override
++    public double getVerticalMax() {
++        return verticalMax;
++    }
++
++    @Override
++    public void setVerticalMax(double verticalMax) {
++        this.verticalMax = verticalMax;
++    }
++
++    @Override
++    public double getExtraHorizontal() {
++        return extraHorizontal;
++    }
++
++    @Override
++    public void setExtraHorizontal(double extraHorizontal) {
++        this.extraHorizontal = extraHorizontal;
++    }
++
++    @Override
++    public double getExtraVertical() {
++        return extraVertical;
++    }
++
++    @Override
++    public void setExtraVertical(double extraVertical) {
++        this.extraVertical = extraVertical;
++    }
++
++    @Override
++    public double getFrictionHorizontal() {
++        return frictionHorizontal;
++    }
++
++    @Override
++    public void setFrictionHorizontal(double frictionHorizontal) {
++        this.frictionHorizontal = frictionHorizontal;
++    }
++
++    @Override
++    public double getFrictionVertical() {
++        return frictionVertical;
++    }
++
++    @Override
++    public void setFrictionVertical(double frictionVertical) {
++        this.frictionVertical = frictionVertical;
++    }
++
++    @Override
++    public boolean isStopSprint() {
++        return stopSprint;
++    }
++
++    @Override
++    public void setStopSprint(boolean stopSprint) {
++        this.stopSprint = stopSprint;
++    }
++
++    @Override
++    public double getRodHorizontal() {
++        return rodHorizontal;
++    }
++
++    @Override
++    public void setRodHorizontal(double rodHorizontal) {
++        this.rodHorizontal = rodHorizontal;
++    }
++
++    @Override
++    public double getRodVertical() {
++        return rodVertical;
++    }
++
++    @Override
++    public void setRodVertical(double rodVertical) {
++        this.rodVertical = rodVertical;
++    }
++
++    @Override
++    public double getArrowHorizontal() {
++        return arrowHorizontal;
++    }
++
++    @Override
++    public void setArrowHorizontal(double arrowHorizontal) {
++        this.arrowHorizontal = arrowHorizontal;
++    }
++
++    @Override
++    public double getArrowVertical() {
++        return arrowVertical;
++    }
++
++    @Override
++    public void setArrowVertical(double arrowVertical) {
++        this.arrowVertical = arrowVertical;
++    }
++
++    @Override
++    public double getPearlHorizontal() {
++        return pearlHorizontal;
++    }
++
++    @Override
++    public void setPearlHorizontal(double pearlHorizontal) {
++        this.pearlHorizontal = pearlHorizontal;
++    }
++
++    @Override
++    public double getPearlVertical() {
++        return pearlVertical;
++    }
++
++    @Override
++    public void setPearlVertical(double pearlVertical) {
++        this.pearlVertical = pearlVertical;
++    }
++
++    @Override
++    public double getSnowballHorizontal() {
++        return snowballHorizontal;
++    }
++
++    @Override
++    public void setSnowballHorizontal(double snowballHorizontal) {
++        this.snowballHorizontal = snowballHorizontal;
++    }
++
++    @Override
++    public double getSnowballVertical() {
++        return snowballVertical;
++    }
++
++    @Override
++    public void setSnowballVertical(double snowballVertical) {
++        this.snowballVertical = snowballVertical;
++    }
++
++    @Override
++    public double getEggHorizontal() {
++        return eggHorizontal;
++    }
++
++    @Override
++    public void setEggHorizontal(double eggHorizontal) {
++        this.eggHorizontal = eggHorizontal;
++    }
++
++    @Override
++    public double getEggVertical() {
++        return eggVertical;
++    }
++
++    @Override
++    public void setEggVertical(double eggVertical) {
++        this.eggVertical = eggVertical;
++    }
++
++    @Override
++    public double getWTapExtraHorizontal() {
++        return wTapHorizontal;
++    }
++
++    @Override
++    public void setWTapExtraHorizontal(double wTapHorizontal) {
++        this.wTapHorizontal = wTapHorizontal;
++    }
++
++    @Override
++    public double getWTapExtraVertical() {
++        return wTapVertical;
++    }
++
++    @Override
++    public void setWTapExtraVertical(double wTapVertical) {
++        this.wTapVertical = wTapVertical;
++    }
++
++    @Override
++    public double getAddHorizontal() {
++        return addHorizontal;
++    }
++
++    @Override
++    public void setAddHorizontal(double addHorizontal) {
++        this.addHorizontal = addHorizontal;
++    }
++
++    @Override
++    public double getAddVertical() {
++        return addVertical;
++    }
++
++    @Override
++    public void setAddVertical(double addVertical) {
++        this.addVertical = addVertical;
++    }
++
++    @Override
++    public String[] getKnockbackValues() {
++        return new String[] {
++                "Horizontal\u00a77: " + this.horizontal,
++                "Vertical\u00a77: " + this.vertical,
++                "Vertical-Max\u00a77: " + this.verticalMax,
++                "Vertical-Min\u00a77: " + this.verticalMin,
++                "Extra-Horizontal\u00a77: " + this.extraHorizontal,
++                "Extra-Vertical\u00a77: " + this.extraVertical,
++                "Friction-Horizontal\u00a77: " + this.frictionHorizontal,
++                "Friction-Vertical\u00a77: " + this.frictionVertical,
++                "Stop-Sprint\u00a77: " + this.stopSprint,
++                "Wtap-Extra-Horizontal\u00a77: " + this.wTapHorizontal,
++                "Wtap-Extra-Vertical\u00a77: " + this.wTapVertical,
++                "Add-Horizontal\u00a77: " + this.addHorizontal,
++                "Add-Vertical\u00a77: " + this.addVertical };
++    }
++
++    @Override
++    public String[] getProjectilesValues() {
++        return new String[] {
++                "Rod-Horizontal\u00a77: " + this.rodHorizontal,
++                "Rod-Vertical\u00a77: " + this.rodVertical,
++                "Arrow-Horizontal\u00a77: " + this.arrowHorizontal,
++                "Arrow-Vertical\u00a77: " + this.arrowVertical,
++                "Pearl-Horizontal\u00a77: " + this.pearlHorizontal,
++                "Pearl-Vertical\u00a77: " + this.pearlVertical,
++                "Snowball-Horizontal\u00a77: " + this.snowballHorizontal,
++                "Snowball-Vertical\u00a77: " + this.snowballVertical,
++                "Egg-Horizontal\u00a77: " + this.eggHorizontal,
++                "Egg-Vertical\u00a77: " + this.eggVertical };
++    }
++}
+diff --git a/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackCommand.java b/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackCommand.java
+new file mode 100644
+index 00000000..634af66b
+--- /dev/null
++++ b/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackCommand.java
+@@ -0,0 +1,296 @@
++package top.speedcubing.cubingpaper.knockback;
++
++import com.google.common.collect.ImmutableList;
++import dev.cobblesword.nachospigot.knockback.KnockbackProfile;
++import java.util.ArrayList;
++import java.util.List;
++import net.md_5.bungee.api.chat.BaseComponent;
++import net.md_5.bungee.api.chat.ClickEvent;
++import net.md_5.bungee.api.chat.ComponentBuilder;
++import net.md_5.bungee.api.chat.HoverEvent;
++import net.md_5.bungee.api.chat.TextComponent;
++import org.bukkit.Bukkit;
++import org.bukkit.command.Command;
++import org.bukkit.command.CommandSender;
++import org.bukkit.entity.Player;
++import org.bukkit.util.StringUtil;
++
++/**
++ * WindSpigot's knockback profile editor.
++ */
++public class KnockbackCommand extends Command {
++
++    private static final String SEPARATOR = "\u00a78\u00a7m-=-------------------------=-";
++    private static final List<String> SUBCOMMANDS = ImmutableList.of("create", "delete", "load", "view", "projectile", "set", "edit");
++    private static final List<String> KNOCKBACK_VALUES = ImmutableList.of("horizontal", "vertical", "vertical-max",
++            "vertical-min", "extra-horizontal", "extra-vertical", "friction-horizontal", "friction-vertical",
++            "stop-sprint", "wtap-extra-horizontal", "wtap-extra-vertical", "add-horizontal", "add-vertical");
++    private static final List<String> PROJECTILE_VALUES = ImmutableList.of("rod-horizontal", "rod-vertical",
++            "arrow-horizontal", "arrow-vertical", "pearl-horizontal", "pearl-vertical", "snowball-horizontal",
++            "snowball-vertical", "egg-horizontal", "egg-vertical");
++
++    public KnockbackCommand(String name) {
++        super(name);
++        this.description = "Assists in knockback configuration.";
++        this.usageMessage = "/knockback [create|delete|load|view|projectile <profile>] [set <profile> <player>] [edit <profile> <value> <amount>]";
++        this.setAliases(ImmutableList.of("kb"));
++        this.setPermission("bukkit.command.knockback");
++    }
++
++    @Override
++    public boolean execute(CommandSender sender, String commandLabel, String[] args) {
++        if (!testPermission(sender)) {
++            return true;
++        }
++        if (!(sender instanceof Player)) {
++            sender.sendMessage("\u00a7cOnly players can use this command.");
++            return true;
++        }
++        Player player = (Player) sender;
++
++        if (args.length == 2) {
++            String name = args[1];
++            switch (args[0].toLowerCase()) {
++                case "create": {
++                    if (!isValidName(name)) {
++                        player.sendMessage("\u00a7cProfile names may only contain letters, digits, '-' and '_'.");
++                    } else if (KnockbackConfig.getKbProfileByName(name) != null) {
++                        player.sendMessage("\u00a7cA knockback profile with that name already exists.");
++                    } else {
++                        KnockbackConfig.createProfile(name);
++                        knockbackCommandMain(player);
++                        player.sendMessage("\u00a7aThe profile \u00a7e" + name + " \u00a7ahas been created.");
++                    }
++                    return true;
++                }
++                case "delete": {
++                    if (KnockbackConfig.getCurrentKb().getName().equalsIgnoreCase(name)) {
++                        knockbackCommandMain(player);
++                        player.sendMessage("\u00a7cYou cannot delete the profile that is being used.");
++                    } else if (KnockbackConfig.deleteProfile(name)) {
++                        knockbackCommandMain(player);
++                        player.sendMessage("\u00a7aThe profile \u00a7e" + name + " \u00a7ahas been removed.");
++                    } else {
++                        player.sendMessage("\u00a7cThis profile doesn't exist.");
++                    }
++                    return true;
++                }
++                case "load": {
++                    KnockbackProfile profile = KnockbackConfig.getKbProfileByName(name);
++                    if (profile == null) {
++                        player.sendMessage("\u00a7cThis profile doesn't exist.");
++                    } else if (KnockbackConfig.getCurrentKb() == profile) {
++                        player.sendMessage("\u00a7cThis profile is loaded.");
++                    } else {
++                        KnockbackConfig.setCurrentKb(profile);
++                        knockbackCommandMain(player);
++                        player.sendMessage("\u00a7aThe profile \u00a7e" + profile.getName() + " \u00a7ahas been loaded.");
++                    }
++                    return true;
++                }
++                case "view": {
++                    KnockbackProfile profile = KnockbackConfig.getKbProfileByName(name);
++                    if (profile == null) {
++                        player.sendMessage("\u00a7cThis profile doesn't exist.");
++                    } else {
++                        knockbackCommandView(player, profile);
++                    }
++                    return true;
++                }
++                case "projectile": {
++                    KnockbackProfile profile = KnockbackConfig.getKbProfileByName(name);
++                    if (profile == null) {
++                        player.sendMessage("\u00a7cThis profile doesn't exist.");
++                    } else {
++                        knockbackCommandViewProjectiles(player, profile);
++                    }
++                    return true;
++                }
++            }
++        } else if (args.length == 3 && "set".equalsIgnoreCase(args[0])) {
++            KnockbackProfile profile = KnockbackConfig.getKbProfileByName(args[1]);
++            if (profile == null) {
++                player.sendMessage("\u00a7cA profile with that name could not be found.");
++                return true;
++            }
++            Player target = Bukkit.getPlayer(args[2]);
++            if (target == null) {
++                player.sendMessage("\u00a7cThat player is not online.");
++                return true;
++            }
++            target.setKnockbackProfile(profile);
++            player.sendMessage("\u00a7aApplied the profile \u00a7e" + profile.getName() + " \u00a7ato \u00a7e" + target.getName() + "\u00a7a.");
++            return true;
++        } else if (args.length == 4 && "edit".equalsIgnoreCase(args[0])) {
++            KnockbackProfile profile = KnockbackConfig.getKbProfileByName(args[1]);
++            if (profile == null) {
++                player.sendMessage("\u00a7cThis profile doesn't exist.");
++                return true;
++            }
++            edit(player, profile, args[2].toLowerCase(), args[3]);
++            return true;
++        }
++
++        knockbackCommandMain(player);
++        return true;
++    }
++
++    private void edit(Player player, KnockbackProfile profile, String key, String input) {
++        if ("stop-sprint".equals(key)) {
++            if (!"true".equalsIgnoreCase(input) && !"false".equalsIgnoreCase(input)) {
++                player.sendMessage("\u00a74" + input + " \u00a7cis not a boolean.");
++                return;
++            }
++            profile.setStopSprint(Boolean.parseBoolean(input));
++            profile.save();
++            knockbackCommandView(player, profile);
++            player.sendMessage("\u00a7aValue edited and saved.");
++            return;
++        }
++
++        double value;
++        try {
++            value = Double.parseDouble(input);
++        } catch (NumberFormatException ex) {
++            player.sendMessage("\u00a74" + input + " \u00a7cis not a number.");
++            return;
++        }
++        if (Double.isNaN(value)) {
++            player.sendMessage("\u00a74" + input + " \u00a7cis not a number.");
++            return;
++        }
++
++        switch (key) {
++            case "horizontal": profile.setHorizontal(value); break;
++            case "vertical": profile.setVertical(value); break;
++            case "vertical-max": profile.setVerticalMax(value); break;
++            case "vertical-min": profile.setVerticalMin(value); break;
++            case "extra-horizontal": profile.setExtraHorizontal(value); break;
++            case "extra-vertical": profile.setExtraVertical(value); break;
++            case "friction-horizontal": profile.setFrictionHorizontal(value); break;
++            case "friction-vertical": profile.setFrictionVertical(value); break;
++            case "wtap-extra-horizontal": profile.setWTapExtraHorizontal(value); break;
++            case "wtap-extra-vertical": profile.setWTapExtraVertical(value); break;
++            case "add-horizontal": profile.setAddHorizontal(value); break;
++            case "add-vertical": profile.setAddVertical(value); break;
++            case "rod-horizontal": profile.setRodHorizontal(value); break;
++            case "rod-vertical": profile.setRodVertical(value); break;
++            case "arrow-horizontal": profile.setArrowHorizontal(value); break;
++            case "arrow-vertical": profile.setArrowVertical(value); break;
++            case "pearl-horizontal": profile.setPearlHorizontal(value); break;
++            case "pearl-vertical": profile.setPearlVertical(value); break;
++            case "snowball-horizontal": profile.setSnowballHorizontal(value); break;
++            case "snowball-vertical": profile.setSnowballVertical(value); break;
++            case "egg-horizontal": profile.setEggHorizontal(value); break;
++            case "egg-vertical": profile.setEggVertical(value); break;
++            default:
++                player.sendMessage("\u00a7cUnknown knockback value \u00a74" + key + "\u00a7c.");
++                return;
++        }
++        profile.save();
++        if (PROJECTILE_VALUES.contains(key)) {
++            knockbackCommandViewProjectiles(player, profile);
++        } else {
++            knockbackCommandView(player, profile);
++        }
++        player.sendMessage("\u00a7aValue edited and saved.");
++    }
++
++    @Override
++    public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
++        if (args.length == 1) {
++            return StringUtil.copyPartialMatches(args[0], SUBCOMMANDS, new ArrayList<String>());
++        }
++        if (args.length == 2 && SUBCOMMANDS.contains(args[0].toLowerCase()) && !"create".equalsIgnoreCase(args[0])) {
++            List<String> names = new ArrayList<>();
++            for (KnockbackProfile profile : KnockbackConfig.getKbProfiles()) {
++                names.add(profile.getName());
++            }
++            return StringUtil.copyPartialMatches(args[1], names, new ArrayList<String>());
++        }
++        if (args.length == 3 && "edit".equalsIgnoreCase(args[0])) {
++            List<String> values = new ArrayList<>(KNOCKBACK_VALUES);
++            values.addAll(PROJECTILE_VALUES);
++            return StringUtil.copyPartialMatches(args[2], values, new ArrayList<String>());
++        }
++        if (args.length == 3 && "set".equalsIgnoreCase(args[0])) {
++            return super.tabComplete(sender, alias, args);
++        }
++        return ImmutableList.of();
++    }
++
++    private void knockbackCommandMain(Player player) {
++        player.sendMessage(SEPARATOR + "\n\u00a7a\u00a7lKnockback profile list:\n");
++
++        for (KnockbackProfile profile : KnockbackConfig.getKbProfiles()) {
++            boolean current = KnockbackConfig.getCurrentKb() == profile;
++
++            TextComponent line = clickable("\u00a78\u00a7l(\u00a7e\u00a7l\u279c\u00a78\u00a7l) ",
++                    "\u00a7c[Click here to apply this profile to a player] ",
++                    "/kb set " + profile.getName() + " ", ClickEvent.Action.SUGGEST_COMMAND);
++            TextComponent load = clickable("\u00a78\u00a7l(" + (current ? "\u00a7a" : "\u00a77") + "\u2714\u00a78\u00a7l) ",
++                    current ? "\u00a7c[This profile is loaded] " : "\u00a7a[Click here to load this profile]",
++                    "/kb load " + profile.getName(), ClickEvent.Action.RUN_COMMAND);
++            TextComponent delete = clickable("\u00a78\u00a7l(\u00a7c\u00a7l\u2716\u00a78\u00a7l) ",
++                    "\u00a7c[Click here to delete this profile] ",
++                    "/kb delete " + profile.getName(), ClickEvent.Action.RUN_COMMAND);
++            TextComponent edit = clickable("\u00a77 " + profile.getName() + " \u00a78\u00a7l[\u00a76\u00a7l\u270e\u00a78\u00a7l]",
++                    "\u00a7e[Click here to edit this profile]",
++                    "/kb view " + profile.getName(), ClickEvent.Action.RUN_COMMAND);
++            player.spigot().sendMessage(new BaseComponent[] { line, load, delete, edit });
++        }
++
++        player.spigot().sendMessage(clickable("\n\u00a78\u00a7l[\u00a7a\u00a7lCreate new profile\u00a78]",
++                "\u00a7c[Click here to create a new profile]", "/kb create ", ClickEvent.Action.SUGGEST_COMMAND));
++        player.sendMessage(SEPARATOR);
++    }
++
++    private void knockbackCommandView(Player player, KnockbackProfile profile) {
++        player.sendMessage(SEPARATOR + "\n\u00a7a\u00a7lKnockback values:\n");
++        sendValues(player, profile, profile.getKnockbackValues());
++        TextComponent back = clickable("\n\u00a78\u00a7l[\u00a7c\u00a7l\u2b11\u00a78\u00a7l] ", "\u00a7e[Click to back]",
++                "/kb", ClickEvent.Action.RUN_COMMAND);
++        TextComponent projectiles = clickable(" \u00a78\u00a7l[\u00a7a\u00a7lEdit projectiles\u00a78\u00a7l]",
++                "\u00a7e[Click to edit projectiles]", "/kb projectile " + profile.getName(), ClickEvent.Action.RUN_COMMAND);
++        player.spigot().sendMessage(new BaseComponent[] { back, projectiles });
++        player.sendMessage(SEPARATOR);
++    }
++
++    private void knockbackCommandViewProjectiles(Player player, KnockbackProfile profile) {
++        player.sendMessage(SEPARATOR + "\n\u00a7a\u00a7lProjectiles values: \n");
++        sendValues(player, profile, profile.getProjectilesValues());
++        TextComponent back = clickable("\n\u00a78\u00a7l[\u00a7c\u00a7l\u2b11\u00a78\u00a7l] ", "\u00a7e[Click to back]",
++                "/kb", ClickEvent.Action.RUN_COMMAND);
++        TextComponent knockback = clickable("\u00a78\u00a7l[\u00a7a\u00a7lEdit knockback\u00a78\u00a7l]",
++                "\u00a7e[Click here to edit this knockback]", "/kb view " + profile.getName(), ClickEvent.Action.RUN_COMMAND);
++        player.spigot().sendMessage(new BaseComponent[] { back, knockback });
++        player.sendMessage(SEPARATOR);
++    }
++
++    private void sendValues(Player player, KnockbackProfile profile, String[] values) {
++        for (String value : values) {
++            TextComponent text = new TextComponent("\u00a76\u00bb \u00a7e" + value);
++            TextComponent edit = clickable(" \u00a78\u00a7l[\u00a7e\u00a7l\u270e\u00a78\u00a7l]",
++                    "\u00a7e[Click to edit " + value + " value]",
++                    "/kb edit " + profile.getName() + " " + value.replace("\u00a77: ", " "), ClickEvent.Action.SUGGEST_COMMAND);
++            player.spigot().sendMessage(new BaseComponent[] { text, edit });
++        }
++    }
++
++    private static TextComponent clickable(String message, String hover, String command, ClickEvent.Action action) {
++        TextComponent component = new TextComponent(message);
++        component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hover).create()));
++        component.setClickEvent(new ClickEvent(action, command));
++        return component;
++    }
++
++    private static boolean isValidName(String name) {
++        for (int i = 0; i < name.length(); i++) {
++            char c = name.charAt(i);
++            if (!Character.isLetterOrDigit(c) && c != '-' && c != '_') {
++                return false;
++            }
++        }
++        return !name.isEmpty();
++    }
++}
+diff --git a/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackConfig.java b/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackConfig.java
+new file mode 100644
+index 00000000..2e70a492
+--- /dev/null
++++ b/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackConfig.java
+@@ -0,0 +1,315 @@
++package top.speedcubing.cubingpaper.knockback;
++
++import com.google.common.base.Throwables;
++import dev.cobblesword.nachospigot.knockback.KnockbackProfile;
++import java.io.File;
++import java.io.IOException;
++import java.util.Collections;
++import java.util.Iterator;
++import java.util.LinkedHashSet;
++import java.util.Set;
++import java.util.logging.Level;
++import net.minecraft.server.MinecraftServer;
++import org.bukkit.Bukkit;
++import org.bukkit.configuration.ConfigurationSection;
++import org.bukkit.configuration.InvalidConfigurationException;
++import org.bukkit.configuration.file.YamlConfiguration;
++
++/**
++ * knockback.yml, ported from WindSpigot. Holds every knockback profile and the
++ * name of the server default profile ("knockback.current").
++ */
++public class KnockbackConfig {
++
++    public static final String DEFAULT_PROFILE = "default";
++    private static final String PROFILES = "knockback.profiles";
++    private static final String CURRENT = "knockback.current";
++    private static final String HEADER = "This is the knockback configuration file for CubingPaper.\n"
++            + "Every living entity without a profile of its own uses the profile named by 'knockback.current'.\n"
++            + "The 'default' profile reproduces stock 1.8 knockback.\n"
++            + "Value reference: https://github.com/Wind-Development/WindSpigot/wiki/Knockback-Configuration\n";
++
++    private static File configFile;
++    private static YamlConfiguration config;
++
++    private static volatile KnockbackProfile currentKb;
++    // Main thread only
++    private static final Set<KnockbackProfile> kbProfiles = new LinkedHashSet<>();
++
++    public static void init(File file) {
++        configFile = file;
++        config = new YamlConfiguration();
++        boolean fresh = !file.exists();
++        try {
++            config.load(file);
++        } catch (IOException ignored) {
++        } catch (InvalidConfigurationException ex) {
++            Bukkit.getLogger().log(Level.SEVERE, "Could not load knockback.yml, please correct your syntax errors", ex);
++            throw Throwables.propagate(ex);
++        }
++        config.options().header(HEADER);
++
++        Set<String> keys = getKeys(PROFILES);
++        if (!containsIgnoreCase(keys, DEFAULT_PROFILE)) {
++            CraftKnockbackProfile defaultProfile = new CraftKnockbackProfile(DEFAULT_PROFILE);
++            migrateLegacyKnockback(defaultProfile);
++            defaultProfile.write(true);
++        }
++        if (fresh) {
++            createWindSpigotPresets();
++        }
++        createCommunityPresets(keys);
++
++        keys = getKeys(PROFILES);
++        Set<KnockbackProfile> loaded = new LinkedHashSet<>();
++        for (String key : keys) {
++            String path = PROFILES + "." + key;
++            CraftKnockbackProfile profile = (CraftKnockbackProfile) getKbProfileByName(key);
++            if (profile == null) {
++                profile = new CraftKnockbackProfile(key);
++            } else {
++                profile.setName(key);
++            }
++            load(profile, path);
++            loaded.add(profile);
++        }
++        // Keep the instances entities already reference, drop profiles removed from the file
++        kbProfiles.retainAll(loaded);
++        kbProfiles.addAll(loaded);
++
++        String current = config.getString(CURRENT, DEFAULT_PROFILE);
++        currentKb = getKbProfileByName(current);
++        if (currentKb == null) {
++            Bukkit.getLogger().warning("Knockback profile '" + current + "' was not found, using '" + DEFAULT_PROFILE + "'");
++            currentKb = getKbProfileByName(DEFAULT_PROFILE);
++            config.set(CURRENT, DEFAULT_PROFILE);
++        } else {
++            config.set(CURRENT, currentKb.getName());
++        }
++        save();
++    }
++
++    private static void load(CraftKnockbackProfile profile, String path) {
++        profile.setStopSprint(config.getBoolean(path + ".stop-sprint", true));
++        profile.setFrictionHorizontal(config.getDouble(path + ".friction-horizontal", 2.0D));
++        profile.setFrictionVertical(config.getDouble(path + ".friction-vertical", 2.0D));
++        profile.setHorizontal(config.getDouble(path + ".horizontal", 0.4D));
++        profile.setVertical(config.getDouble(path + ".vertical", 0.4D));
++        profile.setVerticalMax(config.getDouble(path + ".vertical-max", 0.4D));
++        profile.setVerticalMin(config.getDouble(path + ".vertical-min", Double.NEGATIVE_INFINITY));
++        profile.setExtraHorizontal(config.getDouble(path + ".extra-horizontal", 0.5D));
++        profile.setExtraVertical(config.getDouble(path + ".extra-vertical", 0.1D));
++        profile.setWTapExtraHorizontal(config.getDouble(path + ".wtap-extra-horizontal", 0.5D));
++        profile.setWTapExtraVertical(config.getDouble(path + ".wtap-extra-vertical", 0.1D));
++        profile.setAddHorizontal(config.getDouble(path + ".add-horizontal", 0.0D));
++        profile.setAddVertical(config.getDouble(path + ".add-vertical", 0.0D));
++        profile.setRodHorizontal(config.getDouble(path + ".projectiles.rod.horizontal", 0.4D));
++        profile.setRodVertical(config.getDouble(path + ".projectiles.rod.vertical", 0.4D));
++        profile.setArrowHorizontal(config.getDouble(path + ".projectiles.arrow.horizontal", 0.4D));
++        profile.setArrowVertical(config.getDouble(path + ".projectiles.arrow.vertical", 0.4D));
++        profile.setPearlHorizontal(config.getDouble(path + ".projectiles.pearl.horizontal", 0.4D));
++        profile.setPearlVertical(config.getDouble(path + ".projectiles.pearl.vertical", 0.4D));
++        profile.setSnowballHorizontal(config.getDouble(path + ".projectiles.snowball.horizontal", 0.4D));
++        profile.setSnowballVertical(config.getDouble(path + ".projectiles.snowball.vertical", 0.4D));
++        profile.setEggHorizontal(config.getDouble(path + ".projectiles.egg.horizontal", 0.4D));
++        profile.setEggVertical(config.getDouble(path + ".projectiles.egg.vertical", 0.4D));
++        // Write back missing keys so the file always lists every value
++        profile.write(true);
++    }
++
++    /**
++     * Carries over the knockback section that paper.yml used to hold, so
++     * servers that tuned it keep their knockback.
++     */
++    private static void migrateLegacyKnockback(CraftKnockbackProfile profile) {
++        ConfigurationSection legacy = org.github.paperspigot.PaperSpigotConfig.legacyKnockback;
++        if (legacy == null) {
++            return;
++        }
++        double friction = legacy.getDouble("friction", 2.0D);
++        profile.setFrictionHorizontal(friction);
++        profile.setFrictionVertical(friction);
++        profile.setHorizontal(legacy.getDouble("horizontal", 0.4D));
++        profile.setVertical(legacy.getDouble("vertical", 0.4D));
++        profile.setVerticalMax(legacy.getDouble("vertical-limit", 0.4D));
++        profile.setExtraHorizontal(legacy.getDouble("extra-horizontal", 0.5D));
++        profile.setWTapExtraHorizontal(legacy.getDouble("extra-horizontal", 0.5D));
++        profile.setExtraVertical(legacy.getDouble("extra-vertical", 0.1D));
++        profile.setWTapExtraVertical(legacy.getDouble("extra-vertical", 0.1D));
++        Bukkit.getLogger().info("Migrated the paper.yml knockback settings into the knockback.yml 'default' profile");
++    }
++
++    /**
++     * The extra profiles WindSpigot ships, written once when knockback.yml is created.
++     */
++    private static void createWindSpigotPresets() {
++        CraftKnockbackProfile kohi = windSpigotProfile("kohi");
++        kohi.setHorizontal(0.35D);
++        kohi.setRodHorizontal(0.35D);
++        kohi.setArrowHorizontal(0.35D);
++        kohi.setPearlHorizontal(0.35D);
++        kohi.setSnowballHorizontal(0.35D);
++        kohi.setEggHorizontal(0.35D);
++        kohi.setExtraHorizontal(0.425D);
++        kohi.setWTapExtraHorizontal(0.425D);
++        kohi.setVertical(0.35D);
++        kohi.setRodVertical(0.35D);
++        kohi.setArrowVertical(0.35D);
++        kohi.setPearlVertical(0.35D);
++        kohi.setSnowballVertical(0.35D);
++        kohi.setEggVertical(0.35D);
++        kohi.setExtraVertical(0.085D);
++        kohi.setWTapExtraVertical(0.085D);
++        kohi.write(true);
++
++        // https://www.spigotmc.org/resources/legacykb-disable-netherite-knockback-resistance.86080/
++        CraftKnockbackProfile hypixel = windSpigotProfile("hypixel");
++        hypixel.setVertical(0.36D);
++        hypixel.setVerticalMax(0.43075D);
++        hypixel.write(true);
++
++        CraftKnockbackProfile windpvp = windSpigotProfile("windpvp");
++        windpvp.setHorizontal(0.35D);
++        windpvp.setRodHorizontal(0.425D);
++        windpvp.setArrowHorizontal(0.425D);
++        windpvp.setPearlHorizontal(0.35D);
++        windpvp.setSnowballHorizontal(0.425D);
++        windpvp.setEggHorizontal(0.425D);
++        windpvp.setExtraHorizontal(0.425D);
++        windpvp.setWTapExtraHorizontal(0.425D);
++        windpvp.setVertical(0.35D);
++        windpvp.setRodVertical(0.425D);
++        windpvp.setArrowVertical(0.425D);
++        windpvp.setPearlVertical(0.35D);
++        windpvp.setSnowballVertical(0.425D);
++        windpvp.setEggVertical(0.425D);
++        windpvp.setExtraVertical(0.085D);
++        windpvp.setWTapExtraVertical(0.085D);
++        windpvp.write(true);
++    }
++
++    /**
++     * Community profiles, added whenever they are missing (so existing knockback.yml files get them too).
++     * Approximations: our model can't express every fork's formula.
++     */
++    private static void createCommunityPresets(Set<String> keys) {
++        if (!containsIgnoreCase(keys, "mmc")) {
++            // Minemen Club, approximated from the MineralSpigot replica
++            // https://gist.github.com/jaidennnnn/d29d67217e17d745f8b7afdb146ea4e9 :
++            // horizontal = 0.8835 * 0.6, vertical = 0.9055 * 0.4, extra horizontal = 0.8835 * 0.4 per level, no extra
++            // vertical, vertical limit 0.4, and friction 0 there = the victim's motion is reset (a huge friction here).
++            // Not reproducible: the 50/50 position/yaw direction blend and the beyond-3-blocks extra reduction.
++            CraftKnockbackProfile mmc = new CraftKnockbackProfile("mmc");
++            mmc.setFrictionHorizontal(1_000_000D);
++            mmc.setFrictionVertical(1_000_000D);
++            mmc.setHorizontal(0.5301D);
++            mmc.setVertical(0.3622D);
++            mmc.setVerticalMax(0.4D);
++            mmc.setExtraHorizontal(0.3534D);
++            mmc.setWTapExtraHorizontal(0.3534D);
++            mmc.setExtraVertical(0.0D);
++            mmc.setWTapExtraVertical(0.0D);
++            mmc.write(true);
++        }
++        if (!containsIgnoreCase(keys, "velocity")) {
++            // "Velocity" from https://github.com/tdvne/Bot-Practice/blob/master/src/main/resources/knockback.yml
++            CraftKnockbackProfile velocity = new CraftKnockbackProfile("velocity");
++            velocity.setHorizontal(0.35D);
++            velocity.setVertical(0.35D);
++            velocity.setVerticalMax(0.35D);
++            velocity.setExtraHorizontal(0.5D);
++            velocity.setWTapExtraHorizontal(0.5D);
++            velocity.setExtraVertical(0.01D);
++            velocity.setWTapExtraVertical(0.01D);
++            velocity.write(true);
++        }
++    }
++
++    private static CraftKnockbackProfile windSpigotProfile(String name) {
++        CraftKnockbackProfile profile = new CraftKnockbackProfile(name);
++        profile.setVerticalMin(-1.0D); // WindSpigot's lower clamp
++        return profile;
++    }
++
++    public static void registerCommands() {
++        MinecraftServer.getServer().server.getCommandMap().register("knockback", "CubingPaper", new KnockbackCommand("knockback"));
++    }
++
++    public static KnockbackProfile getCurrentKb() {
++        return currentKb;
++    }
++
++    public static void setCurrentKb(KnockbackProfile kb) {
++        currentKb = kb;
++        config.set(CURRENT, kb.getName());
++        save();
++    }
++
++    public static KnockbackProfile getKbProfileByName(String name) {
++        if (name == null) {
++            return null;
++        }
++        for (KnockbackProfile profile : kbProfiles) {
++            if (profile.getName().equalsIgnoreCase(name)) {
++                return profile;
++            }
++        }
++        return null;
++    }
++
++    public static Set<KnockbackProfile> getKbProfiles() {
++        return Collections.unmodifiableSet(kbProfiles);
++    }
++
++    public static KnockbackProfile createProfile(String name) {
++        CraftKnockbackProfile profile = new CraftKnockbackProfile(name);
++        kbProfiles.add(profile);
++        profile.save();
++        return profile;
++    }
++
++    public static boolean deleteProfile(String name) {
++        for (Iterator<KnockbackProfile> it = kbProfiles.iterator(); it.hasNext(); ) {
++            KnockbackProfile profile = it.next();
++            if (profile.getName().equalsIgnoreCase(name)) {
++                it.remove();
++                config.set(PROFILES + "." + profile.getName(), null);
++                save();
++                return true;
++            }
++        }
++        return false;
++    }
++
++    public static void save() {
++        try {
++            config.save(configFile);
++        } catch (IOException ex) {
++            Bukkit.getLogger().log(Level.SEVERE, "Could not save " + configFile, ex);
++        }
++    }
++
++    /**
++     * Sets a value without writing the file; call {@link #save()} afterwards.
++     */
++    static void set(String path, Object value) {
++        config.set(path, value);
++    }
++
++    private static Set<String> getKeys(String path) {
++        if (!config.isConfigurationSection(path)) {
++            config.createSection(path);
++            return Collections.emptySet();
++        }
++        return config.getConfigurationSection(path).getKeys(false);
++    }
++
++    private static boolean containsIgnoreCase(Set<String> keys, String name) {
++        for (String key : keys) {
++            if (key.equalsIgnoreCase(name)) {
++                return true;
++            }
++        }
++        return false;
++    }
++}
+-- 
+2.55.0.windows.5
+

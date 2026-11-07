@@ -1,0 +1,210 @@
+From 350e6f7a3f59bfda335ca89a76e016db016d2798 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Sat, 7 Nov 2026 23:40:13 +0800
+Subject: [PATCH] Configurable knockback profiles
+
+
+diff --git a/src/main/java/dev/cobblesword/nachospigot/knockback/KnockbackProfile.java b/src/main/java/dev/cobblesword/nachospigot/knockback/KnockbackProfile.java
+new file mode 100644
+index 00000000..dff10378
+--- /dev/null
++++ b/src/main/java/dev/cobblesword/nachospigot/knockback/KnockbackProfile.java
+@@ -0,0 +1,108 @@
++package dev.cobblesword.nachospigot.knockback;
++
++public interface KnockbackProfile {
++
++	void save();
++
++	void save(boolean projectiles);
++
++	String getName();
++
++	void setName(String name);
++
++	double getHorizontal();
++
++	void setHorizontal(double horizontal);
++
++	double getVertical();
++
++	void setVertical(double vertical);
++
++	double getVerticalMin();
++
++	void setVerticalMin(double verticalMin);
++
++	double getVerticalMax();
++
++	void setVerticalMax(double verticalMax);
++
++	double getExtraHorizontal();
++
++	void setExtraHorizontal(double extraHorizontal);
++
++	double getExtraVertical();
++
++	void setExtraVertical(double extraVertical);
++
++	double getFrictionHorizontal();
++
++	void setFrictionHorizontal(double frictionHorizontal);
++
++	double getFrictionVertical();
++
++	void setFrictionVertical(double frictionVertical);
++
++	boolean isStopSprint();
++
++	void setStopSprint(boolean stopSprint);
++
++	double getRodHorizontal();
++
++	void setRodHorizontal(double rodHorizontal);
++
++	double getRodVertical();
++
++	void setRodVertical(double rodVertical);
++
++	double getArrowHorizontal();
++
++	void setArrowHorizontal(double arrowHorizontal);
++
++	double getArrowVertical();
++
++	void setArrowVertical(double arrowVertical);
++
++	double getPearlHorizontal();
++
++	void setPearlHorizontal(double pearlHorizontal);
++
++	double getPearlVertical();
++
++	void setPearlVertical(double pearlVertical);
++
++	double getSnowballHorizontal();
++
++	void setSnowballHorizontal(double snowballHorizontal);
++
++	double getSnowballVertical();
++
++	void setSnowballVertical(double snowballVertical);
++
++	double getEggHorizontal();
++
++	void setEggHorizontal(double eggHorizontal);
++
++	double getEggVertical();
++
++	void setEggVertical(double eggVertical);
++	
++	double getWTapExtraHorizontal();
++	
++	void setWTapExtraHorizontal(double wTapHorizontal);
++	
++	double getWTapExtraVertical();
++	
++	void setWTapExtraVertical(double wTapVertical);
++	
++	double getAddHorizontal();
++	
++	void setAddHorizontal(double addHorizontal);
++	
++	double getAddVertical();
++	
++	void setAddVertical(double addVertical);
++
++	String[] getKnockbackValues();
++
++	String[] getProjectilesValues();
++}
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index 8fbc8283..dbaa6906 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -1162,6 +1162,28 @@ public final class Bukkit {
+     }
+     // Paper end
+ 
++    // CubingPaper start - Configurable knockback profiles
++    /**
++     * Gets a knockback profile from knockback.yml by name.
++     *
++     * @param name the profile name, case-insensitive
++     * @return the profile, or null if no profile with that name exists
++     */
++    public static dev.cobblesword.nachospigot.knockback.KnockbackProfile getKnockbackProfile(String name) {
++        return server.getKnockbackProfile(name);
++    }
++
++    /**
++     * Gets the server default knockback profile, used by every living entity
++     * that has no knockback profile of its own.
++     *
++     * @return the default knockback profile
++     */
++    public static dev.cobblesword.nachospigot.knockback.KnockbackProfile getDefaultKnockbackProfile() {
++        return server.getDefaultKnockbackProfile();
++    }
++    // CubingPaper end
++
+     public static Server.Spigot spigot()
+     {
+         return server.spigot();
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 1b62463a..94b3b527 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -950,6 +950,24 @@ public interface Server extends PluginMessageRecipient {
+     CommandMap getCommandMap();
+     // Paper end
+ 
++    // CubingPaper start - Configurable knockback profiles
++    /**
++     * Gets a knockback profile from knockback.yml by name.
++     *
++     * @param name the profile name, case-insensitive
++     * @return the profile, or null if no profile with that name exists
++     */
++    dev.cobblesword.nachospigot.knockback.KnockbackProfile getKnockbackProfile(String name);
++
++    /**
++     * Gets the server default knockback profile, used by every living entity
++     * that has no knockback profile of its own.
++     *
++     * @return the default knockback profile
++     */
++    dev.cobblesword.nachospigot.knockback.KnockbackProfile getDefaultKnockbackProfile();
++    // CubingPaper end
++
+     public class Spigot
+     {
+         @Deprecated
+diff --git a/src/main/java/org/bukkit/entity/LivingEntity.java b/src/main/java/org/bukkit/entity/LivingEntity.java
+index 9e0c005f..de4ce5fd 100644
+--- a/src/main/java/org/bukkit/entity/LivingEntity.java
++++ b/src/main/java/org/bukkit/entity/LivingEntity.java
+@@ -408,4 +408,20 @@ public interface LivingEntity extends Entity, Damageable, ProjectileSource {
+      */
+     void setArrowsStuck(int arrows);
+     // Paper end
++
++    // CubingPaper start - Configurable knockback profiles
++    /**
++     * Gets the knockback profile applied when this entity takes knockback.
++     *
++     * @return the entity's own profile, or null if it uses the server default profile
++     */
++    dev.cobblesword.nachospigot.knockback.KnockbackProfile getKnockbackProfile();
++
++    /**
++     * Sets the knockback profile applied when this entity takes knockback.
++     *
++     * @param profile the profile, or null to use the server default profile
++     */
++    void setKnockbackProfile(dev.cobblesword.nachospigot.knockback.KnockbackProfile profile);
++    // CubingPaper end
+ }
+-- 
+2.55.0.windows.5
+
