@@ -1,0 +1,33 @@
+From 56bd66d881cd11ae6c936877b3c7d6dc5071b609 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Sun, 15 Nov 2026 11:09:58 +0800
+Subject: [PATCH] Hash set for the chunk unload queue
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 4fa2ffdd..598a8a43 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -28,7 +28,7 @@ import org.github.paperspigot.exception.ServerInternalException;
+ // TacoSpigot start
+ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+-import it.unimi.dsi.fastutil.longs.LongArraySet;
++import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+ import it.unimi.dsi.fastutil.longs.LongIterator;
+ import it.unimi.dsi.fastutil.longs.LongSet;
+ // TacoSpigot end
+@@ -36,7 +36,9 @@ import it.unimi.dsi.fastutil.longs.LongSet;
+ public class ChunkProviderServer implements IChunkProvider {
+ 
+     private static final Logger b = LogManager.getLogger();
+-    public LongSet unloadQueue = new LongArraySet(); // CraftBukkit - LongHashSet // TacoSpigot - LongHashSet -> HashArraySet
++    // CubingPaper - hash set: getChunkAt removes from this on every block lookup, and an array set scans linearly
++    // (TacoSpigot's LongArraySet), which hurts as soon as the queue grows, e.g. in worlds that never save
++    public LongSet unloadQueue = new LongOpenHashSet();
+     public Chunk emptyChunk;
+     public IChunkProvider chunkProvider;
+     private IChunkLoader chunkLoader;
+-- 
+2.55.0.windows.5
+
