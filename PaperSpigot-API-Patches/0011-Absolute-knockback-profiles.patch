@@ -1,0 +1,45 @@
+From 7bb54366d2b9b17f0951b43ba40a191e76e1e050 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Mon, 16 Nov 2026 11:47:12 +0800
+Subject: [PATCH] Absolute knockback profiles
+
+A profile with absolute: true sets the victim's velocity on a player melee hit (horizontal along the
+attacker-to-victim line, vertical up) instead of adding to its motion; friction, the add values and the
+vertical limits are skipped, the (wtap-)extra values still apply. client-sprint: true also counts the
+client's sprint packets as sprinting, so stop-sprint no longer drops the sprint extra while W is held.
+Adds the 'absolute' preset (the practice plugin's AbsoluteKnockback values).
+
+diff --git a/src/main/java/dev/cobblesword/nachospigot/knockback/KnockbackProfile.java b/src/main/java/dev/cobblesword/nachospigot/knockback/KnockbackProfile.java
+index dff10378..25b70b38 100644
+--- a/src/main/java/dev/cobblesword/nachospigot/knockback/KnockbackProfile.java
++++ b/src/main/java/dev/cobblesword/nachospigot/knockback/KnockbackProfile.java
+@@ -102,6 +102,26 @@ public interface KnockbackProfile {
+ 	
+ 	void setAddVertical(double addVertical);
+ 
++	/**
++	 * Absolute knockback: a player melee hit replaces the victim's velocity with
++	 * {@code horizontal} along the attacker-to-victim line and {@code vertical}, instead of
++	 * adding them to the victim's own motion. Friction, the vertical limits and the add
++	 * values are not used for that hit; the (wtap-)extra values are still added on top.
++	 * Projectiles keep the normal formula.
++	 */
++	boolean isAbsolute();
++
++	void setAbsolute(boolean absolute);
++
++	/**
++	 * Also count the attacker as sprinting while its client says so (start/stop sprint
++	 * packets), not only while the server flag is set. Stop-sprint clears only the server
++	 * flag, so with this on every hit while W is held gets the wtap-extra values.
++	 */
++	boolean isClientSprint();
++
++	void setClientSprint(boolean clientSprint);
++
+ 	String[] getKnockbackValues();
+ 
+ 	String[] getProjectilesValues();
+-- 
+2.55.0.windows.5
+

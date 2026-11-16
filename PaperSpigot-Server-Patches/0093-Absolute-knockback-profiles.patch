@@ -1,0 +1,221 @@
+From 2e671416dfb15f0fe765c9f3e5ba9f7014e985d0 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Mon, 16 Nov 2026 11:47:12 +0800
+Subject: [PATCH] Absolute knockback profiles
+
+A profile with absolute: true sets the victim's velocity on a player melee hit (horizontal along the
+attacker-to-victim line, vertical up) instead of adding to its motion; friction, the add values and the
+vertical limits are skipped, the (wtap-)extra values still apply. client-sprint: true also counts the
+client's sprint packets as sprinting, so stop-sprint no longer drops the sprint extra while W is held.
+Adds the 'absolute' preset: the practice plugin's AbsoluteKnockback with the values prod tuned it to
+(0.425 / 0.36, sprint extra 0.31).
+
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index c2f93d15..ecc34965 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -969,7 +969,11 @@ public abstract class EntityHuman extends EntityLiving {
+ 
+                 int i = b0 + EnchantmentManager.a((EntityLiving) this);
+ 
+-                boolean sprintHit = this.isSprinting(); // CubingPaper - Configurable knockback profiles
++                // CubingPaper start - Configurable knockback profiles; client-sprint also counts the client's sprint state,
++                // which stop-sprint (server flag only) does not clear while W is held
++                dev.cobblesword.nachospigot.knockback.KnockbackProfile kb = entity.getEffectiveKnockbackProfile();
++                boolean sprintHit = this.isSprinting() || (kb.isClientSprint() && this instanceof EntityPlayer && ((EntityPlayer) this).clientSprinting);
++                // CubingPaper end
+                 if (sprintHit) {
+                     ++i;
+                 }
+@@ -1005,7 +1009,7 @@ public abstract class EntityHuman extends EntityLiving {
+                     if (flag2) {
+                         if (i > 0) {
+                             // CubingPaper start - Configurable knockback profiles (ported from WindSpigot)
+-                            dev.cobblesword.nachospigot.knockback.KnockbackProfile kb = entity.getEffectiveKnockbackProfile();
++                            // kb: the victim's profile, read above
+                             double extraHorizontal = sprintHit ? kb.getWTapExtraHorizontal() : kb.getExtraHorizontal();
+                             double extraVertical = sprintHit ? kb.getWTapExtraVertical() : kb.getExtraVertical();
+                             entity.g(
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index f5b0f576..c6de667a 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -913,6 +913,18 @@ public abstract class EntityLiving extends Entity {
+             KnockbackProfile kb = this.getEffectiveKnockbackProfile();
+             double magnitude = MathHelper.sqrt(d0 * d0 + d1 * d1);
+ 
++            // CubingPaper start - Absolute knockback: a player melee hit sets the velocity instead of adding to it, so the
++            // victim's own motion, friction, the add values and the vertical limits play no part. The (wtap-)extra values
++            // are still added by EntityHuman#attack afterwards. Projectiles and thorns keep the formula below.
++            if (kb.isAbsolute() && damagesource instanceof EntityDamageSource && !(damagesource instanceof EntityDamageSourceIndirect)
++                    && "player".equals(damagesource.translationIndex) && damagesource.getEntity() instanceof EntityHuman) {
++                this.motX = -d0 / magnitude * kb.getHorizontal();
++                this.motY = kb.getVertical();
++                this.motZ = -d1 / magnitude * kb.getHorizontal();
++                return;
++            }
++            // CubingPaper end
++
+             double horizontal = kb.getHorizontal();
+             double vertical = kb.getVertical();
+             if (damagesource instanceof EntityDamageSourceIndirect) {
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index aeffe63e..761559ae 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -49,6 +49,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+     private int containerCounter;
+     public boolean g;
+     public int ping;
++    public boolean clientSprinting; // CubingPaper - Absolute knockback: the client's own sprint state (start/stop sprint packets)
+     public boolean viewingCredits;
+     public final List<EntityPotion> compensatedPotions = new java.util.ArrayList<EntityPotion>(); // CubingPaper - Lag compensated potions
+ 
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 8092ef93..f2275385 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -1287,6 +1287,8 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+                 break;
+             case START_SPRINTING:
+             case STOP_SPRINTING:
++                // CubingPaper - Absolute knockback: what the client says, even if a plugin cancels the server flag change
++                this.player.clientSprinting = packetplayinentityaction.b() == PacketPlayInEntityAction.EnumPlayerAction.START_SPRINTING;
+                 PlayerToggleSprintEvent e2 = new PlayerToggleSprintEvent(this.getPlayer(), packetplayinentityaction.b() == PacketPlayInEntityAction.EnumPlayerAction.START_SPRINTING);
+                 this.server.getPluginManager().callEvent(e2);
+ 
+diff --git a/src/main/java/top/speedcubing/cubingpaper/knockback/CraftKnockbackProfile.java b/src/main/java/top/speedcubing/cubingpaper/knockback/CraftKnockbackProfile.java
+index 44c4a92e..4711d9e2 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/knockback/CraftKnockbackProfile.java
++++ b/src/main/java/top/speedcubing/cubingpaper/knockback/CraftKnockbackProfile.java
+@@ -39,6 +39,9 @@ public class CraftKnockbackProfile implements KnockbackProfile {
+     private double addHorizontal = 0.0D;
+     private double addVertical = 0.0D;
+ 
++    private boolean absolute = false;
++    private boolean clientSprint = false;
++
+     public CraftKnockbackProfile(String name) {
+         this.name = name;
+     }
+@@ -72,6 +75,8 @@ public class CraftKnockbackProfile implements KnockbackProfile {
+         KnockbackConfig.set(path + ".wtap-extra-vertical", this.wTapVertical);
+         KnockbackConfig.set(path + ".add-horizontal", this.addHorizontal);
+         KnockbackConfig.set(path + ".add-vertical", this.addVertical);
++        KnockbackConfig.set(path + ".absolute", this.absolute);
++        KnockbackConfig.set(path + ".client-sprint", this.clientSprint);
+ 
+         if (projectiles) {
+             KnockbackConfig.set(path + ".projectiles.rod.horizontal", this.rodHorizontal);
+@@ -327,6 +332,26 @@ public class CraftKnockbackProfile implements KnockbackProfile {
+         this.addVertical = addVertical;
+     }
+ 
++    @Override
++    public boolean isAbsolute() {
++        return absolute;
++    }
++
++    @Override
++    public void setAbsolute(boolean absolute) {
++        this.absolute = absolute;
++    }
++
++    @Override
++    public boolean isClientSprint() {
++        return clientSprint;
++    }
++
++    @Override
++    public void setClientSprint(boolean clientSprint) {
++        this.clientSprint = clientSprint;
++    }
++
+     @Override
+     public String[] getKnockbackValues() {
+         return new String[] {
+@@ -342,7 +367,9 @@ public class CraftKnockbackProfile implements KnockbackProfile {
+                 "Wtap-Extra-Horizontal\u00a77: " + this.wTapHorizontal,
+                 "Wtap-Extra-Vertical\u00a77: " + this.wTapVertical,
+                 "Add-Horizontal\u00a77: " + this.addHorizontal,
+-                "Add-Vertical\u00a77: " + this.addVertical };
++                "Add-Vertical\u00a77: " + this.addVertical,
++                "Absolute\u00a77: " + this.absolute,
++                "Client-Sprint\u00a77: " + this.clientSprint };
+     }
+ 
+     @Override
+diff --git a/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackCommand.java b/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackCommand.java
+index 634af66b..2b35bddf 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackCommand.java
++++ b/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackCommand.java
+@@ -24,7 +24,8 @@ public class KnockbackCommand extends Command {
+     private static final List<String> SUBCOMMANDS = ImmutableList.of("create", "delete", "load", "view", "projectile", "set", "edit");
+     private static final List<String> KNOCKBACK_VALUES = ImmutableList.of("horizontal", "vertical", "vertical-max",
+             "vertical-min", "extra-horizontal", "extra-vertical", "friction-horizontal", "friction-vertical",
+-            "stop-sprint", "wtap-extra-horizontal", "wtap-extra-vertical", "add-horizontal", "add-vertical");
++            "stop-sprint", "wtap-extra-horizontal", "wtap-extra-vertical", "add-horizontal", "add-vertical",
++            "absolute", "client-sprint");
+     private static final List<String> PROJECTILE_VALUES = ImmutableList.of("rod-horizontal", "rod-vertical",
+             "arrow-horizontal", "arrow-vertical", "pearl-horizontal", "pearl-vertical", "snowball-horizontal",
+             "snowball-vertical", "egg-horizontal", "egg-vertical");
+@@ -136,12 +137,19 @@ public class KnockbackCommand extends Command {
+     }
+ 
+     private void edit(Player player, KnockbackProfile profile, String key, String input) {
+-        if ("stop-sprint".equals(key)) {
++        if ("stop-sprint".equals(key) || "absolute".equals(key) || "client-sprint".equals(key)) {
+             if (!"true".equalsIgnoreCase(input) && !"false".equalsIgnoreCase(input)) {
+                 player.sendMessage("\u00a74" + input + " \u00a7cis not a boolean.");
+                 return;
+             }
+-            profile.setStopSprint(Boolean.parseBoolean(input));
++            boolean value = Boolean.parseBoolean(input);
++            if ("stop-sprint".equals(key)) {
++                profile.setStopSprint(value);
++            } else if ("absolute".equals(key)) {
++                profile.setAbsolute(value);
++            } else {
++                profile.setClientSprint(value);
++            }
+             profile.save();
+             knockbackCommandView(player, profile);
+             player.sendMessage("\u00a7aValue edited and saved.");
+diff --git a/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackConfig.java b/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackConfig.java
+index 2e70a492..a0dd7f7a 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackConfig.java
++++ b/src/main/java/top/speedcubing/cubingpaper/knockback/KnockbackConfig.java
+@@ -103,6 +103,8 @@ public class KnockbackConfig {
+         profile.setWTapExtraVertical(config.getDouble(path + ".wtap-extra-vertical", 0.1D));
+         profile.setAddHorizontal(config.getDouble(path + ".add-horizontal", 0.0D));
+         profile.setAddVertical(config.getDouble(path + ".add-vertical", 0.0D));
++        profile.setAbsolute(config.getBoolean(path + ".absolute", false));
++        profile.setClientSprint(config.getBoolean(path + ".client-sprint", false));
+         profile.setRodHorizontal(config.getDouble(path + ".projectiles.rod.horizontal", 0.4D));
+         profile.setRodVertical(config.getDouble(path + ".projectiles.rod.vertical", 0.4D));
+         profile.setArrowHorizontal(config.getDouble(path + ".projectiles.arrow.horizontal", 0.4D));
+@@ -211,6 +213,21 @@ public class KnockbackConfig {
+             mmc.setWTapExtraVertical(0.0D);
+             mmc.write(true);
+         }
++        if (!containsIgnoreCase(keys, "absolute")) {
++            // The practice plugin's former AbsoluteKnockback listener, with the values prod tuned it to through /akb:
++            // every melee hit sets the victim's velocity to 0.425 away + 0.36 up, plus 0.31 along the attacker's facing
++            // on a sprint hit (the client's sprint counts)
++            CraftKnockbackProfile absolute = new CraftKnockbackProfile("absolute");
++            absolute.setAbsolute(true);
++            absolute.setClientSprint(true);
++            absolute.setHorizontal(0.425D);
++            absolute.setVertical(0.36D);
++            absolute.setExtraHorizontal(0.0D);
++            absolute.setExtraVertical(0.0D);
++            absolute.setWTapExtraHorizontal(0.31D);
++            absolute.setWTapExtraVertical(0.0D);
++            absolute.write(true);
++        }
+         if (!containsIgnoreCase(keys, "velocity")) {
+             // "Velocity" from https://github.com/tdvne/Bot-Practice/blob/master/src/main/resources/knockback.yml
+             CraftKnockbackProfile velocity = new CraftKnockbackProfile("velocity");
+-- 
+2.55.0.windows.5
+
