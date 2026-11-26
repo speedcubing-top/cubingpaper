@@ -1,0 +1,38 @@
+From cedfe262084fd7ae8221a50f25b851727c1cf7b7 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Thu, 26 Nov 2026 23:00:07 +0800
+Subject: [PATCH] Per player fog of war
+
+Lets plugins turn fog of war on or off per viewer with Player#setFogOfWar, falling back to fogOfWar.default in cubing.yml. A server with modes in one shared world sets fogOfWar.default to false and enables it for the players of the modes that want it.
+
+diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
+index 59fa188c..81d953c4 100644
+--- a/src/main/java/org/bukkit/entity/Player.java
++++ b/src/main/java/org/bukkit/entity/Player.java
+@@ -1391,4 +1391,23 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+ 
+     Spigot spigot();
+     // Spigot end
++
++    // CubingPaper start - Per player fog of war
++    /**
++     * Gets whether fog of war applies to this player as a viewer, so players it could not see are not sent to it.
++     * Always false while fog of war is disabled in cubing.yml.
++     *
++     * @return whether fog of war applies to this player
++     */
++    boolean hasFogOfWar();
++
++    /**
++     * Sets whether fog of war applies to this player as a viewer, overriding fogOfWar.default in cubing.yml.
++     * Has no effect while fog of war is disabled in cubing.yml. Takes effect at the next check, within
++     * fogOfWar.interval-ticks. Main thread only.
++     *
++     * @param enabled true or false to override, or null to use fogOfWar.default
++     */
++    void setFogOfWar(Boolean enabled);
++    // CubingPaper end
+ }
+-- 
+2.55.0.windows.5
+

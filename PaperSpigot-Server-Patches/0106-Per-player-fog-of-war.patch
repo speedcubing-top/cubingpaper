@@ -1,0 +1,92 @@
+From f4d4c10766f30e3db8fe1a88d3b5235f72f0f714 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Thu, 26 Nov 2026 23:00:08 +0800
+Subject: [PATCH] Per player fog of war
+
+Lets plugins turn fog of war on or off per viewer with Player#setFogOfWar, falling back to fogOfWar.default in cubing.yml. A server with modes in one shared world sets fogOfWar.default to false and enables it for the players of the modes that want it.
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index 9cc61554..0064e6d5 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -1638,4 +1638,16 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+         return spigot;
+     }
+     // Spigot end
++
++    // CubingPaper start - Per player fog of war
++    @Override
++    public boolean hasFogOfWar() {
++        return top.speedcubing.cubingpaper.CubingPaperConfig.fogOfWar && getHandle().fogOfWar.isEnabled();
++    }
++
++    @Override
++    public void setFogOfWar(Boolean enabled) {
++        getHandle().fogOfWar.setOverride(enabled);
++    }
++    // CubingPaper end
+ }
+diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+index 0227c034..266a28fe 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
++++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+@@ -152,6 +152,7 @@ public class CubingPaperConfig {
+ 
+     // CubingPaper - Fog of war: players are not sent to viewers that could not see them (anti-ESP)
+     public static boolean fogOfWar;
++    public static boolean fogOfWarDefault; // whether it applies to players without a plugin override (Player#setFogOfWar)
+     public static int fogOfWarIntervalTicks;
+     public static int fogOfWarHideAfterChecks;
+     public static double fogOfWarCameraDistance; // third person camera reach: 4 in vanilla 1.8, more with camera mods
+@@ -159,6 +160,7 @@ public class CubingPaperConfig {
+     public static int fogOfWarLogIntervalSeconds; // 0 = off
+     private static void fogOfWar() {
+         fogOfWar = getBoolean("fogOfWar.enabled", false);
++        fogOfWarDefault = getBoolean("fogOfWar.default", true);
+         fogOfWarIntervalTicks = Math.max(1, getInt("fogOfWar.interval-ticks", 2));
+         fogOfWarHideAfterChecks = Math.max(1, getInt("fogOfWar.hide-after-checks", 3));
+         fogOfWarCameraDistance = Math.max(0, getDouble("fogOfWar.camera-distance", 4.0));
+diff --git a/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWar.java b/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWar.java
+index 6102eb15..cd8343b5 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWar.java
++++ b/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWar.java
+@@ -129,7 +129,8 @@ public final class FogOfWar {
+         for (int v = 0; v < count; v++) {
+             viewerPairStart[v] = pairCount;
+             EntityPlayer viewer = players[v];
+-            if (viewer.playerInteractManager.getGameMode() == WorldSettings.EnumGamemode.SPECTATOR
++            if (!viewer.fogOfWar.isEnabled()
++                    || viewer.playerInteractManager.getGameMode() == WorldSettings.EnumGamemode.SPECTATOR
+                     || viewer.getBukkitEntity().hasPermission("cubingpaper.fogofwar.bypass")) {
+                 revealAll(viewer, tracker);
+                 continue;
+diff --git a/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWarView.java b/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWarView.java
+index eb40beec..446dceba 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWarView.java
++++ b/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWarView.java
+@@ -18,11 +18,22 @@ public final class FogOfWarView {
+     double velX, velY, velZ;
+     private double lastX, lastY, lastZ;
+     private int lastTick = -1;
++    // plugin override of fogOfWar.default for this viewer, null when not overridden
++    private Boolean override;
+ 
+     public boolean isHidden(int entityId) {
+         return hidden.contains(entityId);
+     }
+ 
++    /** Whether fog of war applies to this viewer: its plugin override, else fogOfWar.default. */
++    public boolean isEnabled() {
++        return override != null ? override : CubingPaperConfig.fogOfWarDefault;
++    }
++
++    public void setOverride(Boolean enabled) {
++        override = enabled;
++    }
++
+     void sampleVelocity(Entity entity, int tick) {
+         if (lastTick >= 0 && tick > lastTick) {
+             int ticks = tick - lastTick; // more than the interval when checks were skipped
+-- 
+2.55.0.windows.5
+
