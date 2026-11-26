@@ -26,6 +26,7 @@ function applyPatch {
         echo "  Something did not apply cleanly to $target."
         echo "  Please review above details and finish the apply then"
         echo "  save the changes with rebuildPatches.sh"
+        return 1
     else
         echo "  Patches applied cleanly to $target"
     fi
@@ -37,5 +38,5 @@ echo
 #cd ../Bukkit
 hash=$(git rev-parse HEAD)
 git branch -f spigot "$hash"
-applyPatch CubingPaper-API PaperSpigot-API origin/master
-applyPatch CubingPaper-Server PaperSpigot-Server origin/patched
+applyPatch CubingPaper-API PaperSpigot-API origin/master || exit 1
+applyPatch CubingPaper-Server PaperSpigot-Server origin/patched || exit 1
