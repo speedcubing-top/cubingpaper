@@ -1,0 +1,23 @@
+From 18fa43db21e0609bee93c1760a4e0f1e472aca16 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Thu, 26 Nov 2026 21:37:11 +0800
+Subject: [PATCH] Fix WorldBorder.isInBounds checking the wrong var
+
+Backported from PandaSpigot (hpfxd/PandaSpigot) server patch 0096.
+
+diff --git a/src/main/java/net/minecraft/server/WorldBorder.java b/src/main/java/net/minecraft/server/WorldBorder.java
+index 7ea40468..9730e680 100644
+--- a/src/main/java/net/minecraft/server/WorldBorder.java
++++ b/src/main/java/net/minecraft/server/WorldBorder.java
+@@ -45,7 +45,7 @@ public class WorldBorder {
+ 
+     // Inlined the getters from ChunkCoordIntPair
+     public boolean isInBounds(int x, int z) {
+-        return (double) ((x  << 4) + 15) > this.b() && (double) (x << 4) < this.d() && (double) ((z  << 4) + 15) > this.c() && (double) (x << 4) < this.e();
++        return (double) ((x << 4) + 15) > this.b() && (double) (x << 4) < this.d() && (double) ((z << 4) + 15) > this.c() && (double) (z << 4) < this.e(); // CubingPaper - Fix checking x instead of z (PandaSpigot)
+     }
+ 
+     public boolean a(AxisAlignedBB axisalignedbb) {
+-- 
+2.55.0.windows.5
+

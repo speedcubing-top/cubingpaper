@@ -1,0 +1,63 @@
+From bb3ac1f8f01dde97c1963abeb060e6bb267823df Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Thu, 26 Nov 2026 21:37:12 +0800
+Subject: [PATCH] Entity tracking range vanilla option
+
+Backported from PandaSpigot (hpfxd/PandaSpigot) server patch 0127.
+
+diff --git a/src/main/java/org/spigotmc/TrackingRange.java b/src/main/java/org/spigotmc/TrackingRange.java
+index 4bf4d2ac..9065ad4b 100644
+--- a/src/main/java/org/spigotmc/TrackingRange.java
++++ b/src/main/java/org/spigotmc/TrackingRange.java
+@@ -21,31 +21,41 @@ public class TrackingRange
+      */
+     public static int getEntityTrackingRange(Entity entity, int defaultRange)
+     {
++        int i;
+         SpigotWorldConfig config = entity.world.spigotConfig;
+         if ( entity instanceof EntityPlayer )
+         {
+-            return config.playerTrackingRange;
++            i = config.playerTrackingRange;
+         }  else if ( entity.activationType == 1 )
+         {
+-            return config.monsterTrackingRange;
++            i = config.monsterTrackingRange;
+         } else if ( entity instanceof EntityGhast )
+         {
+             if ( config.monsterTrackingRange > config.monsterActivationRange )
+             {
+-                return config.monsterTrackingRange;
++                i = config.monsterTrackingRange;
+             } else
+             {
+-                return config.monsterActivationRange;
++                i = config.monsterActivationRange;
+             }
+         } else if ( entity.activationType == 2 )
+         {
+-            return config.animalTrackingRange;
++            i = config.animalTrackingRange;
+         } else if ( entity instanceof EntityItemFrame || entity instanceof EntityPainting || entity instanceof EntityItem || entity instanceof EntityExperienceOrb )
+         {
+-            return config.miscTrackingRange;
++            i = config.miscTrackingRange;
+         } else 
+         {
+-            return config.otherTrackingRange;
++            i = config.otherTrackingRange;
+         }
++
++        // CubingPaper start - Negative tracking range uses the vanilla value (PandaSpigot)
++        if ( i < 0 )
++        {
++            i = defaultRange;
++        }
++        // CubingPaper end
++
++        return i;
+     }
+ }
+-- 
+2.55.0.windows.5
+

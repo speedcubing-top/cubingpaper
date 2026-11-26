@@ -1,0 +1,29 @@
+From afac9176395b73067fd9e3bdbf892f592efa0bb1 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Thu, 26 Nov 2026 21:37:12 +0800
+Subject: [PATCH] Fix GH-276: Item durability desync when some events are
+ cancelled
+
+Backported from PandaSpigot (hpfxd/PandaSpigot) server patch 0106.
+
+diff --git a/src/main/java/net/minecraft/server/PlayerInteractManager.java b/src/main/java/net/minecraft/server/PlayerInteractManager.java
+index fbac5dba..52cde102 100644
+--- a/src/main/java/net/minecraft/server/PlayerInteractManager.java
++++ b/src/main/java/net/minecraft/server/PlayerInteractManager.java
+@@ -305,6 +305,13 @@ public class PlayerInteractManager {
+                 if (tileentity != null) {
+                     this.player.playerConnection.sendPacket(tileentity.getUpdatePacket());
+                 }
++                // CubingPaper start - Fix item durability desync when block break event is cancelled (PandaSpigot)
++                org.bukkit.craftbukkit.entity.CraftPlayer bukkitEntity = this.player.getBukkitEntity();
++                org.bukkit.inventory.ItemStack itemInHand = bukkitEntity.getInventory().getItemInHand();
++                if (itemInHand != null && itemInHand.getType().getMaxDurability() > 0) {
++                    bukkitEntity.updateInventory();
++                }
++                // CubingPaper end
+                 return false;
+             }
+         }
+-- 
+2.55.0.windows.5
+

@@ -1,0 +1,58 @@
+From f5428abe02f3a2d4ce187de16e469bdae52dd9d9 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Thu, 26 Nov 2026 21:37:12 +0800
+Subject: [PATCH] Break up and make tab spam limits configurable
+
+Backported from PandaSpigot (hpfxd/PandaSpigot) server patch 0114.
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 2c30fdff..0391a077 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -92,6 +92,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+     // CraftBukkit start - multithreaded fields
+     private volatile int chatThrottle;
+     private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(PlayerConnection.class, "chatThrottle");
++    private int tabSpamLimiter; // CubingPaper - Split tab spam from chat spam (PandaSpigot)
+     // CraftBukkit end
+     private int m;
+     private IntHashMap<Short> n = new IntHashMap();
+@@ -154,6 +155,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+         this.minecraftServer.methodProfiler.b();
+         // CraftBukkit start
+         for (int spam; (spam = this.chatThrottle) > 0 && !chatSpamField.compareAndSet(this, spam, spam - 1); ) ;
++        if (this.tabSpamLimiter > 0) --this.tabSpamLimiter; // CubingPaper - Split tab spam from chat spam (PandaSpigot)
+         /* Use thread-safe field access instead
+         if (this.chatThrottle > 0) {
+             --this.chatThrottle;
+@@ -2010,7 +2012,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+     public void a(PacketPlayInTabComplete packetplayintabcomplete) {
+         PlayerConnectionUtils.ensureMainThread(packetplayintabcomplete, this, this.player.u());
+         // CraftBukkit start
+-        if (PaperSpigotConfig.disconnectSpam && chatSpamField.addAndGet(this, PaperSpigotConfig.disconnectSpamAddition) > 500 && !this.minecraftServer.getPlayerList().isOp(this.player.getProfile())) {
++        if (PaperSpigotConfig.disconnectSpam && (this.tabSpamLimiter += top.speedcubing.cubingpaper.CubingPaperConfig.tabSpamIncrement) > top.speedcubing.cubingpaper.CubingPaperConfig.tabSpamLimit && !this.minecraftServer.getPlayerList().isOp(this.player.getProfile())) { // CubingPaper - Split and make configurable (PandaSpigot)
+             this.disconnect("disconnect.spam");
+             return;
+         }
+diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+index a908622c..0227c034 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
++++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+@@ -217,6 +217,14 @@ public class CubingPaperConfig {
+     }
+     // CubingPaper end
+ 
++    // CubingPaper - tab completion spam limiter, separate from chat spam (PandaSpigot)
++    public static int tabSpamIncrement;
++    public static int tabSpamLimit;
++    private static void tabSpam() {
++        tabSpamIncrement = getInt("tabSpam.increment", 10);
++        tabSpamLimit = getInt("tabSpam.limit", 500);
++    }
++
+     // CubingPaper - max characters per sign line accepted from clients, -1 to disable (PandaSpigot)
+     public static int maxSignLineLength;
+     private static void maxSignLineLength() {
+-- 
+2.55.0.windows.5
+

@@ -1,0 +1,28 @@
+From 00f2b0642fa444dacf97c37d943ab352690fbf73 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Thu, 26 Nov 2026 21:37:12 +0800
+Subject: [PATCH] Fix SPIGOT-509: Negative or zero quantity items made when
+ middle click dragging in creative
+
+Backported from PandaSpigot (hpfxd/PandaSpigot) server patch 0117.
+
+diff --git a/src/main/java/net/minecraft/server/Container.java b/src/main/java/net/minecraft/server/Container.java
+index 943f068f..347502ea 100644
+--- a/src/main/java/net/minecraft/server/Container.java
++++ b/src/main/java/net/minecraft/server/Container.java
+@@ -172,7 +172,11 @@ public abstract class Container {
+                                 itemstack2.count = slot1.getMaxStackSize(itemstack2);
+                             }
+ 
+-                            l -= itemstack2.count - j1;
++                            // CubingPaper start - Fix SPIGOT-509: zero or negative quantity items when middle click dragging in creative (PandaSpigot)
++                            if (this.dragType != 2 || !entityhuman.abilities.canInstantlyBuild) {
++                                l -= itemstack2.count - j1;
++                            }
++                            // CubingPaper end
+                             // slot1.set(itemstack2);
+                             draggedSlots.put(slot1.rawSlotIndex, itemstack2); // CraftBukkit - Put in map instead of setting
+                         }
+-- 
+2.55.0.windows.5
+

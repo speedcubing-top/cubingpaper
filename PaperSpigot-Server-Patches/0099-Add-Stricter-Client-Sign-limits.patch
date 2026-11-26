@@ -1,0 +1,49 @@
+From 0b9dc616cfe703ab77b251fcf1fe4b4ce4150943 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Thu, 26 Nov 2026 21:37:11 +0800
+Subject: [PATCH] Add Stricter Client Sign limits
+
+Backported from PandaSpigot (hpfxd/PandaSpigot) server patch 0092.
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 5024e473..2c30fdff 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -1935,7 +1935,17 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+             String[] lines = new String[4];
+ 
+             for (int i = 0; i < aichatbasecomponent.length; ++i) {
+-                lines[i] = EnumChatFormat.a(aichatbasecomponent[i].c());
++                // CubingPaper start - Cap sign line length, modified clients can send longer data (PandaSpigot)
++                String line = aichatbasecomponent[i].c();
++                int maxLength = top.speedcubing.cubingpaper.CubingPaperConfig.maxSignLineLength;
++                if (maxLength > 0 && line.length() > maxLength) {
++                    int offset = line.codePoints().limit(maxLength).map(Character::charCount).sum();
++                    if (line.length() > offset) {
++                        line = line.substring(0, offset);
++                    }
++                }
++                lines[i] = EnumChatFormat.a(line);
++                // CubingPaper end
+             }
+             SignChangeEvent event = new SignChangeEvent((org.bukkit.craftbukkit.block.CraftBlock) player.getWorld().getBlockAt(x, y, z), this.server.getPlayer(this.player), lines);
+             this.server.getPluginManager().callEvent(event);
+diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+index b10708f2..a908622c 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
++++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+@@ -216,4 +216,10 @@ public class CubingPaperConfig {
+         packetLimiterLimits = limits;
+     }
+     // CubingPaper end
++
++    // CubingPaper - max characters per sign line accepted from clients, -1 to disable (PandaSpigot)
++    public static int maxSignLineLength;
++    private static void maxSignLineLength() {
++        maxSignLineLength = getInt("maxSignLineLength", 80);
++    }
+ }
+\ No newline at end of file
+-- 
+2.55.0.windows.5
+

@@ -1,0 +1,62 @@
+From 1e990f06a9c22db155278e724e59804ac27a3af3 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Thu, 26 Nov 2026 21:37:11 +0800
+Subject: [PATCH] Disconnect for payload errors
+
+Backported from PandaSpigot (hpfxd/PandaSpigot) server patch 0048.
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index f2275385..5024e473 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -2192,21 +2192,38 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+             }
+         }
+         // CraftBukkit start
++        // CubingPaper start - Disconnect for payload errors (PandaSpigot)
+         else if (packetplayincustompayload.a().equals("REGISTER")) {
+-            String channels = packetplayincustompayload.b().toString(com.google.common.base.Charsets.UTF_8);
+-            for (String channel : channels.split("\0")) {
+-                getPlayer().addChannel(channel);
++            try {
++                String channels = packetplayincustompayload.b().toString(com.google.common.base.Charsets.UTF_8);
++                for (String channel : channels.split("\0")) {
++                    getPlayer().addChannel(channel);
++                }
++            } catch (Exception ex) {
++                PlayerConnection.c.error("Couldn't register custom payload", ex);
++                this.disconnect("Invalid payload REGISTER!");
+             }
+         } else if (packetplayincustompayload.a().equals("UNREGISTER")) {
+-            String channels = packetplayincustompayload.b().toString(com.google.common.base.Charsets.UTF_8);
+-            for (String channel : channels.split("\0")) {
+-                getPlayer().removeChannel(channel);
++            try {
++                String channels = packetplayincustompayload.b().toString(com.google.common.base.Charsets.UTF_8);
++                for (String channel : channels.split("\0")) {
++                    getPlayer().removeChannel(channel);
++                }
++            } catch (Exception ex) {
++                PlayerConnection.c.error("Couldn't unregister custom payload", ex);
++                this.disconnect("Invalid payload UNREGISTER!");
+             }
+         } else {
+-            byte[] data = new byte[packetplayincustompayload.b().readableBytes()];
+-            packetplayincustompayload.b().readBytes(data);
+-            server.getMessenger().dispatchIncomingMessage(player.getBukkitEntity(), packetplayincustompayload.a(), data);
++            try {
++                byte[] data = new byte[packetplayincustompayload.b().readableBytes()];
++                packetplayincustompayload.b().readBytes(data);
++                server.getMessenger().dispatchIncomingMessage(player.getBukkitEntity(), packetplayincustompayload.a(), data);
++            } catch (Exception ex) {
++                PlayerConnection.c.error("Couldn't dispatch custom payload", ex);
++                this.disconnect("Invalid custom payload!");
++            }
+         }
++        // CubingPaper end
+         // CraftBukkit end
+         // CraftBukkit start
+         } finally {
+-- 
+2.55.0.windows.5
+

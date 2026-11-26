@@ -1,0 +1,716 @@
+From d00be293b9bb16e44233d643b5e08848e7778013 Mon Sep 17 00:00:00 2001
+From: HaeImAlan <me@haeimalan.com>
+Date: Thu, 26 Nov 2026 10:53:23 +0800
+Subject: [PATCH] Fog of war
+
+Players are only tracked for viewers that could see them (anti-ESP), after VALORANT's fog of war. Both sides are swept over a lookahead of the viewer's ping plus two check intervals, along their momentum, and the viewer may look from a third person camera up to fogOfWar.camera-distance away (clipped at walls), so players are revealed before they can come into sight. Sounds, block effects and particles caused by a hidden player are not sent either. The rays run on fogOfWar.threads workers over a main thread snapshot; the main thread applies each result one check later. fogOfWar.log-interval-seconds logs per world statistics. Off by default: fogOfWar.enabled in cubing.yml.
+
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index 761559ae..34e802f1 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -52,6 +52,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+     public boolean clientSprinting; // CubingPaper - Absolute knockback: the client's own sprint state (start/stop sprint packets)
+     public boolean viewingCredits;
+     public final List<EntityPotion> compensatedPotions = new java.util.ArrayList<EntityPotion>(); // CubingPaper - Lag compensated potions
++    public final top.speedcubing.cubingpaper.fow.FogOfWarView fogOfWar = new top.speedcubing.cubingpaper.fow.FogOfWarView(); // CubingPaper - Fog of war
+ 
+     // CraftBukkit start
+     public String displayName;
+diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java
+index cb72b367..0ecf287d 100644
+--- a/src/main/java/net/minecraft/server/EntityTracker.java
++++ b/src/main/java/net/minecraft/server/EntityTracker.java
+@@ -157,6 +157,13 @@ public class EntityTracker {
+                 entitytrackerentry.a(entityplayer);
+             }
+         }
++        // CubingPaper start - Fog of war: drop the leaving player from every viewer's state
++        if (entity instanceof EntityPlayer) {
++            for (EntityHuman human : this.world.players) {
++                ((EntityPlayer) human).fogOfWar.forget(entity.getId());
++            }
++        }
++        // CubingPaper end
+ 
+         EntityTrackerEntry entitytrackerentry1 = (EntityTrackerEntry) this.trackedEntities.d(entity.getId());
+ 
+@@ -193,6 +200,8 @@ public class EntityTracker {
+             }
+         }
+ 
++        top.speedcubing.cubingpaper.fow.FogOfWar.tick(this.world, this); // CubingPaper - Fog of war
++
+     }
+ 
+     public void a(EntityPlayer entityplayer) {
+diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+index 5cefcd81..a7e4a912 100644
+--- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
++++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+@@ -438,6 +438,11 @@ public class EntityTrackerEntry {
+     }
+ 
+     public boolean c(EntityPlayer entityplayer) {
++        // CubingPaper - Fog of war: players a viewer could not see are not tracked for it
++        return this.inTrackingRange(entityplayer) && !(this.tracker instanceof EntityPlayer && entityplayer.fogOfWar.isHidden(this.tracker.getId()));
++    }
++
++    public boolean inTrackingRange(EntityPlayer entityplayer) { // CubingPaper - Fog of war: the range part of c
+         // CraftBukkit start - this.*Loc / 30 -> this.tracker.loc*
+         double d0 = entityplayer.locX - this.tracker.locX;
+         double d1 = entityplayer.locZ - this.tracker.locZ;
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 876e9048..8143ed94 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -1061,6 +1061,8 @@ public abstract class PlayerList {
+                continue;
+             }
+             // CraftBukkit end
++            // CubingPaper - Fog of war: no sounds or block effects from a player this viewer is not sent
++            if (entityhuman != null && entityplayer.fogOfWar.isHidden(entityhuman.getId())) continue;
+ 
+             if (entityplayer != entityhuman && entityplayer.dimension == i) {
+                 double d4 = d0 - entityplayer.locX;
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 40a066ca..397839f1 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -1205,6 +1205,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+         for (int j = 0; j < this.players.size(); ++j) {
+             EntityPlayer entityplayer = (EntityPlayer) this.players.get(j);
+             if (sender != null && !entityplayer.getBukkitEntity().canSee(sender.getBukkitEntity())) continue; // CraftBukkit
++            if (sender != null && entityplayer.fogOfWar.isHidden(sender.getId())) continue; // CubingPaper - Fog of war
+             BlockPosition blockposition = entityplayer.getChunkCoordinates();
+             double d7 = blockposition.c(d0, d1, d2);
+ 
+diff --git a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+index 0b92f8d3..d6b7a1e2 100644
+--- a/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
++++ b/src/main/java/top/speedcubing/cubingpaper/CubingPaperConfig.java
+@@ -144,6 +144,22 @@ public class CubingPaperConfig {
+         disableEntityCollisions = getBoolean("disableEntityCollisions", false);
+     }
+ 
++    // CubingPaper - Fog of war: players are not sent to viewers that could not see them (anti-ESP)
++    public static boolean fogOfWar;
++    public static int fogOfWarIntervalTicks;
++    public static int fogOfWarHideAfterChecks;
++    public static double fogOfWarCameraDistance; // third person camera reach: 4 in vanilla 1.8, more with camera mods
++    public static int fogOfWarThreads;
++    public static int fogOfWarLogIntervalSeconds; // 0 = off
++    private static void fogOfWar() {
++        fogOfWar = getBoolean("fogOfWar.enabled", false);
++        fogOfWarIntervalTicks = Math.max(1, getInt("fogOfWar.interval-ticks", 2));
++        fogOfWarHideAfterChecks = Math.max(1, getInt("fogOfWar.hide-after-checks", 3));
++        fogOfWarCameraDistance = Math.max(0, getDouble("fogOfWar.camera-distance", 4.0));
++        fogOfWarThreads = Math.max(1, getInt("fogOfWar.threads", Math.max(1, Runtime.getRuntime().availableProcessors() / 4)));
++        fogOfWarLogIntervalSeconds = Math.max(0, getInt("fogOfWar.log-interval-seconds", 0));
++    }
++
+     // CubingPaper start - Packet limiter (from Paper, via PandaSpigot)
+     public static final class PacketLimit {
+         public final long intervalNS;
+diff --git a/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWar.java b/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWar.java
+new file mode 100644
+index 00000000..6102eb15
+--- /dev/null
++++ b/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWar.java
+@@ -0,0 +1,238 @@
++package top.speedcubing.cubingpaper.fow;
++
++import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
++import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
++import net.minecraft.server.Chunk;
++import net.minecraft.server.EntityHuman;
++import net.minecraft.server.EntityPlayer;
++import net.minecraft.server.EntityTracker;
++import net.minecraft.server.EntityTrackerEntry;
++import net.minecraft.server.MinecraftServer;
++import net.minecraft.server.WorldServer;
++import net.minecraft.server.WorldSettings;
++import top.speedcubing.cubingpaper.CubingPaperConfig;
++
++import java.util.List;
++import java.util.Map;
++import java.util.WeakHashMap;
++import java.util.concurrent.ExecutorService;
++import java.util.concurrent.Executors;
++import java.util.concurrent.ThreadFactory;
++import java.util.concurrent.atomic.AtomicInteger;
++import java.util.logging.Logger;
++
++/**
++ * Fog of war: a player is only tracked (spawned and moved) for viewers that could see it, so ESP, chams and nametags
++ * through walls have nothing to draw. EntityTrackerEntry#c asks FogOfWarView#isHidden; this recomputes it.
++ * <p>
++ * Revealing late is worse than any ESP, so a player is shown before it can come into sight:
++ * <ul>
++ * <li>ping: the viewer's client is ahead of the server by half its ping, and a reveal reaches it half a ping later.
++ * A check's result is applied one check later (it runs on worker threads in between). So both sides are swept over
++ * a lookahead of the viewer's whole round trip plus two check intervals.</li>
++ * <li>momentum: each player's hitbox (and the viewer's eye) is stretched along its current movement over the
++ * lookahead, so a player flying out from behind an edge (knockback, a sprint-jump) is revealed early.</li>
++ * <li>a base growth of walking speed per tick covers turns and jumps the momentum does not show yet.</li>
++ * <li>third person (F5, free look): the server cannot tell, so the camera may be anywhere up to
++ * fogOfWar.camera-distance (4 in 1.8) from the eye, in any direction. The camera cannot pass blocks, so every viewer
++ * point is pulled back to just before the first wall between it and the eye. That clipping also keeps the grown
++ * lookahead box from reaching through a wall the viewer hugs.</li>
++ * </ul>
++ * No field of view: anything around the viewer counts, so FOV settings and mods change nothing.
++ * <p>
++ * Threads: every check the main thread snapshots the players, the pairs to check and the loaded chunks around them,
++ * and applies the previous check's result (hysteresis, spawn and destroy). The rays run on fogOfWar.threads workers,
++ * see FogOfWarJob. A check still running at the next one is skipped, not queued.
++ */
++public final class FogOfWar {
++
++    static final double MOVE_PER_TICK = 0.3; // a sprint-jump on flat ground
++    private static final int MAX_LOOKAHEAD_TICKS = 20;
++    // rays stay within the tracking range plus the lookahead growth and the camera: snapshot the chunks that far
++    private static final int CHUNK_RADIUS = 5;
++    private static final Logger LOGGER = Logger.getLogger("Minecraft");
++
++    // main thread only
++    private static final Map<WorldServer, FogOfWarJob> running = new WeakHashMap<WorldServer, FogOfWarJob>();
++    private static ExecutorService workers;
++    private static int workerThreads;
++    // fogOfWar.log-interval-seconds statistics, per world: a map whose hidden share drifts says its fog is off
++    private static final Map<WorldServer, Stats> stats = new WeakHashMap<WorldServer, Stats>();
++    private static int statLastLogTick;
++
++    private static final class Stats {
++        long checks, workerNanos, maxWorkerNanos, mainNanos, maxMainNanos, pairs, hiddenPairs, skipped;
++    }
++
++    private static Stats stats(WorldServer world) {
++        Stats worldStats = stats.get(world);
++        if (worldStats == null) stats.put(world, worldStats = new Stats());
++        return worldStats;
++    }
++
++    private FogOfWar() {
++    }
++
++    /** Main thread, after the world's tracker update. */
++    public static void tick(WorldServer world, EntityTracker tracker) {
++        List<EntityHuman> players = world.players;
++        logStatistics();
++        if (!CubingPaperConfig.fogOfWar) {
++            running.remove(world);
++            for (EntityHuman human : players) {
++                revealAll((EntityPlayer) human, tracker);
++            }
++            return;
++        }
++        int interval = CubingPaperConfig.fogOfWarIntervalTicks;
++        if (MinecraftServer.currentTick % interval != 0) return;
++
++        long mainStart = System.nanoTime();
++        FogOfWarJob previous = running.get(world);
++        if (previous != null) {
++            if (!previous.isDone()) {
++                stats(world).skipped++; // the lookahead covers a late result; queueing would only fall further behind
++                return;
++            }
++            running.remove(world);
++            apply(world, tracker, previous);
++        }
++
++        FogOfWarJob job = snapshot(world, tracker, interval);
++        if (job != null) {
++            running.put(world, job);
++            job.start(workers());
++        }
++        long mainNanos = System.nanoTime() - mainStart;
++        Stats worldStats = stats(world);
++        worldStats.mainNanos += mainNanos;
++        worldStats.maxMainNanos = Math.max(worldStats.maxMainNanos, mainNanos);
++    }
++
++    private static FogOfWarJob snapshot(WorldServer world, EntityTracker tracker, int interval) {
++        List<EntityHuman> humans = world.players;
++        int count = humans.size();
++        EntityPlayer[] players = new EntityPlayer[count];
++        double[] state = FogOfWarJob.newState(count);
++        for (int i = 0; i < count; i++) {
++            EntityPlayer player = (EntityPlayer) humans.get(i);
++            players[i] = player;
++            player.fogOfWar.sampleVelocity(player, MinecraftServer.currentTick);
++            FogOfWarJob.writeState(state, i, player, player.fogOfWar);
++        }
++
++        int[] lookahead = new int[count];
++        int[] viewerPairStart = new int[count + 1];
++        int[] pairTarget = new int[Math.max(1, count * (count - 1))];
++        int pairCount = 0;
++        Long2ObjectOpenHashMap<Chunk> chunks = new Long2ObjectOpenHashMap<Chunk>();
++        for (int v = 0; v < count; v++) {
++            viewerPairStart[v] = pairCount;
++            EntityPlayer viewer = players[v];
++            if (viewer.playerInteractManager.getGameMode() == WorldSettings.EnumGamemode.SPECTATOR
++                    || viewer.getBukkitEntity().hasPermission("cubingpaper.fogofwar.bypass")) {
++                revealAll(viewer, tracker);
++                continue;
++            }
++            lookahead[v] = Math.min(MAX_LOOKAHEAD_TICKS, (viewer.ping + 49) / 50 + 2 * interval + 1);
++            int pairsBefore = pairCount;
++            for (int t = 0; t < count; t++) {
++                if (t == v) continue;
++                EntityTrackerEntry entry = tracker.trackedEntities.get(players[t].getId());
++                if (entry != null && entry.inTrackingRange(viewer)) pairTarget[pairCount++] = t;
++            }
++            if (pairCount > pairsBefore) addChunksAround(world, chunks, viewer);
++        }
++        viewerPairStart[count] = pairCount;
++        if (pairCount == 0) return null;
++        return new FogOfWarJob(players, state, lookahead, pairTarget, viewerPairStart, pairCount, chunks,
++                CubingPaperConfig.fogOfWarCameraDistance);
++    }
++
++    private static void addChunksAround(WorldServer world, Long2ObjectOpenHashMap<Chunk> chunks, EntityPlayer viewer) {
++        int centerX = (int) Math.floor(viewer.locX) >> 4, centerZ = (int) Math.floor(viewer.locZ) >> 4;
++        for (int x = centerX - CHUNK_RADIUS; x <= centerX + CHUNK_RADIUS; x++) {
++            for (int z = centerZ - CHUNK_RADIUS; z <= centerZ + CHUNK_RADIUS; z++) {
++                long key = FogOfWarJob.chunkKey(x, z);
++                if (chunks.containsKey(key)) continue;
++                Chunk chunk = world.chunkProviderServer.getChunkIfLoaded(x, z);
++                if (chunk != null) chunks.put(key, chunk);
++            }
++        }
++    }
++
++    /** Main thread: hysteresis and tracker updates for the pairs of a finished check. */
++    private static void apply(WorldServer world, EntityTracker tracker, FogOfWarJob job) {
++        IntOpenHashSet present = new IntOpenHashSet();
++        for (EntityHuman human : world.players) {
++            present.add(human.getId());
++        }
++        EntityPlayer[] players = job.players;
++        int hidden = 0;
++        for (int v = 0; v < players.length; v++) {
++            for (int pair = job.viewerPairStart[v]; pair < job.viewerPairStart[v + 1]; pair++) {
++                EntityPlayer viewer = players[v], target = players[job.pairTarget[pair]];
++                if (!job.visible[pair]) hidden++;
++                if (!present.contains(viewer.getId()) || !present.contains(target.getId())) continue; // left meanwhile
++                EntityTrackerEntry entry = tracker.trackedEntities.get(target.getId());
++                if (entry != null && viewer.fogOfWar.update(target.getId(), job.visible[pair])) {
++                    entry.updatePlayer(viewer); // spawns or destroys through EntityTrackerEntry#c
++                }
++            }
++        }
++        Stats worldStats = stats(world);
++        worldStats.checks++;
++        worldStats.workerNanos += job.durationNanos;
++        worldStats.maxWorkerNanos = Math.max(worldStats.maxWorkerNanos, job.durationNanos);
++        worldStats.pairs += job.pairCount;
++        worldStats.hiddenPairs += hidden;
++    }
++
++    private static void revealAll(EntityPlayer viewer, EntityTracker tracker) {
++        if (!viewer.fogOfWar.hasHidden()) return;
++        for (int id : viewer.fogOfWar.revealAll()) {
++            EntityTrackerEntry entry = tracker.trackedEntities.get(id);
++            if (entry != null) entry.updatePlayer(viewer);
++        }
++    }
++
++    private static ExecutorService workers() {
++        int threads = CubingPaperConfig.fogOfWarThreads;
++        if (workers == null || workerThreads != threads) {
++            if (workers != null) workers.shutdown(); // running checks finish on the old pool
++            final AtomicInteger number = new AtomicInteger();
++            workers = Executors.newFixedThreadPool(threads, new ThreadFactory() {
++                public Thread newThread(Runnable runnable) {
++                    Thread thread = new Thread(runnable, "CubingPaper Fog of War #" + number.incrementAndGet());
++                    thread.setDaemon(true);
++                    return thread;
++                }
++            });
++            workerThreads = threads;
++        }
++        return workers;
++    }
++
++    private static void logStatistics() {
++        int seconds = CubingPaperConfig.fogOfWarLogIntervalSeconds;
++        if (seconds <= 0 || MinecraftServer.currentTick - statLastLogTick < seconds * 20) return;
++        statLastLogTick = MinecraftServer.currentTick;
++        long[] tickNanos = MinecraftServer.getServer().h; // the last 100 ticks
++        long tickSum = 0, tickMax = 0;
++        for (long nanos : tickNanos) {
++            tickSum += nanos;
++            tickMax = Math.max(tickMax, nanos);
++        }
++        LOGGER.info(String.format("[FogOfWar] server tick %.2f ms avg, %.2f ms max (last 100), %d worker threads",
++                tickSum / 1e6 / tickNanos.length, tickMax / 1e6, workerThreads));
++        for (Map.Entry<WorldServer, Stats> entry : stats.entrySet()) {
++            Stats s = entry.getValue();
++            if (s.checks == 0 && s.skipped == 0) continue;
++            LOGGER.info(String.format("[FogOfWar] %s: %d checks, workers %.2f ms avg / %.2f ms max, main thread %.3f ms avg / %.3f ms max, %d skipped; %d pairs/check, %.0f%% hidden",
++                    entry.getKey().getWorld().getName(), s.checks, s.checks == 0 ? 0 : s.workerNanos / 1e6 / s.checks,
++                    s.maxWorkerNanos / 1e6, s.checks == 0 ? 0 : s.mainNanos / 1e6 / s.checks, s.maxMainNanos / 1e6, s.skipped,
++                    s.checks == 0 ? 0 : s.pairs / s.checks, s.pairs == 0 ? 0 : 100.0 * s.hiddenPairs / s.pairs));
++        }
++        stats.clear();
++    }
++}
+diff --git a/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWarJob.java b/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWarJob.java
+new file mode 100644
+index 00000000..00f044a6
+--- /dev/null
++++ b/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWarJob.java
+@@ -0,0 +1,274 @@
++package top.speedcubing.cubingpaper.fow;
++
++import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
++import net.minecraft.server.AxisAlignedBB;
++import net.minecraft.server.Chunk;
++import net.minecraft.server.EntityPlayer;
++import org.bukkit.craftbukkit.util.LongHash;
++
++import java.util.Arrays;
++import java.util.concurrent.Executor;
++import java.util.concurrent.atomic.AtomicInteger;
++import java.util.logging.Level;
++import java.util.logging.Logger;
++
++/**
++ * One visibility check of one world. The main thread fills it with a snapshot (players, the pairs to check, the loaded
++ * chunks around them), worker threads cast the rays, and the main thread applies the result at the next check.
++ * Workers read nothing from the world but block data of the snapshotted chunks: plain array reads, where a block
++ * changing mid-check only means one check sees the old block.
++ */
++final class FogOfWarJob {
++
++    private static final Logger LOGGER = Logger.getLogger("Minecraft");
++    private static final double ALWAYS_VISIBLE_DISTANCE_SQ = 3 * 3;
++    private static final int TARGET_POINTS = 9; // 8 corners and the center
++    // the eye, 8 corners and the center of the swept eye box, and 8 third person camera spots
++    private static final int VIEWER_POINTS = 18;
++    private static final double[][] AXES = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
++    private static final int VIEWERS_PER_TASK = 4;
++
++    // per player: x, y, z, eye y, hitbox min x/y/z and max x/y/z, velocity x/y/z, yaw, pitch
++    private static final int X = 0, Y = 1, Z = 2, EYE_Y = 3, BOX = 4, VEL = 10, YAW = 13, PITCH = 14, STATE = 15;
++
++    final EntityPlayer[] players;
++    private final double[] state;
++    private final int[] lookahead; // per player as viewer, in ticks
++    // pairs grouped by viewer: the pairs of viewer v are viewerPairStart[v] until viewerPairStart[v + 1]
++    final int[] pairTarget;
++    final int[] viewerPairStart;
++    final int pairCount;
++    // results, true until a worker proves a pair hidden: a failed task reveals rather than hides
++    final boolean[] visible;
++    private final Long2ObjectOpenHashMap<Chunk> chunks;
++    private final double cameraDistance;
++
++    private final AtomicInteger remainingTasks = new AtomicInteger();
++    private volatile boolean done;
++    final long startNanos = System.nanoTime();
++    volatile long durationNanos;
++
++    FogOfWarJob(EntityPlayer[] players, double[] state, int[] lookahead, int[] pairTarget, int[] viewerPairStart, int pairCount,
++                Long2ObjectOpenHashMap<Chunk> chunks, double cameraDistance) {
++        this.players = players;
++        this.state = state;
++        this.lookahead = lookahead;
++        this.pairTarget = pairTarget;
++        this.viewerPairStart = viewerPairStart;
++        this.pairCount = pairCount;
++        this.visible = new boolean[pairCount];
++        Arrays.fill(this.visible, true);
++        this.chunks = chunks;
++        this.cameraDistance = cameraDistance;
++    }
++
++    /** Main thread: the snapshot of one player. */
++    static void writeState(double[] state, int index, EntityPlayer player, FogOfWarView view) {
++        int s = index * STATE;
++        AxisAlignedBB box = player.getBoundingBox();
++        state[s + X] = player.locX;
++        state[s + Y] = player.locY;
++        state[s + Z] = player.locZ;
++        state[s + EYE_Y] = player.locY + player.getHeadHeight();
++        state[s + BOX] = box.a;
++        state[s + BOX + 1] = box.b;
++        state[s + BOX + 2] = box.c;
++        state[s + BOX + 3] = box.d;
++        state[s + BOX + 4] = box.e;
++        state[s + BOX + 5] = box.f;
++        state[s + VEL] = view.velX;
++        state[s + VEL + 1] = view.velY;
++        state[s + VEL + 2] = view.velZ;
++        state[s + YAW] = player.yaw;
++        state[s + PITCH] = player.pitch;
++    }
++
++    static double[] newState(int players) {
++        return new double[players * STATE];
++    }
++
++    static long chunkKey(int chunkX, int chunkZ) {
++        return LongHash.toLong(chunkX, chunkZ);
++    }
++
++    boolean isDone() {
++        return done;
++    }
++
++    /** Main thread: hands the viewers to the workers in small batches. */
++    void start(Executor executor) {
++        int viewers = players.length;
++        int tasks = (viewers + VIEWERS_PER_TASK - 1) / VIEWERS_PER_TASK;
++        remainingTasks.set(tasks);
++        for (int task = 0; task < tasks; task++) {
++            final int from = task * VIEWERS_PER_TASK, to = Math.min(viewers, from + VIEWERS_PER_TASK);
++            executor.execute(new Runnable() {
++                public void run() {
++                    try {
++                        new Scratch().run(from, to);
++                    } catch (Throwable throwable) {
++                        LOGGER.log(Level.SEVERE, "Fog of war check failed; its players stay visible", throwable);
++                    } finally {
++                        if (remainingTasks.decrementAndGet() == 0) {
++                            durationNanos = System.nanoTime() - startNanos;
++                            done = true; // publishes every task's writes to visible[]
++                        }
++                    }
++                }
++            });
++        }
++    }
++
++    /** The per-thread working memory of a task. */
++    private final class Scratch {
++        private final double[] viewerPoints = new double[VIEWER_POINTS * 3];
++        private final double[] targetPoints = new double[TARGET_POINTS * 3];
++
++        void run(int fromViewer, int toViewer) {
++            for (int viewer = fromViewer; viewer < toViewer; viewer++) {
++                boolean viewerPointsBuilt = false;
++                for (int pair = viewerPairStart[viewer]; pair < viewerPairStart[viewer + 1]; pair++) {
++                    int target = pairTarget[pair];
++                    if (isVisibleFromEye(viewer, target)) continue;
++                    if (!viewerPointsBuilt) {
++                        buildViewerPoints(viewer);
++                        viewerPointsBuilt = true;
++                    }
++                    visible[pair] = isVisibleFromViewerPoints(target, lookahead[viewer]);
++                }
++            }
++        }
++
++        /** The likely case first: close, or eye to the target's center. */
++        private boolean isVisibleFromEye(int viewer, int target) {
++            int v = viewer * STATE, t = target * STATE + BOX;
++            double eyeX = state[v + X], eyeY = state[v + EYE_Y], eyeZ = state[v + Z];
++            double centerX = (state[t] + state[t + 3]) / 2, centerY = (state[t + 1] + state[t + 4]) / 2, centerZ = (state[t + 2] + state[t + 5]) / 2;
++            double dx = centerX - eyeX, dy = centerY - eyeY, dz = centerZ - eyeZ;
++            return dx * dx + dy * dy + dz * dz < ALWAYS_VISIBLE_DISTANCE_SQ || walk(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, false) >= 1;
++        }
++
++        /** Every place the viewer could look from within the lookahead, each pulled back to the first wall from the eye. */
++        private void buildViewerPoints(int viewer) {
++            int v = viewer * STATE;
++            double eyeX = state[v + X], eyeY = state[v + EYE_Y], eyeZ = state[v + Z];
++            int ticks = lookahead[viewer];
++            viewerPoints[0] = eyeX;
++            viewerPoints[1] = eyeY;
++            viewerPoints[2] = eyeZ;
++            sweptBoxPoints(viewerPoints, 3, eyeX, eyeY, eyeZ, eyeX, eyeY, eyeZ,
++                    state[v + VEL] * ticks, state[v + VEL + 1] * ticks, state[v + VEL + 2] * ticks, FogOfWar.MOVE_PER_TICK * ticks);
++
++            // third person: behind and in front along the current look, and the six axes for free look and fast turns
++            double yaw = Math.toRadians(state[v + YAW]), pitch = Math.toRadians(state[v + PITCH]);
++            double lookX = -Math.sin(yaw) * Math.cos(pitch), lookY = -Math.sin(pitch), lookZ = Math.cos(yaw) * Math.cos(pitch);
++            int i = 30;
++            for (int sign = -1; sign <= 1; sign += 2) {
++                viewerPoints[i++] = eyeX + sign * lookX * cameraDistance;
++                viewerPoints[i++] = eyeY + sign * lookY * cameraDistance;
++                viewerPoints[i++] = eyeZ + sign * lookZ * cameraDistance;
++            }
++            for (double[] axis : AXES) {
++                viewerPoints[i++] = eyeX + axis[0] * cameraDistance;
++                viewerPoints[i++] = eyeY + axis[1] * cameraDistance;
++                viewerPoints[i++] = eyeZ + axis[2] * cameraDistance;
++            }
++
++            for (int p = 3; p < VIEWER_POINTS * 3; p += 3) {
++                clipFromEye(eyeX, eyeY, eyeZ, p);
++            }
++        }
++
++        private boolean isVisibleFromViewerPoints(int target, int ticks) {
++            int t = target * STATE;
++            sweptBoxPoints(targetPoints, 0, state[t + BOX], state[t + BOX + 1], state[t + BOX + 2], state[t + BOX + 3], state[t + BOX + 4], state[t + BOX + 5],
++                    state[t + VEL] * ticks, state[t + VEL + 1] * ticks, state[t + VEL + 2] * ticks, FogOfWar.MOVE_PER_TICK * ticks);
++            for (int v = 0; v < VIEWER_POINTS * 3; v += 3) {
++                for (int p = 0; p < TARGET_POINTS * 3; p += 3) {
++                    if (walk(viewerPoints[v], viewerPoints[v + 1], viewerPoints[v + 2],
++                            targetPoints[p], targetPoints[p + 1], targetPoints[p + 2], false) >= 1) {
++                        return true;
++                    }
++                }
++            }
++            return false;
++        }
++
++        /** Pulls viewerPoints[p..p+2] back to just before the first occluding block between the eye and it. */
++        private void clipFromEye(double eyeX, double eyeY, double eyeZ, int p) {
++            double hit = walk(eyeX, eyeY, eyeZ, viewerPoints[p], viewerPoints[p + 1], viewerPoints[p + 2], true);
++            if (hit >= 1) return;
++            double dx = viewerPoints[p] - eyeX, dy = viewerPoints[p + 1] - eyeY, dz = viewerPoints[p + 2] - eyeZ;
++            double t = Math.max(0, hit - 0.1 / Math.sqrt(dx * dx + dy * dy + dz * dz));
++            viewerPoints[p] = eyeX + dx * t;
++            viewerPoints[p + 1] = eyeY + dy * t;
++            viewerPoints[p + 2] = eyeZ + dz * t;
++        }
++    }
++
++    /** Writes the corners and center of the box swept by (sx, sy, sz) and grown by grow on every side, from out[offset]. */
++    private static void sweptBoxPoints(double[] out, int offset, double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
++                                       double sx, double sy, double sz, double grow) {
++        double x0 = Math.min(minX, minX + sx) - grow, x1 = Math.max(maxX, maxX + sx) + grow;
++        double y0 = Math.min(minY, minY + sy) - grow, y1 = Math.max(maxY, maxY + sy) + grow;
++        double z0 = Math.min(minZ, minZ + sz) - grow, z1 = Math.max(maxZ, maxZ + sz) + grow;
++        int i = offset;
++        for (int corner = 0; corner < 8; corner++) {
++            out[i++] = (corner & 1) == 0 ? x0 : x1;
++            out[i++] = (corner & 2) == 0 ? y0 : y1;
++            out[i++] = (corner & 4) == 0 ? z0 : z1;
++        }
++        out[i++] = (x0 + x1) / 2;
++        out[i++] = (y0 + y1) / 2;
++        out[i] = (z0 + z1) / 2;
++    }
++
++    /**
++     * Voxel walk: the fraction of the way where the first occluding block is entered, or 1 for none. The start block is
++     * never checked and the end block only with checkEnd: a grown box corner may sit inside a wall, and that alone must
++     * not hide anything.
++     */
++    private double walk(double x0, double y0, double z0, double x1, double y1, double z1, boolean checkEnd) {
++        int x = floor(x0), y = floor(y0), z = floor(z0);
++        int steps = Math.abs(floor(x1) - x) + Math.abs(floor(y1) - y) + Math.abs(floor(z1) - z);
++        double dx = x1 - x0, dy = y1 - y0, dz = z1 - z0;
++        int stepX = dx > 0 ? 1 : -1, stepY = dy > 0 ? 1 : -1, stepZ = dz > 0 ? 1 : -1;
++        double deltaX = dx == 0 ? Double.MAX_VALUE : Math.abs(1 / dx);
++        double deltaY = dy == 0 ? Double.MAX_VALUE : Math.abs(1 / dy);
++        double deltaZ = dz == 0 ? Double.MAX_VALUE : Math.abs(1 / dz);
++        double maxX = dx == 0 ? Double.MAX_VALUE : (dx > 0 ? x + 1 - x0 : x0 - x) * deltaX;
++        double maxY = dy == 0 ? Double.MAX_VALUE : (dy > 0 ? y + 1 - y0 : y0 - y) * deltaY;
++        double maxZ = dz == 0 ? Double.MAX_VALUE : (dz > 0 ? z + 1 - z0 : z0 - z) * deltaZ;
++
++        int last = checkEnd ? steps : steps - 1; // the last step lands on the end block
++        for (int i = 0; i < last; i++) {
++            double entered;
++            if (maxX < maxY && maxX < maxZ) {
++                x += stepX;
++                entered = maxX;
++                maxX += deltaX;
++            } else if (maxY < maxZ) {
++                y += stepY;
++                entered = maxY;
++                maxY += deltaY;
++            } else {
++                z += stepZ;
++                entered = maxZ;
++                maxZ += deltaZ;
++            }
++            if (occludes(x, y, z)) return entered;
++        }
++        return 1;
++    }
++
++    private boolean occludes(int x, int y, int z) {
++        if (y < 0 || y > 255) return false;
++        Chunk chunk = chunks.get(chunkKey(x >> 4, z >> 4));
++        return chunk != null && chunk.getTypeAbs(x, y, z).isOccluding(); // not in the snapshot counts as open
++    }
++
++    private static int floor(double value) {
++        int i = (int) value;
++        return value < i ? i - 1 : i;
++    }
++}
+diff --git a/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWarView.java b/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWarView.java
+new file mode 100644
+index 00000000..eb40beec
+--- /dev/null
++++ b/src/main/java/top/speedcubing/cubingpaper/fow/FogOfWarView.java
+@@ -0,0 +1,69 @@
++package top.speedcubing.cubingpaper.fow;
++
++import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
++import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
++import net.minecraft.server.Entity;
++import top.speedcubing.cubingpaper.CubingPaperConfig;
++
++/** Per viewer fog of war state. Main thread only. */
++public final class FogOfWarView {
++
++    // ids of players this viewer is not sent
++    private final IntOpenHashSet hidden = new IntOpenHashSet();
++    // consecutive checks a not yet hidden player was out of sight: hiding waits a few checks so a player
++    // dancing on a wall edge is not destroyed and respawned every check
++    private final Int2IntOpenHashMap unseenChecks = new Int2IntOpenHashMap();
++
++    // this player's own movement per tick, from its position at the last two samples
++    double velX, velY, velZ;
++    private double lastX, lastY, lastZ;
++    private int lastTick = -1;
++
++    public boolean isHidden(int entityId) {
++        return hidden.contains(entityId);
++    }
++
++    void sampleVelocity(Entity entity, int tick) {
++        if (lastTick >= 0 && tick > lastTick) {
++            int ticks = tick - lastTick; // more than the interval when checks were skipped
++            velX = (entity.locX - lastX) / ticks;
++            velY = (entity.locY - lastY) / ticks;
++            velZ = (entity.locZ - lastZ) / ticks;
++        }
++        lastX = entity.locX;
++        lastY = entity.locY;
++        lastZ = entity.locZ;
++        lastTick = tick;
++    }
++
++    /** @return whether the hidden state of this player changed */
++    boolean update(int entityId, boolean visible) {
++        if (visible) {
++            unseenChecks.remove(entityId);
++            return hidden.remove(entityId);
++        }
++        if (hidden.contains(entityId)) return false;
++        int unseen = unseenChecks.addTo(entityId, 1) + 1;
++        if (unseen < CubingPaperConfig.fogOfWarHideAfterChecks) return false;
++        unseenChecks.remove(entityId);
++        return hidden.add(entityId);
++    }
++
++    /** The player left the world: drop its state. */
++    public void forget(int entityId) {
++        hidden.remove(entityId);
++        unseenChecks.remove(entityId);
++    }
++
++    /** Clears every hidden player, returning their ids. */
++    int[] revealAll() {
++        int[] ids = hidden.toIntArray();
++        hidden.clear();
++        unseenChecks.clear();
++        return ids;
++    }
++
++    boolean hasHidden() {
++        return !hidden.isEmpty();
++    }
++}
+-- 
+2.55.0.windows.5
+
